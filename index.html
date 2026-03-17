@@ -779,9 +779,26 @@ function _render(){
           "Search: \""+kwVal+"\" in \""+(locVal||"Canada")+"\"."+(S.polished?" Resume summary: "+S.polished.substring(0,400):"")
         );
         const parsed=JSON.parse(r.replace(/```json|```/g,"").trim());
-        S.aiSuggestions=Array.isArray(parsed)?parsed:[];S.searchDone=true;
-      }catch(e){S.aiSuggestionsError=e.message||"Search failed.";}
-      S.load="";rerender();
+        S.aiSuggestions=Array.isArray(parsed)?parsed.map(j=>({...j,matchScore:null,matchKeywords:[]})):[];
+        S.searchDone=true;
+        S.load="";rerender();
+        // Score all leads against resume in background if resume is loaded
+        if(S.polished){
+          S.load="scoring";rerender();
+          try{
+            const scoreR=await callAI(
+              "Resume-job match scorer. The user has a resume and a list of job leads. For EACH job return a match score and matching keywords. Return ONLY a JSON array (same order as input), each item: {score: integer 0-100, keywords: array of 3 short matching skill/keyword strings}. No markdown.",
+              "RESUME SUMMARY:\n"+S.polished.substring(0,600)+"\n\nJOB LEADS:\n"+
+              S.aiSuggestions.map((j,i)=>`${i+1}. ${j.title} at ${j.company} — ${j.whyGoodFit||""}`).join("\n")
+            );
+            const scores=JSON.parse(scoreR.replace(/```json|```/g,"").trim());
+            if(Array.isArray(scores)){
+              S.aiSuggestions=S.aiSuggestions.map((j,i)=>scores[i]?{...j,matchScore:scores[i].score||0,matchKeywords:scores[i].keywords||[]}:j);
+            }
+          }catch(e){console.log("Scoring failed:",e);}
+          S.load="";rerender();
+        }
+      }catch(e){S.aiSuggestionsError=e.message||"Search failed.";S.load="";rerender();}
     }
     [kwInp,locInp].forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();runAISearch();}}));
 
@@ -791,32 +808,83 @@ function _render(){
         div({style:{fontSize:"13px",fontWeight:"600",color:T.text,marginBottom:"3px"}},["\u2726 Generating leads\u2026"]),
         div({style:{fontSize:"12px",color:T.muted}},["Claude is researching real companies and roles."]),
       ]);
-    }else if(S.aiSuggestionsError){
-      aiBody=div({style:{padding:"10px 14px",background:T.danger.bg,border:"1px solid "+T.danger.border,borderRadius:"8px"}},[
-        span({style:{fontSize:"13px",color:T.danger.text}},["\u26A0 "+S.aiSuggestionsError]),
-      ]);
-    }else if(S.searchDone&&S.aiSuggestions.length>0){
+    }else if(S.load==="scoring"){
       aiBody=div({},[
-        div({style:{fontSize:"12px",color:T.muted,marginBottom:"10px"}},[S.aiSuggestions.length+" leads for \u201c"+S.searchKw+"\u201d \u2014 add any to your board, then search the live boards in Step 2 to find the real postings."]),
+        div({style:{textAlign:"center",padding:"12px",background:T.inBg,borderRadius:"8px",marginBottom:"10px",fontSize:"12px",color:T.muted,display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}},[
+          spinEl(),
+          span({},[S.polished?"Scoring leads against your resume\u2026":"Leads ready \u2014 polish your resume to see match scores"]),
+        ]),
         ...S.aiSuggestions.map(job=>{
           const already=S.apps.some(a=>a.title===job.title&&a.company===job.company);
-          const card=div({style:{background:T.inBg,border:"1px solid "+T.inB,borderRadius:"10px",padding:"12px 14px",marginBottom:"8px",display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"12px"}});
-          const addBtn=mkBtn(already?"ghost":"primary",already?"\u2713 Added":"+ Add to Board",()=>addJobToBoard(job),{fontSize:"11px",padding:"5px 11px",flexShrink:"0",opacity:already?"0.7":"1"});
-          addBtn.disabled=already;
+          const card=div({style:{background:T.inBg,border:"1px solid "+T.inB,borderRadius:"10px",padding:"12px 14px",marginBottom:"8px",display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"12px",opacity:"0.7"}});
           card.appendChild(div({style:{flex:"1",minWidth:"0"}},[
             div({style:{display:"flex",alignItems:"center",gap:"7px",flexWrap:"wrap",marginBottom:"3px"}},[
               span({style:{fontSize:"13px",fontWeight:"700",color:T.text}},[job.title]),
               job.type?span({style:{fontSize:"10px",padding:"2px 7px",borderRadius:"8px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[job.type]):null,
             ].filter(Boolean)),
-            div({style:{fontSize:"12px",color:T.sub,marginBottom:"3px"}},[
-              span({style:{fontWeight:"600",color:T.text}},[job.company])," \u00b7 ",job.location,
-              job.salaryRange?span({style:{color:T.text}},[" \u00b7 "+job.salaryRange]):null,
-            ].filter(Boolean)),
-            job.whyGoodFit?div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5"}},["💡 "+job.whyGoodFit]):null,
+            div({style:{fontSize:"12px",color:T.sub}},[span({style:{fontWeight:"600",color:T.text}},[job.company])," \u00b7 ",job.location]),
           ].filter(Boolean)));
-          card.appendChild(div({style:{display:"flex",flexDirection:"column",gap:"5px",alignItems:"flex-end"}},[
-            addBtn,
-            h("a",{href:JOB_BOARDS[0].url(job.title,job.location||loc),target:"_blank",rel:"noreferrer",style:{fontSize:"10px",color:T.muted,textDecoration:"none"}},["Search \u2197"]),
+          card.appendChild(span({style:{fontSize:"11px",color:T.muted,background:T.inBg,border:"1px solid "+T.inB,borderRadius:"8px",padding:"3px 8px",flexShrink:"0"}},["Scoring\u2026"]));
+          return card;
+        }),
+      ]);
+    }else if(S.aiSuggestionsError){
+      aiBody=div({style:{padding:"10px 14px",background:T.danger.bg,border:"1px solid "+T.danger.border,borderRadius:"8px"}},[
+        span({style:{fontSize:"13px",color:T.danger.text}},["\u26A0 "+S.aiSuggestionsError]),
+      ]);
+    }else if(S.searchDone&&S.aiSuggestions.length>0){
+      const hasScores=S.aiSuggestions.some(j=>j.matchScore!=null);
+      aiBody=div({},[
+        div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px",flexWrap:"wrap",gap:"6px"}},[
+          div({style:{fontSize:"12px",color:T.muted}},[S.aiSuggestions.length+" leads for \u201c"+S.searchKw+"\u201d"]),
+          hasScores
+            ?div({style:{fontSize:"11px",color:T.muted,display:"flex",alignItems:"center",gap:"4px"}},[
+                span({style:{width:"6px",height:"6px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}}),
+                " Scored against your resume"
+              ])
+            :!S.polished?div({style:{fontSize:"11px",color:T.muted}},["Polish your resume to see match scores"]):null,
+        ].filter(Boolean)),
+        ...S.aiSuggestions.map(job=>{
+          const already=S.apps.some(a=>a.title===job.title&&a.company===job.company);
+          const card=div({style:{background:T.inBg,border:"1px solid "+T.inB,borderRadius:"10px",padding:"12px 14px",marginBottom:"8px"}});
+
+          // Match score badge
+          const scoreBadge=job.matchScore!=null
+            ?div({style:{display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",flexShrink:"0"}},[
+                span({style:{
+                  fontSize:"13px",fontWeight:"800",padding:"4px 10px",borderRadius:"9px",
+                  background:job.matchScore>=85?"#052e16":job.matchScore>=70?"#1a2e05":job.matchScore>=50?"#1c1917":"#1c1917",
+                  color:job.matchScore>=85?"#4ade80":job.matchScore>=70?"#a3e635":job.matchScore>=50?"#d6d3d1":"#9ca3af",
+                  border:"1px solid "+(job.matchScore>=85?"#166534":job.matchScore>=70?"#3f6212":"#44403c"),
+                }},[job.matchScore+"%"]),
+                span({style:{fontSize:"9px",color:T.muted,textTransform:"uppercase",letterSpacing:"0.05em"}},["match"]),
+              ])
+            :null;
+
+          const addBtn=mkBtn(already?"ghost":"primary",already?"\u2713 Added":"+ Add",()=>addJobToBoard(job),{fontSize:"11px",padding:"5px 11px",flexShrink:"0",opacity:already?"0.7":"1"});
+          addBtn.disabled=already;
+
+          card.appendChild(div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"10px"}},[
+            div({style:{flex:"1",minWidth:"0"}},[
+              div({style:{display:"flex",alignItems:"center",gap:"7px",flexWrap:"wrap",marginBottom:"3px"}},[
+                span({style:{fontSize:"13px",fontWeight:"700",color:T.text}},[job.title]),
+                job.type?span({style:{fontSize:"10px",padding:"2px 7px",borderRadius:"8px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[job.type]):null,
+              ].filter(Boolean)),
+              div({style:{fontSize:"12px",color:T.sub,marginBottom:"3px"}},[
+                span({style:{fontWeight:"600",color:T.text}},[job.company])," \u00b7 ",job.location,
+                job.salaryRange?span({style:{color:T.text}},[" \u00b7 "+job.salaryRange]):null,
+              ].filter(Boolean)),
+              job.whyGoodFit?div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",marginBottom:"4px"}},["\uD83D\uDCA1 "+job.whyGoodFit]):null,
+              // Keyword chips from scoring
+              job.matchKeywords&&job.matchKeywords.length>0?div({style:{display:"flex",gap:"4px",flexWrap:"wrap"}},[
+                ...job.matchKeywords.map(k=>span({style:{fontSize:"10px",padding:"2px 7px",borderRadius:"6px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[k]))
+              ]):null,
+            ].filter(Boolean)),
+            div({style:{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"6px",flexShrink:"0"}},[
+              scoreBadge,
+              addBtn,
+              h("a",{href:JOB_BOARDS[0].url(job.title,job.location||loc),target:"_blank",rel:"noreferrer",style:{fontSize:"10px",color:T.muted,textDecoration:"none"}},["Search \u2197"]),
+            ].filter(Boolean)),
           ]));
           return card;
         }),
