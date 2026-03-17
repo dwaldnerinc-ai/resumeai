@@ -657,16 +657,20 @@ function _render(){
     }
 
     // ── 1. PASTE A JOB POSTING ──
+    let pasteBtn;
     const pasteArea=(()=>{
       const ta=h("textarea",{style:{...inp_s,width:"100%",minHeight:"100px",resize:"vertical",lineHeight:"1.6",fontFamily:"inherit"}});
       ta.placeholder="Find a job online? Paste the full posting here — Claude extracts the details and adds it to your board automatically.";
       ta.value=S.pastePosting||"";
-      ta.addEventListener("input",e=>S.pastePosting=e.target.value);
+      ta.addEventListener("input",e=>{
+        S.pastePosting=e.target.value;
+        if(pasteBtn)pasteBtn.disabled=!e.target.value.trim();
+      });
       return ta;
     })();
-    const pasteBtn=(()=>{
+    pasteBtn=(()=>{
       const b=mkBtn("primary",S.load==="pasteadd"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Adding…"));return w;})():"+ Add",async()=>{
-        const txt=(S.pastePosting||pasteArea.value||"").trim();
+        const txt=(pasteArea.value||S.pastePosting||"").trim();
         if(!txt||S.load==="pasteadd")return;
         S.load="pasteadd";rerender();
         try{
@@ -679,7 +683,7 @@ function _render(){
         }catch{
           await addJobToBoard({title:"Job from posting",company:"",location:loc,type:"On-site",salary:"",desc:txt.substring(0,300)});
         }
-        S.pastePosting="";S.load="";rerender();
+        S.pastePosting="";S.load="";pasteArea.value="";rerender();
       });
       b.disabled=S.load==="pasteadd"||!(S.pastePosting||"").trim();
       return b;
@@ -696,40 +700,73 @@ function _render(){
     const kwInp=(()=>{const i=h("input",{style:inp_s,placeholder:"e.g. Project Manager, Plumber, Sales Rep…"});i.value=kw;i.addEventListener("input",e=>S.searchKw=e.target.value);return i;})();
     const locInp=(()=>{const i=h("input",{style:inp_s,placeholder:"e.g. Vancouver, BC"});i.value=loc;i.addEventListener("input",e=>S.searchLoc=e.target.value);return i;})();
 
-    const boardCard=div({style:card_s},[
-      div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"3px"}},["Search live job boards"]),
-      div({style:{fontSize:"13px",color:T.sub,marginBottom:"12px"}},["Enter keywords and click any board to open a live search in a new tab."]),
-      div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}},[
-        div({},[mkLabel("Keywords"),kwInp]),
+    // ── STEP HEADER helper ──
+    function stepHeader(num, color, title, subtitle){
+      return div({style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"14px"}},[
+        div({style:{width:"28px",height:"28px",borderRadius:"50%",background:color,color:"#fff",
+          fontSize:"13px",fontWeight:"800",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:"0"}},[num]),
+        div({},[
+          div({style:{fontSize:"14px",fontWeight:"700",color:T.text}},[title]),
+          div({style:{fontSize:"12px",color:T.muted,marginTop:"1px"}},[subtitle]),
+        ]),
+      ]);
+    }
+
+    // ── STEP 1: Search keywords ──
+    const step1Card=div({style:{...card_s,borderLeft:"3px solid #2563eb"}},[
+      stepHeader("1","#2563eb","What are you looking for?","Enter a job title and location — this powers all three steps below"),
+      div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}},[
+        div({},[mkLabel("Job title or keywords"),kwInp]),
         div({},[mkLabel("Location"),locInp]),
       ]),
+      !kw?div({style:{marginTop:"10px",display:"flex",alignItems:"center",gap:"6px",fontSize:"12px",color:T.muted}}):[
+        span({style:{fontSize:"14px"}},["⬆"]),
+        span({},[" Enter keywords above — then use steps 2 and 3 below"]),
+      ],
+    ]);
+
+    // ── STEP 2: Search live boards ──
+    const step2Card=div({style:{...card_s,borderLeft:"3px solid #0d9488",opacity:kw?"1":"0.55"}},[
+      stepHeader("2","#0d9488","Search live job boards","Opens your search directly on the site in a new tab"),
       div({style:{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"8px"}},[
         ...JOB_BOARDS.map(board=>{
+          const active=!!kw;
           const el=h("a",{href:"javascript:void(0)",target:"_blank",rel:"noreferrer",
             style:{display:"flex",alignItems:"center",gap:"10px",padding:"11px 14px",borderRadius:"10px",
-              border:"1px solid "+(kw?T.active.border:T.cardB),background:kw?T.inBg:"transparent",
-              textDecoration:"none",cursor:kw?"pointer":"default",opacity:kw?"1":"0.45"},
+              border:"1px solid "+(active?T.active.border:T.cardB),
+              background:active?T.inBg:"transparent",
+              textDecoration:"none",cursor:active?"pointer":"not-allowed",
+              transition:"all 0.15s"},
           },[
             span({style:{fontSize:"20px"}},[board.icon]),
             div({},[
               div({style:{fontSize:"12px",fontWeight:"600",color:T.text}},[board.name]),
-              div({style:{fontSize:"11px",color:T.muted,marginTop:"1px"}},[kw?("Search \u201c"+kw+"\u201d"):"Enter keywords first"]),
+              div({style:{fontSize:"11px",color:T.muted,marginTop:"1px"}},[
+                active?("Search \u201c"+kw+"\u201d"):"\u2191 Enter keywords in Step 1",
+              ]),
             ]),
           ]);
           el.addEventListener("click",e=>{
             const liveKw=(kwInp.value||"").trim();
             const liveLoc=(locInp.value||"Vancouver, BC").trim();
-            if(!liveKw){e.preventDefault();kwInp.focus();return;}
+            if(!liveKw){
+              e.preventDefault();
+              // Scroll step 1 into view and focus input
+              kwInp.focus();
+              kwInp.scrollIntoView({behavior:"smooth",block:"center"});
+              // Flash the step 1 card
+              step1Card.style.boxShadow="0 0 0 3px #2563eb66";
+              setTimeout(()=>step1Card.style.boxShadow="",1500);
+              return;
+            }
             el.href=board.url(liveKw,liveLoc);
           });
           return el;
         }),
       ]),
+    ]);
 
-      !kw?div({style:{marginTop:"10px",fontSize:"12px",color:T.muted,textAlign:"center"}},["\u2191 Enter a job title above to activate the links"]):null,
-    ].filter(Boolean));
-
-    // ── 3. AI JOB LEADS ──
+    // ── STEP 3: AI job leads ──
     async function runAISearch(){
       const kwVal=(kwInp.value||S.searchKw||"").trim();
       const locVal=(locInp.value||S.searchLoc||"").trim();
@@ -750,21 +787,21 @@ function _render(){
 
     let aiBody=div();
     if(S.load==="search"){
-      aiBody=div({style:{textAlign:"center",padding:"28px",color:T.sub}},[
-        div({style:{fontSize:"13px",fontWeight:"600",color:T.text,marginBottom:"3px"}},["✦ Generating leads…"]),
+      aiBody=div({style:{textAlign:"center",padding:"24px",color:T.sub}},[
+        div({style:{fontSize:"13px",fontWeight:"600",color:T.text,marginBottom:"3px"}},["\u2726 Generating leads\u2026"]),
         div({style:{fontSize:"12px",color:T.muted}},["Claude is researching real companies and roles."]),
       ]);
     }else if(S.aiSuggestionsError){
       aiBody=div({style:{padding:"10px 14px",background:T.danger.bg,border:"1px solid "+T.danger.border,borderRadius:"8px"}},[
-        span({style:{fontSize:"13px",color:T.danger.text}},["⚠ "+S.aiSuggestionsError]),
+        span({style:{fontSize:"13px",color:T.danger.text}},["\u26A0 "+S.aiSuggestionsError]),
       ]);
     }else if(S.searchDone&&S.aiSuggestions.length>0){
       aiBody=div({},[
-        div({style:{fontSize:"12px",color:T.muted,marginBottom:"10px"}},[S.aiSuggestions.length+" leads for \u201c"+S.searchKw+"\u201d \u2014 add any to your board, then search the live boards above to find real postings."]),
+        div({style:{fontSize:"12px",color:T.muted,marginBottom:"10px"}},[S.aiSuggestions.length+" leads for \u201c"+S.searchKw+"\u201d \u2014 add any to your board, then search the live boards in Step 2 to find the real postings."]),
         ...S.aiSuggestions.map(job=>{
           const already=S.apps.some(a=>a.title===job.title&&a.company===job.company);
           const card=div({style:{background:T.inBg,border:"1px solid "+T.inB,borderRadius:"10px",padding:"12px 14px",marginBottom:"8px",display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"12px"}});
-          const addBtn=mkBtn(already?"ghost":"primary",already?"✓ Added":"+ Add",()=>addJobToBoard(job),{fontSize:"11px",padding:"5px 11px",flexShrink:"0",opacity:already?"0.7":"1"});
+          const addBtn=mkBtn(already?"ghost":"primary",already?"\u2713 Added":"+ Add to Board",()=>addJobToBoard(job),{fontSize:"11px",padding:"5px 11px",flexShrink:"0",opacity:already?"0.7":"1"});
           addBtn.disabled=already;
           card.appendChild(div({style:{flex:"1",minWidth:"0"}},[
             div({style:{display:"flex",alignItems:"center",gap:"7px",flexWrap:"wrap",marginBottom:"3px"}},[
@@ -772,44 +809,54 @@ function _render(){
               job.type?span({style:{fontSize:"10px",padding:"2px 7px",borderRadius:"8px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[job.type]):null,
             ].filter(Boolean)),
             div({style:{fontSize:"12px",color:T.sub,marginBottom:"3px"}},[
-              span({style:{fontWeight:"600",color:T.text}},[job.company])," · ",job.location,
-              job.salaryRange?span({style:{color:T.text}},[" · "+job.salaryRange]):null,
+              span({style:{fontWeight:"600",color:T.text}},[job.company])," \u00b7 ",job.location,
+              job.salaryRange?span({style:{color:T.text}},[" \u00b7 "+job.salaryRange]):null,
             ].filter(Boolean)),
             job.whyGoodFit?div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5"}},["💡 "+job.whyGoodFit]):null,
           ].filter(Boolean)));
           card.appendChild(div({style:{display:"flex",flexDirection:"column",gap:"5px",alignItems:"flex-end"}},[
             addBtn,
-            h("a",{href:JOB_BOARDS[0].url(job.title,job.location||loc),target:"_blank",rel:"noreferrer",style:{fontSize:"10px",color:T.muted,textDecoration:"none"}},["Search ↗"]),
+            h("a",{href:JOB_BOARDS[0].url(job.title,job.location||loc),target:"_blank",rel:"noreferrer",style:{fontSize:"10px",color:T.muted,textDecoration:"none"}},["Search \u2197"]),
           ]));
           return card;
         }),
       ]);
+    }else if(!S.searchDone){
+      aiBody=div({style:{padding:"14px",background:T.inBg,borderRadius:"8px",fontSize:"12px",color:T.muted,textAlign:"center"}},[
+        kw?"Click \u201cGet AI leads\u201d to generate real company leads based on your search":"\u2191 Enter keywords in Step 1 first",
+      ]);
     }
 
-    const aiCard=div({style:card_s},[
-      div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"3px"}},[
-        div({style:{fontSize:"15px",fontWeight:"700"}},["AI job leads"]),
-        div({style:{fontSize:"11px",color:T.muted,background:T.inBg,border:"1px solid "+T.inB,borderRadius:"6px",padding:"3px 8px"}},["✨ Uses API key"]),
+    const step3Card=div({style:{...card_s,borderLeft:"3px solid #7c3aed",opacity:kw?"1":"0.55"}},[
+      div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"14px"}},[
+        stepHeader("3","#7c3aed","AI job leads","Claude finds real companies hiring for your role — add any to your board"),
+        div({style:{fontSize:"11px",color:T.muted,background:T.inBg,border:"1px solid "+T.inB,borderRadius:"6px",padding:"3px 8px",flexShrink:"0"}},["✨ Uses API"]),
       ]),
-      div({style:{fontSize:"13px",color:T.sub,marginBottom:"12px"}},["Claude generates real company leads based on your keywords and resume background."]),
-      div({style:{display:"flex",gap:"8px",alignItems:"center",marginBottom:(S.searchDone||S.aiSuggestionsError||S.load==="search")?"12px":"0"}},[
-        (()=>{const b=mkBtn("teal",S.load==="search"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Searching…"));return w;})():"✦ Get AI leads",runAISearch);b.disabled=S.load==="search";return b;})(),
+      div({style:{display:"flex",gap:"8px",alignItems:"center",marginBottom:"12px"}},[
+        (()=>{const b=mkBtn("purple",S.load==="search"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Searching\u2026"));return w;})():"\u2726 Get AI leads",runAISearch);b.disabled=S.load==="search"||!kw;return b;})(),
         S.polished
-          ?span({style:{fontSize:"11px",color:T.done.text,display:"flex",alignItems:"center",gap:"4px"}},[span({style:{width:"6px",height:"6px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}})," Resume loaded"])
-          :span({style:{fontSize:"11px",color:T.muted}},["Polish your resume first for better matches"]),
+          ?span({style:{fontSize:"11px",color:T.done.text,display:"flex",alignItems:"center",gap:"4px"}},[span({style:{width:"6px",height:"6px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}}),"\u00a0Resume loaded \u2014 leads matched to your background"])
+          :span({style:{fontSize:"11px",color:T.muted}},["Polish your resume first for better-matched leads"]),
       ].filter(Boolean)),
       aiBody,
     ]);
 
-    // ── 4. RECENTLY ADDED ──
+    // ── STEP 4: Paste a posting ──
+    const step4Card=div({style:{...card_s,borderLeft:"3px solid #ea580c"}},[
+      stepHeader("4","#ea580c","Paste a job posting","Found a specific job? Paste the full text and Claude adds it to your board"),
+      pasteArea,
+      div({style:{display:"flex",justifyContent:"flex-end",gap:"8px",marginTop:"10px"}},[pasteBtn]),
+    ]);
+
+    // ── Recently added ──
     const recent=S.recentlyAdded||[];
     const recentCard=recent.length>0?div({style:card_s},[
       div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"12px"}},[
         div({},[
           div({style:{fontSize:"14px",fontWeight:"700",color:T.text}},["Recently added"]),
-          div({style:{fontSize:"12px",color:T.muted,marginTop:"1px"}},[recent.length+" job"+(recent.length!==1?"s":"")+" added this session — click any to view on Job Board"]),
+          div({style:{fontSize:"12px",color:T.muted,marginTop:"1px"}},[recent.length+" job"+(recent.length!==1?"s":"")+" added this session \u2014 click any to view on Job Board"]),
         ]),
-        mkBtn("ghost","Job Board →",()=>{S.tab="board";rerender();},{fontSize:"12px",padding:"5px 12px"}),
+        mkBtn("ghost","Job Board \u2192",()=>{S.tab="board";rerender();},{fontSize:"12px",padding:"5px 12px"}),
       ]),
       ...recent.map(app=>{
         const btn=h("button",{style:{
@@ -819,22 +866,21 @@ function _render(){
         }});
         btn.addEventListener("click",()=>{S.tab="board";S.expandedApp=app.id;rerender();});
         const score=app.matchScore!=null
-          ?span({style:{
-              fontSize:"11px",fontWeight:"700",padding:"3px 8px",borderRadius:"8px",flexShrink:"0",
+          ?span({style:{fontSize:"11px",fontWeight:"700",padding:"3px 8px",borderRadius:"8px",flexShrink:"0",
               background:app.matchScore>=85?"#052e16":app.matchScore>=70?"#1a2e05":"#1c1917",
               color:app.matchScore>=85?"#4ade80":app.matchScore>=70?"#a3e635":"#d6d3d1",
               border:"1px solid "+(app.matchScore>=85?"#166534":app.matchScore>=70?"#3f6212":"#44403c"),
             }},[app.matchScore+"%"])
-          :span({style:{fontSize:"11px",color:T.muted,background:T.inBg,border:"1px solid "+T.inB,borderRadius:"8px",padding:"3px 8px",flexShrink:"0"}},["Scoring…"]);
+          :span({style:{fontSize:"11px",color:T.muted,background:T.inBg,border:"1px solid "+T.inB,borderRadius:"8px",padding:"3px 8px",flexShrink:"0"}},["Scoring\u2026"]);
         btn.appendChild(div({style:{flex:"1",minWidth:"0"}},[
           div({style:{fontSize:"13px",fontWeight:"600",color:T.text,marginBottom:"2px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}},[app.title]),
-          div({style:{fontSize:"11px",color:T.sub}},[app.company+(app.location?" · "+app.location:"")]),
+          div({style:{fontSize:"11px",color:T.sub}},[app.company+(app.location?" \u00b7 "+app.location:"")]),
           app.matchKeywords&&app.matchKeywords.length>0?div({style:{display:"flex",gap:"4px",flexWrap:"wrap",marginTop:"4px"}},[
             ...app.matchKeywords.map(k=>span({style:{fontSize:"10px",padding:"2px 6px",borderRadius:"6px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[k]))
           ]):null,
         ].filter(Boolean)));
         btn.appendChild(score);
-        btn.appendChild(span({style:{fontSize:"12px",color:T.muted,flexShrink:"0"}},{},true)?null:span({style:{fontSize:"12px",color:T.muted,marginLeft:"4px",flexShrink:"0"}},["→"]));
+        btn.appendChild(span({style:{fontSize:"12px",color:T.muted,marginLeft:"4px",flexShrink:"0"}},["\u2192"]));
         return btn;
       }),
     ]):null;
@@ -846,7 +892,7 @@ function _render(){
       borderRadius:"12px",padding:"12px 18px",boxShadow:"0 8px 32px rgba(0,0,0,0.25)",
       display:"flex",alignItems:"center",gap:"10px",maxWidth:"300px",
     }},[
-      span({style:{fontSize:"16px",color:"#4ade80"}},{},true)?null:span({style:{fontSize:"16px"}},["\u2713"]),
+      span({style:{fontSize:"16px"}},["✓"]),
       div({},[
         div({style:{fontSize:"13px",fontWeight:"700",color:S.dark?"#4ade80":"#15803d"}},[S.addToast+" added!"]),
         h("button",{style:{fontSize:"12px",color:S.dark?"#86efac":"#16a34a",background:"transparent",border:"none",cursor:"pointer",padding:"0",textDecoration:"underline"},
@@ -854,7 +900,7 @@ function _render(){
       ]),
     ]):null;
 
-    content=div({},[pasteCard,boardCard,aiCard,recentCard,toast].filter(Boolean));
+    content=div({},[step1Card,step2Card,step3Card,step4Card,recentCard,toast].filter(Boolean));
   }
 
   // ── TAB 3: JOB BOARD ──
