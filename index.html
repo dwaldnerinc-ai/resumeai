@@ -636,20 +636,6 @@ function _render(){
       if(!S.polished){
         tabBody=div({style:{color:T.muted,fontSize:"13px",padding:"20px 0"}},["Polish your resume first to see the PDF preview."]);
       }else{
-        const ciFields=[["name","Full Name","e.g. John Smith"],["tagline","Title / Tagline","e.g. Senior Program Manager | PMP"],["phone","Phone","e.g. (604) 555-1234"],["email","Email","e.g. john@email.com"],["location","Location","e.g. Vancouver, BC"],["linkedin","LinkedIn","linkedin.com/in/yourprofile"]];
-        const ciBox=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"14px"}},[
-          div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:S.showCi?"12px":"0"}},[
-            span({style:{fontSize:"12px",fontWeight:"600",color:T.sub}},["Contact info for header"]),
-            h("button",{style:{fontSize:"11px",color:T.sub,background:"transparent",border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"3px 10px",cursor:"pointer"},onClick:()=>{S.showCi=!S.showCi;rerender();}},[S.showCi?"Hide":"Edit"]),
-          ]),
-          !S.showCi?span({style:{fontSize:"11px",color:T.muted,marginTop:"4px",display:"block"}},[`${S.ci.name||"Your Name"} · ${S.ci.email||"yourname@email.com"} · ${S.ci.phone||"(xxx) xxx-xxxx"}`]):
-          div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginTop:"8px"}},
-            ciFields.map(([f,lb,ph])=>div({},[
-              mkLabel(lb),
-              (()=>{const i=mkInput(S.ci[f]||"",v=>{S.ci={...S.ci,[f]:v};lsSet("resume-ci",JSON.stringify(S.ci));rerender();},{placeholder:ph});return i;})()
-            ]))
-          ),
-        ]);
 
         // Re-polish bar — visible when already polished
         const repolishBar=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"12px 16px",marginBottom:"14px",display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},[
@@ -679,7 +665,7 @@ function _render(){
         const previewBox=div({style:{border:`1px solid ${T.cardB}`,borderRadius:"10px",overflow:"hidden",position:"relative"}});
         previewBox.innerHTML=buildPDFHTML(S.polished,S.ci);
         wireEditable(previewBox,()=>S.polished,v=>{S.polished=v;lsSet("resume-polished",v);});
-        tabBody=div({},[ciBox,repolishBar,actionRow,previewBox]);
+        tabBody=div({},[repolishBar,actionRow,previewBox]);
       }
     }
 
@@ -1338,22 +1324,6 @@ function _render(){
       }else if(S.applyOut==="resumepdf"&&S.tailored){
         const jobSlug=S.selectedJob?S.selectedJob.company.replace(/[^a-z0-9]/gi,"_").toLowerCase():"tailored";
 
-        // Contact info box (same as main resume tab)
-        const ciFields=[["name","Full Name","e.g. John Smith"],["tagline","Title / Tagline","e.g. Senior Program Manager | PMP"],["phone","Phone","e.g. (604) 555-1234"],["email","Email","e.g. john@email.com"],["location","Location","e.g. Vancouver, BC"],["linkedin","LinkedIn","linkedin.com/in/yourprofile"]];
-        const ciBox=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"12px 16px",marginBottom:"12px"}},[
-          div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:S.showCi?"12px":"0"}},[
-            span({style:{fontSize:"12px",fontWeight:"600",color:T.sub}},["Contact info for header"]),
-            h("button",{style:{fontSize:"11px",color:T.sub,background:"transparent",border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"3px 10px",cursor:"pointer"},onClick:()=>{S.showCi=!S.showCi;rerender();}},[S.showCi?"Hide":"Edit"]),
-          ]),
-          !S.showCi
-            ?span({style:{fontSize:"11px",color:T.muted,marginTop:"4px",display:"block"}},[`${S.ci.name||"Your Name"} · ${S.ci.email||"yourname@email.com"} · ${S.ci.phone||"(xxx) xxx-xxxx"}`])
-            :div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginTop:"8px"}},
-              ciFields.map(([f,lb,ph])=>div({},[
-                mkLabel(lb),
-                (()=>{const i=mkInput(S.ci[f]||"",v=>{S.ci={...S.ci,[f]:v};lsSet("resume-ci",JSON.stringify(S.ci));rerender();},{placeholder:ph});return i;})()
-              ]))
-            ),
-        ]);
 
         // Refine box wired to S.tailored
         const refineInp=h("input",{style:{...inp_s,flex:"1"},placeholder:'e.g. "Change all locations to Vancouver, BC" or "Tighten the summary"'});
@@ -1408,7 +1378,7 @@ function _render(){
         const previewBox=div({style:{border:`1px solid ${T.cardB}`,borderRadius:"10px",overflow:"hidden",position:"relative"}});
         previewBox.innerHTML=buildPDFHTML(S.tailored,S.ci);
         wireEditable(previewBox,()=>S.tailored,v=>{S.tailored=v;lsSet("apply-tailored",v);});
-        body=div({},[ciBox,exportRow,previewBox]);
+        body=div({},[exportRow,previewBox]);
       }else if(S.applyOut==="cover"&&S.cover){
         body=div({style:out_s},[S.cover]);
       }else if(S.applyOut==="compare"){
