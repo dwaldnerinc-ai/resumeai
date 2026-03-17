@@ -567,34 +567,6 @@ function _render(){
           })(),
         ]);
 
-        // Refine box — plain-English edits applied to the polished resume
-        const refineBox=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"12px 16px",marginBottom:"14px"}},[
-          div({style:{fontSize:"12px",fontWeight:"600",color:T.sub,marginBottom:"8px",display:"flex",alignItems:"center",gap:"6px"}},[
-            span({style:{fontSize:"14px"}},["✏️"]),
-            "Refine with a quick instruction",
-          ]),
-          div({style:{display:"flex",gap:"8px",alignItems:"flex-start"}},[
-            (()=>{
-              const inp=h("input",{style:{...inp_s,flex:"1",fontSize:"13px"},placeholder:'e.g. "Change all locations to Vancouver, BC" or "Make the summary shorter"'});
-              inp.value=S.refineText;
-              inp.addEventListener("input",e=>S.refineText=e.target.value);
-              inp.addEventListener("keydown",async e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();await doRefine();}});
-              return inp;
-            })(),
-            (()=>{
-              const b=mkBtn("teal",S.load==="refine"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Applying…"));return w;})():"Apply",doRefine,{padding:"9px 16px",fontSize:"13px",flexShrink:"0"});
-              b.disabled=S.load==="refine"||!S.refineText.trim()||!S.polished;
-              return b;
-            })(),
-          ]),
-          div({style:{marginTop:"8px",display:"flex",gap:"6px",flexWrap:"wrap"}},
-            ['Change all locations to Vancouver, BC','Remove buzzwords','Shorten the summary','Add more quantified results'].map(hint=>
-              h("button",{style:{fontSize:"11px",padding:"3px 10px",borderRadius:"12px",border:`1px solid ${T.cardB}`,background:"transparent",color:T.muted,cursor:"pointer"},onClick:()=>{S.refineText=hint;rerender();}},[ hint ])
-            )
-          ),
-        ]);
-
-
         const actionRow=div({style:{display:"flex",gap:"8px",marginBottom:"14px",justifyContent:"flex-end"}},[
           (()=>{const b=mkBtn("ghost",S.copied==="resume"?"✓ Copied":"Copy text",()=>{
             navigator.clipboard.writeText(S.polished).catch(()=>{});
@@ -899,7 +871,7 @@ function _render(){
           ]),
           div({style:{fontSize:"12px",color:T.sub}},[span({style:{fontWeight:"600",color:T.text}},[app.company]),app.location?" · "+app.location:"",app.salary?" · ":"",(app.salary?span({style:{color:T.text,fontWeight:"500"}},[app.salary]):null)].filter(Boolean)),
         ]),
-        statusSel,
+
       ]);
       card.appendChild(row);
       if(exp){
@@ -1302,6 +1274,7 @@ function _render(){
           div({style:{fontSize:"12px",color:T.sub}},[span({style:{fontWeight:"600",color:T.text}},[app.company]),app.location?" · "+app.location:"",app.appliedDate?" · "+app.appliedDate:""]),
         ]),
         statusSel,
+        (()=>{const b=h("button",{style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0"},title:"Remove"});b.textContent="\uD83D\uDDD1";b.addEventListener("click",e=>{e.stopPropagation();if(!confirm("Remove "+app.title+"?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();});return b;})(),
       ]);
       card.appendChild(row);
       if(exp){
