@@ -306,18 +306,40 @@ function buildPDFHTML(text,ci){
 // ─────────────────────────────────────────────────────────
 function wireEditable(previewBox,getText,onSave){
   let editing=false;
-  let undoStack=[];  // snapshots of text before each edit session
-  const T=t();
+  let undoStack=[];
 
   function extractText(){
     const lines=[];
-    previewBox.querySelectorAll(".pdf-sec-title,.pdf-exp-left,.pdf-exp-right,.pdf-bullet-text,.pdf-text-line,.pdf-name,.pdf-tagline").forEach(el=>{
+    // Skip header elements — name/tagline/contact live in S.ci, not the body text
+    previewBox.querySelectorAll(".pdf-sec-title,.pdf-exp-left,.pdf-exp-right,.pdf-bullet-text,.pdf-text-line").forEach(el=>{
       const tx=el.innerText.trim();if(!tx)return;
       if(el.classList.contains("pdf-sec-title"))lines.push("\n"+tx.toUpperCase());
       else if(el.classList.contains("pdf-bullet-text"))lines.push("\u2022 "+tx);
       else lines.push(tx);
     });
     return lines.join("\n").trim();
+  }
+
+  function syncCiFromHeader(){
+    // When user edits header directly in the PDF, sync back to S.ci
+    const nameEl=previewBox.querySelector(".pdf-name");
+    const tagEl=previewBox.querySelector(".pdf-tagline");
+    if(nameEl&&nameEl.innerText.trim()&&nameEl.innerText.trim()!=="Your Name"){
+      S.ci={...S.ci,name:nameEl.innerText.trim()};
+    }
+    if(tagEl&&tagEl.innerText.trim()){
+      S.ci={...S.ci,tagline:tagEl.innerText.trim()};
+    }
+    // Sync contact line items
+    previewBox.querySelectorAll(".pdf-contact-item").forEach(el=>{
+      const tx=el.innerText.trim();
+      if(!tx)return;
+      if(tx.includes("@"))S.ci={...S.ci,email:tx};
+      else if(tx.match(/^\(?\d/))S.ci={...S.ci,phone:tx};
+      else if(tx.includes("linkedin"))S.ci={...S.ci,linkedin:tx};
+      else if(tx.includes(",")&&tx.length<40)S.ci={...S.ci,location:tx};
+    });
+    lsSet("resume-ci",JSON.stringify(S.ci));
   }
 
   // ── Toolbar: Edit / Save / Revert / Undo ──
@@ -385,6 +407,7 @@ function wireEditable(previewBox,getText,onSave){
   editBtn.addEventListener("click",()=>startEdit());
 
   saveBtn.addEventListener("click",()=>{
+    syncCiFromHeader();
     const newText=extractText();
     if(newText&&newText!==getText())onSave(newText);
     stopEdit();
@@ -1257,11 +1280,27 @@ function _render(){
     const genBtn=(()=>{
       const b=mkBtn("purple",S.load==="gen"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Generating…"));return w;})():"✦ Generate tailored documents",async()=>{
         const base=S.polished||S.raw;
+        // Strip any header lines (name, email, phone etc.) from the top of the resume
+        // so Claude only sees the actual resume body content
+        const stripHeader=(txt)=>{
+          const lines=txt.split("\n");
+          let bodyStart=0;
+          for(let i=0;i<Math.min(8,lines.length);i++){
+            const l=lines[i].trim();
+            // Skip lines that look like header info: short name lines, emails, phones, LinkedIn, locations
+            if(!l||l.includes("@")||l.match(/^\(?\d{3}\)?[\s.-]\d{3}/)||l.toLowerCase().includes("linkedin")||
+               (l.length<50&&i<3&&!l.includes("|")&&!l.match(/[A-Z]{3,}/))){
+              bodyStart=i+1;
+            } else break;
+          }
+          return lines.slice(bodyStart).join("\n").trim()||txt;
+        };
+        const cleanBase=stripHeader(base);
         if(!base.trim()||!S.posting.trim()||S.load==="gen")return;
         S.load="gen";S.tailored="";S.cover="";rerender();
         try{
-          if(S.genWhat!=="cover"){const r=await callAI(`Resume writer. Tailor this resume to the job posting.\n${TONE_RULES[S.tone]}\n\nRULES — read carefully:\n1. NEVER invent, add, or imply experience the candidate does not have. Do not insert industry names, project types, sector references, or responsibilities that are not already in the resume.\n2. Transferable skills (managing teams, delivering projects, stakeholder communication, budgets, process improvement) apply across all industries — use them as-is without adding an industry label.\n3. Tailor by: reordering bullets to lead with the most relevant, adjusting the summary to speak to this role, and naturally weaving in keywords from the posting where they genuinely match existing experience.\n4. If the job asks for something the candidate clearly has no background in, simply omit that gap — do not fill it with fabricated content.\n5. ALL CAPS section headers, • bullets. Output ONLY the resume text.`,`JOB:\n${S.posting}\n\nRESUME:\n${base}`);S.tailored=r;lsSet("apply-tailored",r);}
-          if(S.genWhat!=="resume"){const r=await callAI(`Cover letter writer.\n${TONE_RULES[S.tone]}\nOpen specifically — not "I am writing to apply". Para 1: why this role/company. Para 2: 2-3 concrete matching experiences drawn only from the candidate's actual background — never invent industry experience they don't have; transferable skills are enough. Para 3: confident close. Under 320 words. No hollow phrases. Output ONLY cover letter.`,`JOB:\n${S.posting}\n\nRESUME:\n${base}`);S.cover=r;lsSet("apply-cover",r);}
+          if(S.genWhat!=="cover"){const r=await callAI(`Resume writer. Tailor this resume to the job posting.\n${TONE_RULES[S.tone]}\n\nRULES — read carefully:\n1. NEVER invent, add, or imply experience the candidate does not have. Do not insert industry names, project types, sector references, or responsibilities that are not already in the resume.\n2. Transferable skills (managing teams, delivering projects, stakeholder communication, budgets, process improvement) apply across all industries — use them as-is without adding an industry label.\n3. Tailor by: reordering bullets to lead with the most relevant, adjusting the summary to speak to this role, and naturally weaving in keywords from the posting where they genuinely match existing experience.\n4. If the job asks for something the candidate clearly has no background in, simply omit that gap — do not fill it with fabricated content.\n5. ALL CAPS section headers, • bullets. Output ONLY the resume text.`,`JOB:\n${S.posting}\n\nRESUME:\n${cleanBase}`);S.tailored=r;lsSet("apply-tailored",r);}
+          if(S.genWhat!=="resume"){const r=await callAI(`Cover letter writer.\n${TONE_RULES[S.tone]}\nOpen specifically — not "I am writing to apply". Para 1: why this role/company. Para 2: 2-3 concrete matching experiences drawn only from the candidate's actual background — never invent industry experience they don't have; transferable skills are enough. Para 3: confident close. Under 320 words. No hollow phrases. Output ONLY cover letter.`,`JOB:\n${S.posting}\n\nRESUME:\n${cleanBase}`);S.cover=r;lsSet("apply-cover",r);}
           S.applyOut=S.genWhat==="cover"?"cover":"resume";
           if(S.selectedJob){
             const _date=new Date().toLocaleDateString("en-CA");
@@ -1275,7 +1314,7 @@ function _render(){
         }catch{S.tailored="Error. Try again.";}
         S.load="";rerender();
       });
-      b.disabled=S.load==="gen"||!S.posting.trim()||(!S.polished&&!S.raw.trim());
+      b.disabled=S.load==="gen"||!S.posting.trim()||(!S.polished&&!S.raw.trim()); // uses cleanBase
       return b;
     })();
 
