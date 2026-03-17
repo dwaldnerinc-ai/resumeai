@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ResumeAI — Powered by Claude</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&amp;display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100vh;font-family:'Inter',system-ui,sans-serif}
@@ -46,8 +44,8 @@ button:active{transform:scale(0.97)}
 }
 </style>
 </head>
-<body>
-<div id="app"></div>
+<body style="background: rgb(13, 17, 23); color: rgb(232, 237, 245);">
+<div id="app"><div style="min-height: 100vh; background: rgb(13, 17, 23); color: rgb(232, 237, 245); font-family: Inter, system-ui, sans-serif;"><div style="background: rgb(22, 28, 39); border-bottom: 1px solid rgb(33, 41, 58); padding: 8px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0px; z-index: 10; min-height: 54px; flex-wrap: wrap; gap: 8px;"><div style="display: flex; align-items: center; gap: 10px;"><div title="Reload" style="width: 28px; height: 28px; background: rgb(37, 99, 235); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: rgb(255, 255, 255); cursor: pointer;">R</div><span style="font-size: 15px; font-weight: 700; letter-spacing: -0.01em;">ResumeAI</span><span style="font-size: 11px; color: rgb(75, 85, 99); margin-left: 2px;">powered by Claude</span></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><div style="font-size: 11px; color: rgb(75, 85, 99); display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: rgb(22, 163, 74); display: inline-block;"></span> Auto-saved</div><div style="display: flex; align-items: center; gap: 6px;"><button style="padding: 5px 11px; border-radius: 20px; font-size: 11px; cursor: pointer; border: 1px solid rgb(22, 101, 52); background: rgb(5, 46, 22); color: rgb(74, 222, 128); display: flex; align-items: center; gap: 5px;">🔑 Key set</button></div><button style="padding: 5px 13px; border-radius: 20px; border: 1px solid rgb(33, 41, 58); background: rgb(22, 28, 39); color: rgb(139, 149, 168); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">☀ Light</button><button style="padding: 5px 10px; border-radius: 20px; border: 1px solid rgb(33, 41, 58); background: transparent; color: rgb(75, 85, 99); font-size: 11px; cursor: pointer;">Reset</button></div></div><div style="max-width: 1080px; margin: 0px auto; padding: 24px 20px;"><div style="display: flex; gap: 7px; margin-bottom: 24px; flex-wrap: wrap;"><button style="padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgb(33, 41, 58); background: rgb(22, 28, 39); color: rgb(75, 85, 99); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500;"><span style="width: 18px; height: 18px; border-radius: 50%; background: rgb(75, 85, 99); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: rgb(255, 255, 255); flex-shrink: 0; font-weight: 700;">1</span> Resume</button><button style="padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgb(30, 64, 175); background: rgb(12, 30, 62); color: rgb(147, 197, 253); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600;"><span style="width: 18px; height: 18px; border-radius: 50%; background: rgb(37, 99, 235); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: rgb(255, 255, 255); flex-shrink: 0; font-weight: 700;">2</span> Find Jobs</button><button style="padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgb(22, 101, 52); background: rgb(5, 46, 22); color: rgb(74, 222, 128); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500;"><span style="width: 18px; height: 18px; border-radius: 50%; background: rgb(22, 163, 74); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: rgb(255, 255, 255); flex-shrink: 0; font-weight: 700;">✓</span> Job Board</button><button style="padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgb(33, 41, 58); background: rgb(22, 28, 39); color: rgb(75, 85, 99); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500;"><span style="width: 18px; height: 18px; border-radius: 50%; background: rgb(75, 85, 99); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: rgb(255, 255, 255); flex-shrink: 0; font-weight: 700;">4</span> Apply</button><button style="padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgb(33, 41, 58); background: rgb(22, 28, 39); color: rgb(75, 85, 99); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500;"><span style="width: 18px; height: 18px; border-radius: 50%; background: rgb(75, 85, 99); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: rgb(255, 255, 255); flex-shrink: 0; font-weight: 700;">5</span> Tracker<span style="font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; background: rgb(12, 30, 62); color: rgb(147, 197, 253);">5</span></button><button style="padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgb(33, 41, 58); background: rgb(22, 28, 39); color: rgb(75, 85, 99); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500;"><span style="width: 18px; height: 18px; border-radius: 50%; background: rgb(75, 85, 99); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: rgb(255, 255, 255); flex-shrink: 0; font-weight: 700;">6</span> Interview Prep</button></div><div><div style="background: rgb(22, 28, 39); border: 1px solid rgb(33, 41, 58); border-radius: 14px; padding: 22px 24px; margin-bottom: 18px;"><div style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Find matching jobs</div><div style="font-size: 13px; color: rgb(139, 149, 168); margin-bottom: 16px;">Tip: polish your resume first for personalized match scores.</div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;"><div><label style="font-size: 11px; color: rgb(75, 85, 99); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600;">Keywords</label><input placeholder="e.g. Project Manager, Construction…" style="background: rgb(13, 17, 23); border: 1px solid rgb(33, 41, 58); border-radius: 8px; color: rgb(232, 237, 245); padding: 9px 13px; font-size: 13px; font-family: inherit; width: 100%; box-sizing: border-box;"></div><div><label style="font-size: 11px; color: rgb(75, 85, 99); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600;">Location</label><input placeholder="e.g. Vancouver, BC" style="background: rgb(13, 17, 23); border: 1px solid rgb(33, 41, 58); border-radius: 8px; color: rgb(232, 237, 245); padding: 9px 13px; font-size: 13px; font-family: inherit; width: 100%; box-sizing: border-box;"></div></div><div style="margin-bottom: 16px;"><label style="font-size: 11px; color: rgb(75, 85, 99); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600;">Work type</label><div style="display: flex; gap: 7px; flex-wrap: wrap;"><button style="padding: 6px 13px; border-radius: 16px; border: 1.5px solid rgb(33, 41, 58); background: transparent; color: rgb(139, 149, 168); font-size: 12px; cursor: pointer; font-weight: 400;">Remote</button><button style="padding: 6px 13px; border-radius: 16px; border: 1.5px solid rgb(33, 41, 58); background: transparent; color: rgb(139, 149, 168); font-size: 12px; cursor: pointer; font-weight: 400;">Hybrid</button><button style="padding: 6px 13px; border-radius: 16px; border: 1.5px solid rgb(33, 41, 58); background: transparent; color: rgb(139, 149, 168); font-size: 12px; cursor: pointer; font-weight: 400;">On-site</button><button style="padding: 6px 13px; border-radius: 16px; border: 1.5px solid rgb(33, 41, 58); background: transparent; color: rgb(139, 149, 168); font-size: 12px; cursor: pointer; font-weight: 400;">Contract</button></div></div><div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;"><button style="padding: 9px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; background: rgb(13, 148, 136); color: rgb(255, 255, 255); display: inline-flex; align-items: center; gap: 7px;">⌕ Search jobs</button></div></div><div style="background: rgb(22, 28, 39); border: 1px solid rgb(33, 41, 58); border-radius: 14px; padding: 48px 24px; margin-bottom: 18px; text-align: center; color: rgb(139, 149, 168);"><div style="font-size: 32px; margin-bottom: 10px;">⌕</div><div style="font-size: 15px; font-weight: 600; color: rgb(232, 237, 245); margin-bottom: 6px;">Search for relevant jobs</div><div style="font-size: 13px; line-height: 1.6;">Leave keywords blank to see all roles, or filter by type.</div></div></div></div></div></div>
 <div id="print-area" style="display:none"></div>
 
 <script>
@@ -64,28 +62,8 @@ const STATUSES=[
 ];
 const smeta=k=>STATUSES.find(s=>s.key===k)||STATUSES[0];
 
-const SEED_APPS=[
-  {id:"s1",company:"Vancouver Airport Authority",title:"Senior Manager, Airside Operations",location:"Richmond, BC",type:"On-site",salary:"Competitive",url:"https://mail.jobbankcanada.com/display-job/9317970/Senior-Manager,-Airside-Operations.html",status:"saved",appliedDate:"",notes:"24/7 ops leadership, emergency response, regulatory compliance. Strong match: multi-site ops from TELUS."},
-  {id:"s2",company:"Vancouver Airport Authority",title:"Manager, Airside Standards & Compliance",location:"Richmond, BC",type:"On-site",salary:"$105,680–$158,520",url:"https://careers.yvr.ca/job/vancouver/manager-airside-standards-and-compliance/38253/91951111008",status:"saved",appliedDate:"",notes:"Safety programs, regulatory frameworks, airfield compliance. Address aviation experience gap in cover letter."},
-  {id:"s3",company:"Rayner Construction Services",title:"Senior Project Manager – Commercial Construction",location:"Vancouver, BC",type:"On-site",salary:"$120,000–$140,000",url:"https://www.glassdoor.ca/Job/vancouver-project-manager-jobs-SRCH_IL.0,9_IC2278756_KO10,25.htm",status:"saved",appliedDate:"",notes:"BC commercial construction. Subcontractor mgmt, financial discipline, client relationships."},
-  {id:"s4",company:"Outpost Recruitment",title:"Project Manager – Owner's Rep, Buildings",location:"Vancouver, BC",type:"Hybrid",salary:"$125,000–$155,000",url:"https://outpostrecruitment.com/job/project-manager-program-management/",status:"saved",appliedDate:"",notes:"PM consulting, owner's rep on commercial/residential/healthcare projects. PMP required."},
-  {id:"s5",company:"Community Living BC",title:"Senior Program Manager",location:"Vancouver, BC",type:"Hybrid",salary:"~$99,000+",url:"https://www.ziprecruiter.com/c/Community-Living-BC/Job/Senior-Program-Manager-Vancouver-Head-Office-2026.038/-in-Vancouver,BC",status:"saved",appliedDate:"",notes:"Portfolio PMO, Agile/Waterfall, governance focus. Min 1 day/week in office."},
-];
+const SEED_APPS=[];
 
-const SEARCH_POOL=[
-  {id:"j1",title:"Senior Manager, Airside Operations",company:"Vancouver Airport Authority",location:"Richmond, BC",type:"On-site",salary:"Competitive",url:"https://mail.jobbankcanada.com/display-job/9317970/Senior-Manager,-Airside-Operations.html",desc:"Lead 24/7 airside operations, real-time decision-making, regulatory compliance and emergency response.",tags:["Operations","Leadership","Safety","Compliance"],match:92},
-  {id:"j2",title:"Manager, Airside Standards & Compliance",company:"Vancouver Airport Authority",location:"Richmond, BC",type:"On-site",salary:"$105,680–$158,520",url:"https://careers.yvr.ca/job/vancouver/manager-airside-standards-and-compliance/38253/91951111008",desc:"Govern safety programs, regulatory frameworks, and compliance across the airfield.",tags:["Compliance","Safety","Capital Projects","PMP"],match:88},
-  {id:"j3",title:"Senior Project Manager – Commercial Construction",company:"Rayner Construction Services",location:"Vancouver, BC",type:"On-site",salary:"$120,000–$140,000",url:"https://www.glassdoor.ca/Job/vancouver-project-manager-jobs-SRCH_IL.0,9_IC2278756_KO10,25.htm",desc:"Deliver commercial construction projects. Manage scope, schedule, budget, subcontractors and trade partners.",tags:["Construction","PMP","Subcontractors","Budget"],match:91},
-  {id:"j4",title:"Project Manager – Owner's Rep, Buildings",company:"Outpost Recruitment",location:"Vancouver, BC",type:"Hybrid",salary:"$125,000–$155,000",url:"https://outpostrecruitment.com/job/project-manager-program-management/",desc:"PM consulting managing commercial, residential and healthcare building projects.",tags:["PM Consulting","Buildings","Hybrid","PMP"],match:89},
-  {id:"j5",title:"Senior Program Manager",company:"Community Living BC",location:"Vancouver, BC",type:"Hybrid",salary:"~$99,000+",url:"https://www.ziprecruiter.com/c/Community-Living-BC/Job/Senior-Program-Manager-Vancouver-Head-Office-2026.038/-in-Vancouver,BC",desc:"Portfolio PMO role. Agile/Waterfall, stakeholder management, program governance.",tags:["Program Management","Agile","Governance","Hybrid"],match:84},
-  {id:"j6",title:"Manager, Operations Centre",company:"Vancouver Airport Authority",location:"Richmond, BC",type:"On-site",salary:"Competitive",url:"https://careers.yvr.ca/job/vancouver/manager-operations-centre/38253/71323151792",desc:"Oversee day-to-day airport operations. Lead multi-functional teams, manage incidents, emergency coordination.",tags:["Operations","Leadership","Emergency Response"],match:86},
-  {id:"j7",title:"Senior PM – Infrastructure Capital Projects",company:"BC Hydro",location:"Burnaby, BC",type:"Hybrid",salary:"$110,000–$130,000",url:"https://www.glassdoor.ca/",desc:"Lead infrastructure capital projects from planning through commissioning.",tags:["Infrastructure","Capital Projects","Hybrid"],match:83},
-  {id:"j8",title:"Program Manager – Digital Transformation",company:"Fortis BC",location:"Surrey, BC",type:"Hybrid",salary:"$115,000–$135,000",url:"https://www.glassdoor.ca/",desc:"Drive large-scale digital and operational transformation. Cross-functional teams, change management.",tags:["Program Management","Change Management","Lean Six Sigma"],match:81},
-  {id:"j9",title:"Project Manager – Business Governance",company:"Robert Half Client",location:"Remote – Vancouver",type:"Remote",salary:"$60–$75/hr",url:"https://www.roberthalf.com/ca/en/jobs/vancouver-bc/project-manager",desc:"Self-directed PM leading governance initiatives for a Vancouver enterprise client.",tags:["Remote","Governance","Program Management"],match:79},
-  {id:"j10",title:"Construction Manager – Civil Infrastructure",company:"Jacob Bros Construction",location:"Langley, BC",type:"On-site",salary:"$120,000–$160,000",url:"https://ca.linkedin.com/jobs/construction-project-manager-jobs-vancouver-bc",desc:"Manage civil infrastructure projects in Lower Mainland. Field teams, subcontractors, safety.",tags:["Civil","Construction","Field Leadership","Safety"],match:77},
-  {id:"j11",title:"Senior PM – Telecom Infrastructure",company:"Rogers Communications",location:"Vancouver, BC",type:"Hybrid",salary:"$105,000–$125,000",url:"https://ca.linkedin.com/jobs/rogers-communications-jobs",desc:"Lead telecom network infrastructure programs across BC. Vendor management, field teams.",tags:["Telecom","Infrastructure","Hybrid","Vendors"],match:90},
-  {id:"j12",title:"Operations Manager – Field Services",company:"TELUS",location:"Burnaby, BC",type:"Hybrid",salary:"$100,000–$120,000",url:"https://www.telus.com/en/about/careers",desc:"Oversee field service operations across Lower Mainland. Dispatch, vendor contracts, KPIs.",tags:["Telecom","Field Ops","Hybrid","KPI"],match:88},
-];
 
 const TONE_RULES={
   natural:`VOICE (critical): Write like a confident human — not a corporate AI. Plain direct language. AVOID: spearheaded, leveraged, utilized, orchestrated, championed, fostered, robust, seamless, synergy, dynamic, innovative, results-driven, passionate, proven track record, end-to-end, holistic, transformative. Use simple verbs: Led, Built, Managed, Reduced, Saved, Improved, Delivered, Cut, Launched.`,
@@ -100,11 +78,11 @@ const S={
   dark:true, tab:"resume",
   raw:"", polished:"", resumeView:"edit", tone:"natural",
   ci:{name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""},
-  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, polishError:"", apiKey:"", apiKeyError:false, showApiKey:false,
+  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false,
   selectedJob:null, posting:"", tailored:"", cover:"", applyOut:"resume", genWhat:"both",
   apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
   searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
-  addedJobs:new Set(), aiSuggestions:[], aiSuggestionsError:"",
+  addedJobs:new Set(), aiSuggestions:[], aiSuggestionsError:"", recentlyAdded:[], addToast:"", pastePosting:"",
   intJob:null, intRound:"prescreen", intQs:[], mockQ:"", mockA:"", mockFb:"", intLoad:false,
   urlImport:"", urlImportPaste:"", urlImportStatus:"", showUrlPaste:false,
 };
@@ -124,8 +102,8 @@ function debounceSave(key,val,delay=800){
 
 function loadAll(){
   const apps=lsGet("tracker-apps-v2");
-  S.apps=apps?JSON.parse(apps):[...SEED_APPS];
-  if(!apps)lsSet("tracker-apps-v2",JSON.stringify(SEED_APPS));
+  S.apps=apps?JSON.parse(apps):[];
+  if(!apps)lsSet("tracker-apps-v2",JSON.stringify([]));
 
   const raw=lsGet("resume-raw",""); S.raw=raw;
   const pol=lsGet("resume-polished",""); S.polished=pol;
@@ -134,7 +112,6 @@ function loadAll(){
   const tone=lsGet("resume-tone"); if(tone)S.tone=tone;
   const dark=lsGet("app-dark"); if(dark!==null)S.dark=(dark==="true");
   const posting=lsGet("apply-posting",""); S.posting=posting;
-  S.apiKey=lsGet("api-key","")||"";
   S.apiKey=lsGet("api-key","")||"";
   const tailored=lsGet("apply-tailored",""); S.tailored=tailored;
   const cover=lsGet("apply-cover",""); S.cover=cover;
@@ -220,6 +197,7 @@ async function callAI(sys,usr){
   hdrs.append("Content-Type","application/json");
   hdrs.append("x-api-key",key);
   hdrs.append("anthropic-version","2023-06-01");
+  hdrs.append("anthropic-dangerous-direct-browser-access","true");
   const r=await fetch("https://api.anthropic.com/v1/messages",{
     method:"POST",headers:hdrs,
     body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:4000,system:sys,messages:[{role:"user",content:usr}]})
@@ -328,27 +306,21 @@ function buildPDFHTML(text,ci){
 // ─────────────────────────────────────────────────────────
 // EDITABLE PDF HELPER
 // ─────────────────────────────────────────────────────────
-function wireEditable(previewBox, getText, onSave){
+function wireEditable(previewBox,getText,onSave){
   setTimeout(()=>{
     const wrap=previewBox.querySelector(".pdf-wrap");
     if(!wrap)return;
-    wrap.contentEditable="true";
-    wrap.spellcheck=true;
-    wrap.style.outline="none";
-    wrap.style.cursor="text";
-    wrap.style.caretColor="#2563eb";
-    let saveTimer=null;
+    wrap.contentEditable="true";wrap.spellcheck=true;
+    wrap.style.outline="none";wrap.style.cursor="text";wrap.style.caretColor="#2563eb";
+    let t=null;
     wrap.addEventListener("input",()=>{
-      clearTimeout(saveTimer);
-      saveTimer=setTimeout(()=>{
+      clearTimeout(t);
+      t=setTimeout(()=>{
         const lines=[];
         wrap.querySelectorAll(".pdf-sec-title,.pdf-exp-left,.pdf-exp-right,.pdf-bullet-text,.pdf-text-line,.pdf-name,.pdf-tagline").forEach(el=>{
-          const tx=el.innerText.trim();
-          if(!tx)return;
+          const tx=el.innerText.trim();if(!tx)return;
           if(el.classList.contains("pdf-sec-title"))lines.push("\n"+tx.toUpperCase());
           else if(el.classList.contains("pdf-bullet-text"))lines.push("\u2022 "+tx);
-          else if(el.classList.contains("pdf-exp-left"))lines.push(tx);
-          else if(el.classList.contains("pdf-exp-right"))lines.push(tx);
           else lines.push(tx);
         });
         const newText=lines.join("\n").trim();
@@ -356,9 +328,9 @@ function wireEditable(previewBox, getText, onSave){
       },600);
     });
   },50);
-  const hint=div({style:{position:"absolute",top:"10px",right:"10px",fontSize:"11px",color:"#6b7280",background:"rgba(31,41,55,0.85)",border:"1px solid #374151",borderRadius:"6px",padding:"3px 9px",pointerEvents:"none",backdropFilter:"blur(4px)",zIndex:"5"}},["\u270E Click to edit"]);
+  const hint=div({style:{position:"absolute",top:"10px",right:"10px",fontSize:"11px",color:"#9ca3af",background:"rgba(17,24,39,0.85)",border:"1px solid #374151",borderRadius:"6px",padding:"3px 9px",pointerEvents:"none",zIndex:"5"}},["\u270E Click to edit"]);
   previewBox.appendChild(hint);
-  previewBox.addEventListener("click",()=>{hint.style.display="none";},{once:true});
+  previewBox.addEventListener("click",()=>hint.style.display="none",{once:true});
 }
 
 // ─────────────────────────────────────────────────────────
@@ -373,7 +345,6 @@ function rerender(){
 function _render(){
   const T=t();
   const app=document.getElementById("app");
-  const hasKey=!!S.apiKey;
 
   // Apply theme to body
   document.body.style.background=T.appBg;
@@ -430,6 +401,7 @@ function _render(){
   // ── HEADER ──
   const TABS=[["resume","1","Resume"],["search","2","Find Jobs"],["board","3","Job Board"],["apply","4","Apply"],["tracker","5","Tracker"],["interview","6","Interview Prep"]];
 
+  const hasKey=!!S.apiKey;
   const header=div({style:{background:T.hBg,borderBottom:`1px solid ${T.hBorder}`,padding:"0 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:"0",zIndex:"10",minHeight:"54px",flexWrap:"wrap",gap:"8px",paddingTop:"8px",paddingBottom:"8px"}},[
     div({style:{display:"flex",alignItems:"center",gap:"10px"}},[
       div({style:{width:"28px",height:"28px",background:"#2563eb",borderRadius:"7px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px",fontWeight:"700",color:"#fff",cursor:"pointer"},title:"Reload",onClick:()=>location.reload()},["R"]),
@@ -495,21 +467,6 @@ function _render(){
     }
 
     // Refine action — apply plain-English instruction to polished resume
-    async function doRefine(){
-      if(!S.polished||!S.refineText.trim()||S.load==="refine")return;
-      S.load="refine";rerender();
-      try{
-        const r=await callAI(
-          `You are editing a resume. The user will give you an instruction. Apply it precisely and return the COMPLETE updated resume text — same format, ALL CAPS section headers, • bullets. Do not summarise, truncate, or add commentary. Output ONLY the resume text.`,
-          `INSTRUCTION: ${S.refineText}\n\nRESUME:\n${S.polished}`
-        );
-        S.polished=r;lsSet("resume-polished",r);
-        S.refineText="";
-      }catch{/* leave polished as-is on error */}
-      S.load="";rerender();
-    }
-
-
     function mkToneRow(){
       return div({style:{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap"}},[
         span({style:{fontSize:"11px",color:T.muted,fontWeight:"600",textTransform:"uppercase",letterSpacing:"0.06em",marginRight:"2px"}},["Tone:"]),
@@ -680,190 +637,249 @@ function _render(){
   // ── TAB 2: FIND JOBS ──
   else if(S.tab==="search"){
 
-    // Quick-link job boards
     const JOB_BOARDS=[
-      {name:"Indeed Canada",  icon:"🔍", color:"#2164f3", url:(kw,loc)=>`https://ca.indeed.com/jobs?q=${encodeURIComponent(kw)}&l=${encodeURIComponent(loc)}`},
-      {name:"LinkedIn",       icon:"💼", color:"#0a66c2", url:(kw,loc)=>`https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(kw)}&location=${encodeURIComponent(loc)}`},
-      {name:"WorkBC",         icon:"🍁", color:"#d4271c", url:(kw,loc)=>`https://www.workbc.ca/Search-Jobs.aspx?searchTerm=${encodeURIComponent(kw)}&location=${encodeURIComponent(loc)}`},
-      {name:"Glassdoor",      icon:"🪞", color:"#0caa41", url:(kw,loc)=>`https://www.glassdoor.ca/Job/jobs.htm?sc.keyword=${encodeURIComponent(kw)}&locT=C&locKeyword=${encodeURIComponent(loc)}`},
-      {name:"Government Jobs",icon:"🏛", color:"#7c3aed", url:(kw,loc)=>`https://jobs-emplois.gc.ca/en/search#q=${encodeURIComponent(kw)}`},
-      {name:"Charity Village", icon:"🤝", color:"#0d9488", url:(kw,loc)=>`https://charityvillage.com/search/?q=${encodeURIComponent(kw)}&location=${encodeURIComponent(loc)}`},
+      {name:"Indeed Canada",   icon:"🔍", url:(kw,loc)=>"https://ca.indeed.com/jobs?q="+encodeURIComponent(kw)+"&l="+encodeURIComponent(loc)},
+      {name:"LinkedIn",        icon:"💼", url:(kw,loc)=>"https://www.linkedin.com/jobs/search/?keywords="+encodeURIComponent(kw)+"&location="+encodeURIComponent(loc)},
+      {name:"WorkBC",          icon:"🍁", url:(kw,loc)=>"https://www.workbc.ca/Search-Jobs.aspx?searchTerm="+encodeURIComponent(kw)+"&location="+encodeURIComponent(loc)},
+      {name:"Glassdoor",       icon:"🪞", url:(kw,loc)=>"https://www.glassdoor.ca/Job/jobs.htm?sc.keyword="+encodeURIComponent(kw)+"&locT=C&locKeyword="+encodeURIComponent(loc)},
+      {name:"Gov Jobs",        icon:"🏛", url:(kw,loc)=>"https://jobs-emplois.gc.ca/en/search#q="+encodeURIComponent(kw)},
+      {name:"Charity Village", icon:"🤝", url:(kw,loc)=>"https://charityvillage.com/search/?q="+encodeURIComponent(kw)+"&location="+encodeURIComponent(loc)},
     ];
 
-    // AI suggestions state
     if(!S.aiSuggestions)S.aiSuggestions=[];
-    if(S.aiSuggestionsError===undefined)S.aiSuggestionsError="";
-
-    const kwInput=(()=>{
-      const i=h("input",{style:inp_s,placeholder:"e.g. Project Manager, Plumber, Sales Rep…"});
-      i.value=S.searchKw;
-      i.addEventListener("input",e=>{S.searchKw=e.target.value;});
-      i.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();runAISearch();}});
-      return i;
-    })();
-    const locInput=(()=>{
-      const i=h("input",{style:inp_s,placeholder:"e.g. Vancouver, BC"});
-      i.value=S.searchLoc;
-      i.addEventListener("input",e=>{S.searchLoc=e.target.value;});
-      i.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();runAISearch();}});
-      return i;
-    })();
-
-    async function runAISearch(){
-      const kw=(kwInput.value||S.searchKw||"").trim();
-      const loc=(locInput.value||S.searchLoc||"").trim();
-      if(!kw||S.load==="search")return;
-      S.searchKw=kw;S.searchLoc=loc;
-      S.load="search";S.aiSuggestions=[];S.aiSuggestionsError="";S.searchDone=false;
-      rerender();
-      try{
-        const r=await callAI(
-          `You are a Canadian job market expert. The user is searching for jobs. Return ONLY a valid JSON array of 8 job leads. Each item must have: title (string), company (string — a real company that typically hires for this role in this location), location (string), type (one of: Remote/Hybrid/On-site/Contract), salaryRange (string, e.g. "$60,000–$80,000" or "~$25/hr"), whyGoodFit (1 sentence), searchTip (1 sentence tip for finding this type of role). No markdown, no backticks, no extra text.`,
-          `Job search: "${kw}" in "${loc||"Canada"}". ${S.polished?"Candidate background summary: "+S.polished.substring(0,400):""}`
-        );
-        try{
-          const parsed=JSON.parse(r.replace(/```json|```/g,"").trim());
-          S.aiSuggestions=parsed;S.searchDone=true;
-        }catch{S.aiSuggestionsError="Could not parse results. Try again.";}
-      }catch(e){S.aiSuggestionsError=e.message||"Search failed. Check your API key.";}
-      S.load="";rerender();
-    }
+    if(!S.recentlyAdded)S.recentlyAdded=[];
 
     const kw=S.searchKw||"";
     const loc=S.searchLoc||"Vancouver, BC";
 
-    // Search bar
-    const searchCard=div({style:card_s},[
-      div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"4px"}},["Find Jobs"]),
-      div({style:{fontSize:"13px",color:T.sub,marginBottom:"16px"}},["Get real AI-powered job leads and search live job boards — all in one place."]),
-      div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"14px"}},[
-        div({},[mkLabel("What are you looking for?"),kwInput]),
-        div({},[mkLabel("Location"),locInput]),
-      ]),
-      div({style:{display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap"}},[
-        (()=>{
-          const b=mkBtn("primary",S.load==="search"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Searching…"));return w;})():"✦ Get AI job leads",runAISearch);
-          b.disabled=S.load==="search";
-          return b;
-        })(),
-        S.polished?span({style:{fontSize:"12px",color:T.done.text,display:"flex",alignItems:"center",gap:"5px"}},[
-          span({style:{width:"7px",height:"7px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}}),
-          " Resume loaded — leads will match your background"
-        ]):null,
-      ].filter(Boolean)),
+    // Add a job to the board + score it in background
+    async function addJobToBoard(job){
+      if(S.apps.some(a=>a.title===job.title&&a.company===job.company))return;
+      const newApp={
+        id:Date.now().toString(),
+        company:job.company||"",title:job.title||"Untitled",
+        location:job.location||loc,type:job.type||"On-site",
+        salary:job.salaryRange||job.salary||"",url:job.url||"",
+        status:"saved",appliedDate:"",
+        notes:[job.whyGoodFit,job.searchTip?"Search tip: "+job.searchTip:"",job.desc].filter(Boolean).join("\n\n"),
+        matchScore:null,matchKeywords:[],
+      };
+      S.apps=[newApp,...S.apps];
+      lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+      S.recentlyAdded=[newApp,...S.recentlyAdded].slice(0,20);
+      S.addToast=newApp.title+" at "+newApp.company;
+      rerender();
+      // Background match scoring
+      if(S.polished){
+        try{
+          const r=await callAI(
+            "Resume-job matcher. Return ONLY valid JSON: {score: integer 0-100, keywords: array of 3-4 short matching skill strings}. No markdown.",
+            "RESUME:\n"+S.polished.substring(0,500)+"\n\nJOB: "+newApp.title+" at "+newApp.company+"\n"+newApp.notes.substring(0,200)
+          );
+          const sc=JSON.parse(r.replace(/```json|```/g,"").trim());
+          S.apps=S.apps.map(a=>a.id===newApp.id?{...a,matchScore:sc.score,matchKeywords:sc.keywords||[]}:a);
+          S.recentlyAdded=S.recentlyAdded.map(a=>a.id===newApp.id?{...a,matchScore:sc.score,matchKeywords:sc.keywords||[]}:a);
+          lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+        }catch{}
+      }
+      setTimeout(()=>{if(S.addToast===newApp.title+" at "+newApp.company){S.addToast="";rerender();}},3000);
+      rerender();
+    }
+
+    // ── 1. PASTE A JOB POSTING ──
+    const pasteArea=(()=>{
+      const ta=h("textarea",{style:{...inp_s,width:"100%",minHeight:"100px",resize:"vertical",lineHeight:"1.6",fontFamily:"inherit"}});
+      ta.placeholder="Find a job online? Paste the full posting here — Claude extracts the details and adds it to your board automatically.";
+      ta.value=S.pastePosting||"";
+      ta.addEventListener("input",e=>S.pastePosting=e.target.value);
+      return ta;
+    })();
+    const pasteBtn=(()=>{
+      const b=mkBtn("primary",S.load==="pasteadd"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Adding…"));return w;})():"+ Add",async()=>{
+        const txt=(S.pastePosting||pasteArea.value||"").trim();
+        if(!txt||S.load==="pasteadd")return;
+        S.load="pasteadd";rerender();
+        try{
+          const r=await callAI(
+            "Extract job details. Return ONLY JSON: {title,company,location,type,salary,desc} where desc is a 2-sentence summary. No markdown.",
+            txt.substring(0,2000)
+          );
+          const parsed=JSON.parse(r.replace(/```json|```/g,"").trim());
+          await addJobToBoard({...parsed,desc:parsed.desc||txt.substring(0,200)});
+        }catch{
+          await addJobToBoard({title:"Job from posting",company:"",location:loc,type:"On-site",salary:"",desc:txt.substring(0,300)});
+        }
+        S.pastePosting="";S.load="";rerender();
+      });
+      b.disabled=S.load==="pasteadd"||!(S.pastePosting||"").trim();
+      return b;
+    })();
+
+    const pasteCard=div({style:card_s},[
+      div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"3px"}},["Paste a job posting"]),
+      div({style:{fontSize:"13px",color:T.sub,marginBottom:"12px"}},["Found something on Indeed or LinkedIn? Paste the posting here and Claude will add it to your board."]),
+      pasteArea,
+      div({style:{display:"flex",justifyContent:"flex-end",gap:"8px",marginTop:"10px"}},[pasteBtn]),
     ]);
 
-    // Live board quick links
-    const boardLinks=div({style:card_s},[
-      div({style:{fontSize:"13px",fontWeight:"700",color:T.text,marginBottom:"4px"}},["Search live job boards"]),
-      div({style:{fontSize:"12px",color:T.muted,marginBottom:"12px"}},["Click any board to open your search directly — opens in a new tab."]),
+    // ── 2. LIVE JOB BOARDS ──
+    const kwInp=(()=>{const i=h("input",{style:inp_s,placeholder:"e.g. Project Manager, Plumber, Sales Rep…"});i.value=kw;i.addEventListener("input",e=>S.searchKw=e.target.value);return i;})();
+    const locInp=(()=>{const i=h("input",{style:inp_s,placeholder:"e.g. Vancouver, BC"});i.value=loc;i.addEventListener("input",e=>S.searchLoc=e.target.value);return i;})();
+
+    const boardCard=div({style:card_s},[
+      div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"3px"}},["Search live job boards"]),
+      div({style:{fontSize:"13px",color:T.sub,marginBottom:"12px"}},["Enter keywords and click any board to open a live search in a new tab."]),
+      div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}},[
+        div({},[mkLabel("Keywords"),kwInp]),
+        div({},[mkLabel("Location"),locInp]),
+      ]),
       div({style:{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"8px"}},[
         ...JOB_BOARDS.map(board=>
           h("a",{
-            href:kw?board.url(kw,loc):"#",
+            href:kw?board.url(kw,loc):"javascript:void(0)",
             target:"_blank",rel:"noreferrer",
-            style:{
-              display:"flex",alignItems:"center",gap:"9px",
-              padding:"10px 14px",borderRadius:"10px",
-              border:`1px solid ${T.cardB}`,background:T.inBg,
-              textDecoration:"none",cursor:kw?"pointer":"not-allowed",
-              opacity:kw?"1":"0.5",transition:"border-color 0.15s",
-            },
-            onClick:e=>{if(!kw){e.preventDefault();kwInput.focus();}}
+            style:{display:"flex",alignItems:"center",gap:"10px",padding:"11px 14px",borderRadius:"10px",
+              border:"1px solid "+(kw?T.active.border:T.cardB),background:kw?T.inBg:"transparent",
+              textDecoration:"none",cursor:kw?"pointer":"default",opacity:kw?"1":"0.45",},
+            onClick:e=>{if(!kw){e.preventDefault();kwInp.focus();}}
           },[
-            span({style:{fontSize:"18px"}},[board.icon]),
+            span({style:{fontSize:"20px"}},[board.icon]),
             div({},[
               div({style:{fontSize:"12px",fontWeight:"600",color:T.text}},[board.name]),
-              div({style:{fontSize:"11px",color:T.muted}},[kw?`"${kw}" · ${loc}`:"Enter keywords first"]),
+              div({style:{fontSize:"11px",color:T.muted,marginTop:"1px"}},[kw?("Search \u201c"+kw+"\u201d"):"Enter keywords first"]),
             ]),
           ])
         ),
       ]),
-      !kw?div({style:{marginTop:"10px",fontSize:"12px",color:T.muted,textAlign:"center"}},["Enter a job title above to activate the links"]):null,
+      !kw?div({style:{marginTop:"10px",fontSize:"12px",color:T.muted,textAlign:"center"}},["\u2191 Enter a job title above to activate the links"]):null,
     ].filter(Boolean));
 
-    // AI results
-    let aiResults=div();
+    // ── 3. AI JOB LEADS ──
+    async function runAISearch(){
+      const kwVal=(kwInp.value||S.searchKw||"").trim();
+      const locVal=(locInp.value||S.searchLoc||"").trim();
+      if(!kwVal||S.load==="search")return;
+      S.searchKw=kwVal;S.searchLoc=locVal||"Canada";
+      S.load="search";S.aiSuggestions=[];S.aiSuggestionsError="";S.searchDone=false;rerender();
+      try{
+        const r=await callAI(
+          "Canadian job market expert. Return ONLY a JSON array of 8 job leads. Each: {title, company (real employer), location, type (Remote/Hybrid/On-site/Contract), salaryRange, whyGoodFit (1 sentence), searchTip (1 actionable tip)}. No markdown, no backticks.",
+          "Search: \""+kwVal+"\" in \""+(locVal||"Canada")+"\"."+(S.polished?" Resume summary: "+S.polished.substring(0,400):"")
+        );
+        const parsed=JSON.parse(r.replace(/```json|```/g,"").trim());
+        S.aiSuggestions=Array.isArray(parsed)?parsed:[];S.searchDone=true;
+      }catch(e){S.aiSuggestionsError=e.message||"Search failed.";}
+      S.load="";rerender();
+    }
+    [kwInp,locInp].forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();runAISearch();}}));
+
+    let aiBody=div();
     if(S.load==="search"){
-      aiResults=div({style:{...card_s,textAlign:"center",padding:"36px",color:T.sub}},[
-        div({style:{fontSize:"24px",marginBottom:"8px"}},["✦"]),
-        div({style:{fontSize:"14px",fontWeight:"600",color:T.text,marginBottom:"4px"}},["Finding job leads…"]),
-        div({style:{fontSize:"12px",color:T.muted}},["Claude is researching roles, companies, and tips for your search."]),
+      aiBody=div({style:{textAlign:"center",padding:"28px",color:T.sub}},[
+        div({style:{fontSize:"13px",fontWeight:"600",color:T.text,marginBottom:"3px"}},["✦ Generating leads…"]),
+        div({style:{fontSize:"12px",color:T.muted}},["Claude is researching real companies and roles."]),
       ]);
     }else if(S.aiSuggestionsError){
-      aiResults=div({style:{...card_s,background:T.danger.bg,border:`1px solid ${T.danger.border}`,padding:"14px 18px"}},[
+      aiBody=div({style:{padding:"10px 14px",background:T.danger.bg,border:"1px solid "+T.danger.border,borderRadius:"8px"}},[
         span({style:{fontSize:"13px",color:T.danger.text}},["⚠ "+S.aiSuggestionsError]),
       ]);
     }else if(S.searchDone&&S.aiSuggestions.length>0){
-      aiResults=div({},[
-        div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"12px",flexWrap:"wrap",gap:"8px"}},[
-          div({},[
-            div({style:{fontSize:"14px",fontWeight:"700",color:T.text}},[S.aiSuggestions.length+" job leads for “"+S.searchKw+"”"]),
-            div({style:{fontSize:"12px",color:T.muted,marginTop:"2px"}},["AI-generated leads based on your search. Click any to add to your board."]),
-          ]),
-          div({style:{display:"flex",gap:"6px",flexWrap:"wrap"}},[
-            ...JOB_BOARDS.slice(0,3).map(board=>
-              h("a",{href:board.url(kw,loc),target:"_blank",rel:"noreferrer",style:{fontSize:"11px",padding:"4px 10px",borderRadius:"8px",border:`1px solid ${T.cardB}`,background:T.inBg,color:T.sub,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"4px"}},[board.icon," ",board.name," ↗"])
-            ),
-          ]),
-        ]),
-        ...S.aiSuggestions.map((job,idx)=>{
-          const id="ai_"+idx+"_"+Date.now();
+      aiBody=div({},[
+        div({style:{fontSize:"12px",color:T.muted,marginBottom:"10px"}},[S.aiSuggestions.length+" leads for \u201c"+S.searchKw+"\u201d \u2014 add any to your board, then search the live boards above to find real postings."]),
+        ...S.aiSuggestions.map(job=>{
           const already=S.apps.some(a=>a.title===job.title&&a.company===job.company);
-          const card=div({style:{background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"12px",padding:"16px 20px",marginBottom:"10px"}});
-
-          const addBtn=mkBtn(already?"ghost":"primary",already?"✓ On Board":"+ Add to Board",()=>{
-            if(already)return;
-            const newApp={
-              id:Date.now().toString()+"_"+idx,
-              company:job.company,title:job.title,location:job.location,
-              type:job.type||"On-site",salary:job.salaryRange||"",url:"",
-              status:"saved",appliedDate:"",
-              notes:`${job.whyGoodFit||""}\n\nSearch tip: ${job.searchTip||""}`,
-            };
-            S.apps=[newApp,...S.apps];lsSet("tracker-apps-v2",JSON.stringify(S.apps));
-            rerender();
-          },{fontSize:"12px",padding:"7px 14px",opacity:already?"0.7":"1"});
+          const card=div({style:{background:T.inBg,border:"1px solid "+T.inB,borderRadius:"10px",padding:"12px 14px",marginBottom:"8px",display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"12px"}});
+          const addBtn=mkBtn(already?"ghost":"primary",already?"✓ Added":"+ Add",()=>addJobToBoard(job),{fontSize:"11px",padding:"5px 11px",flexShrink:"0",opacity:already?"0.7":"1"});
           addBtn.disabled=already;
-
-          // Search this specific role on live boards
-          const searchLinks=div({style:{display:"flex",gap:"6px",flexWrap:"wrap",marginTop:"10px"}},[
-            span({style:{fontSize:"11px",color:T.muted,alignSelf:"center"}},["Search: "]),
-            ...JOB_BOARDS.slice(0,4).map(board=>
-              h("a",{href:board.url(job.title+" "+job.company,job.location),target:"_blank",rel:"noreferrer",
-                style:{fontSize:"11px",padding:"3px 9px",borderRadius:"7px",border:`1px solid ${T.cardB}`,background:T.inBg,color:T.sub,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"3px"}},[board.icon," ",board.name])
-            ),
-          ]);
-
-          card.appendChild(div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"12px"}},[
-            div({style:{flex:"1",minWidth:"0"}},[
-              div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"4px"}},[
-                span({style:{fontSize:"14px",fontWeight:"700"}},[job.title]),
-                job.type?span({style:{fontSize:"11px",padding:"2px 8px",borderRadius:"9px",background:T.tag.bg,color:T.tag.text,border:`1px solid ${T.tag.border}`}},[job.type]):null,
-              ].filter(Boolean)),
-              div({style:{fontSize:"13px",color:T.sub,marginBottom:"6px"}},[
-                span({style:{fontWeight:"600",color:T.text}},[job.company]),
-                " · ",job.location,
-                job.salaryRange?span({style:{color:T.text,fontWeight:"500"}},[" · "+job.salaryRange]):null,
-              ].filter(Boolean)),
-              job.whyGoodFit?div({style:{fontSize:"12px",color:T.sub,lineHeight:"1.6",marginBottom:"4px"}},["\uD83D\uDCA1 "+job.whyGoodFit]):null,
-              job.searchTip?div({style:{fontSize:"12px",color:T.muted,lineHeight:"1.6",borderLeft:`2px solid ${T.div}`,paddingLeft:"8px"}},["\uD83D\uDD0D Tip: "+job.searchTip]):null,
-              searchLinks,
+          card.appendChild(div({style:{flex:"1",minWidth:"0"}},[
+            div({style:{display:"flex",alignItems:"center",gap:"7px",flexWrap:"wrap",marginBottom:"3px"}},[
+              span({style:{fontSize:"13px",fontWeight:"700",color:T.text}},[job.title]),
+              job.type?span({style:{fontSize:"10px",padding:"2px 7px",borderRadius:"8px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[job.type]):null,
             ].filter(Boolean)),
-            div({style:{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"8px",flexShrink:"0"}},[
-              addBtn,
-            ]),
+            div({style:{fontSize:"12px",color:T.sub,marginBottom:"3px"}},[
+              span({style:{fontWeight:"600",color:T.text}},[job.company])," · ",job.location,
+              job.salaryRange?span({style:{color:T.text}},[" · "+job.salaryRange]):null,
+            ].filter(Boolean)),
+            job.whyGoodFit?div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5"}},["💡 "+job.whyGoodFit]):null,
+          ].filter(Boolean)));
+          card.appendChild(div({style:{display:"flex",flexDirection:"column",gap:"5px",alignItems:"flex-end"}},[
+            addBtn,
+            h("a",{href:JOB_BOARDS[0].url(job.title,job.location||loc),target:"_blank",rel:"noreferrer",style:{fontSize:"10px",color:T.muted,textDecoration:"none"}},["Search ↗"]),
           ]));
           return card;
         }),
-        div({style:{...card_s,borderColor:S.dark?"#1e40af":"#93c5fd",background:S.dark?"#0c1e3e":"#eff6ff",padding:"14px 20px",marginTop:"4px"}},[
-          span({style:{fontSize:"13px",color:S.dark?"#93c5fd":"#1d4ed8",fontWeight:"600"}},["Added jobs to your board? "]),
-          mkBtn("primary","Go to Job Board →",()=>{S.tab="board";rerender();},{fontSize:"12px",padding:"6px 14px",marginLeft:"10px"}),
-        ]),
       ]);
     }
 
-    content=div({},[searchCard,boardLinks,aiResults]);
+    const aiCard=div({style:card_s},[
+      div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"3px"}},[
+        div({style:{fontSize:"15px",fontWeight:"700"}},["AI job leads"]),
+        div({style:{fontSize:"11px",color:T.muted,background:T.inBg,border:"1px solid "+T.inB,borderRadius:"6px",padding:"3px 8px"}},["✨ Uses API key"]),
+      ]),
+      div({style:{fontSize:"13px",color:T.sub,marginBottom:"12px"}},["Claude generates real company leads based on your keywords and resume background."]),
+      div({style:{display:"flex",gap:"8px",alignItems:"center",marginBottom:(S.searchDone||S.aiSuggestionsError||S.load==="search")?"12px":"0"}},[
+        (()=>{const b=mkBtn("teal",S.load==="search"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Searching…"));return w;})():"✦ Get AI leads",runAISearch);b.disabled=S.load==="search";return b;})(),
+        S.polished
+          ?span({style:{fontSize:"11px",color:T.done.text,display:"flex",alignItems:"center",gap:"4px"}},[span({style:{width:"6px",height:"6px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}})," Resume loaded"])
+          :span({style:{fontSize:"11px",color:T.muted}},["Polish your resume first for better matches"]),
+      ].filter(Boolean)),
+      aiBody,
+    ]);
+
+    // ── 4. RECENTLY ADDED ──
+    const recent=S.recentlyAdded||[];
+    const recentCard=recent.length>0?div({style:card_s},[
+      div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"12px"}},[
+        div({},[
+          div({style:{fontSize:"14px",fontWeight:"700",color:T.text}},["Recently added"]),
+          div({style:{fontSize:"12px",color:T.muted,marginTop:"1px"}},[recent.length+" job"+(recent.length!==1?"s":"")+" added this session — click any to view on Job Board"]),
+        ]),
+        mkBtn("ghost","Job Board →",()=>{S.tab="board";rerender();},{fontSize:"12px",padding:"5px 12px"}),
+      ]),
+      ...recent.map(app=>{
+        const btn=h("button",{style:{
+          width:"100%",display:"flex",alignItems:"center",gap:"12px",
+          padding:"10px 14px",borderRadius:"10px",marginBottom:"6px",
+          border:"1px solid "+T.cardB,background:T.inBg,cursor:"pointer",textAlign:"left",
+        }});
+        btn.addEventListener("click",()=>{S.tab="board";S.expandedApp=app.id;rerender();});
+        const score=app.matchScore!=null
+          ?span({style:{
+              fontSize:"11px",fontWeight:"700",padding:"3px 8px",borderRadius:"8px",flexShrink:"0",
+              background:app.matchScore>=85?"#052e16":app.matchScore>=70?"#1a2e05":"#1c1917",
+              color:app.matchScore>=85?"#4ade80":app.matchScore>=70?"#a3e635":"#d6d3d1",
+              border:"1px solid "+(app.matchScore>=85?"#166534":app.matchScore>=70?"#3f6212":"#44403c"),
+            }},[app.matchScore+"%"])
+          :span({style:{fontSize:"11px",color:T.muted,background:T.inBg,border:"1px solid "+T.inB,borderRadius:"8px",padding:"3px 8px",flexShrink:"0"}},["Scoring…"]);
+        btn.appendChild(div({style:{flex:"1",minWidth:"0"}},[
+          div({style:{fontSize:"13px",fontWeight:"600",color:T.text,marginBottom:"2px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}},[app.title]),
+          div({style:{fontSize:"11px",color:T.sub}},[app.company+(app.location?" · "+app.location:"")]),
+          app.matchKeywords&&app.matchKeywords.length>0?div({style:{display:"flex",gap:"4px",flexWrap:"wrap",marginTop:"4px"}},[
+            ...app.matchKeywords.map(k=>span({style:{fontSize:"10px",padding:"2px 6px",borderRadius:"6px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[k]))
+          ]):null,
+        ].filter(Boolean)));
+        btn.appendChild(score);
+        btn.appendChild(span({style:{fontSize:"12px",color:T.muted,flexShrink:"0"}},{},true)?null:span({style:{fontSize:"12px",color:T.muted,marginLeft:"4px",flexShrink:"0"}},["→"]));
+        return btn;
+      }),
+    ]):null;
+
+    // Toast
+    const toast=S.addToast?div({style:{
+      position:"fixed",bottom:"24px",right:"24px",zIndex:"300",
+      background:S.dark?"#052e16":"#f0fdf4",border:"1px solid #16a34a",
+      borderRadius:"12px",padding:"12px 18px",boxShadow:"0 8px 32px rgba(0,0,0,0.25)",
+      display:"flex",alignItems:"center",gap:"10px",maxWidth:"300px",
+    }},[
+      span({style:{fontSize:"16px",color:"#4ade80"}},{},true)?null:span({style:{fontSize:"16px"}},["\u2713"]),
+      div({},[
+        div({style:{fontSize:"13px",fontWeight:"700",color:S.dark?"#4ade80":"#15803d"}},[S.addToast+" added!"]),
+        h("button",{style:{fontSize:"12px",color:S.dark?"#86efac":"#16a34a",background:"transparent",border:"none",cursor:"pointer",padding:"0",textDecoration:"underline"},
+          onClick:()=>{S.tab="board";S.addToast="";rerender();}},["Go to Job Board \u2192"]),
+      ]),
+    ]):null;
+
+    content=div({},[pasteCard,boardCard,aiCard,recentCard,toast].filter(Boolean));
   }
 
   // ── TAB 3: JOB BOARD ──
@@ -1075,14 +1091,12 @@ function _render(){
           if(S.genWhat!=="cover"){const r=await callAI(`Resume writer. Tailor this resume to the job posting.\n${TONE_RULES[S.tone]}\n\nRULES — read carefully:\n1. NEVER invent, add, or imply experience the candidate does not have. Do not insert industry names, project types, sector references, or responsibilities that are not already in the resume.\n2. Transferable skills (managing teams, delivering projects, stakeholder communication, budgets, process improvement) apply across all industries — use them as-is without adding an industry label.\n3. Tailor by: reordering bullets to lead with the most relevant, adjusting the summary to speak to this role, and naturally weaving in keywords from the posting where they genuinely match existing experience.\n4. If the job asks for something the candidate clearly has no background in, simply omit that gap — do not fill it with fabricated content.\n5. ALL CAPS section headers, • bullets. Output ONLY the resume text.`,`JOB:\n${S.posting}\n\nRESUME:\n${base}`);S.tailored=r;lsSet("apply-tailored",r);}
           if(S.genWhat!=="resume"){const r=await callAI(`Cover letter writer.\n${TONE_RULES[S.tone]}\nOpen specifically — not "I am writing to apply". Para 1: why this role/company. Para 2: 2-3 concrete matching experiences drawn only from the candidate's actual background — never invent industry experience they don't have; transferable skills are enough. Para 3: confident close. Under 320 words. No hollow phrases. Output ONLY cover letter.`,`JOB:\n${S.posting}\n\nRESUME:\n${base}`);S.cover=r;lsSet("apply-cover",r);}
           S.applyOut=S.genWhat==="cover"?"cover":"resume";
-          // Save docs back to the job board entry
           if(S.selectedJob){
-            const date=new Date().toLocaleDateString("en-CA");
-            S.apps=S.apps.map(a=>a.id===S.selectedJob.id?{
-              ...a,
+            const _date=new Date().toLocaleDateString("en-CA");
+            S.apps=S.apps.map(a=>a.id===S.selectedJob.id?{...a,
               savedResume:S.tailored||a.savedResume||"",
               savedCover:S.cover||a.savedCover||"",
-              savedDocsDate:date,
+              savedDocsDate:_date,
             }:a);
             lsSet("tracker-apps-v2",JSON.stringify(S.apps));
           }
@@ -1223,7 +1237,7 @@ function _render(){
     content=div({},[
       div({style:card_s},[
         div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"4px"}},["Select a job"]),
-        div({style:{fontSize:"13px",color:T.sub,marginBottom:"12px"}},["Pick from your job board to auto-fill, or paste a posting manually below."]),
+        div({style:{fontSize:"13px",color:T.sub,marginBottom:"12px"}},["Pick from your job board, or paste a posting manually below."]),
         S.apps.length>0?div({style:{marginBottom:"12px"}},[
           mkLabel("Choose from your job board"),
           div({style:{display:"flex",gap:"8px",alignItems:"center"}},[
@@ -1242,18 +1256,14 @@ function _render(){
                 if(!app)return;
                 S.selectedJob=app;
                 S.posting=app.title+" at "+app.company+"\nLocation: "+app.location+"\nType: "+app.type+(app.salary?"\nSalary: "+app.salary:"")+"\n\n"+(app.notes||"");
-                S.tailored="";S.cover="";
-                debounceSave("apply-posting",S.posting);
-                rerender();
+                S.tailored="";S.cover="";debounceSave("apply-posting",S.posting);rerender();
               });
               return sel;
             })(),
-            S.selectedJob?span({style:{fontSize:"11px",fontWeight:"600",color:T.done.text,background:T.done.bg,border:`1px solid ${T.done.border}`,padding:"4px 10px",borderRadius:"8px",flexShrink:"0",whiteSpace:"nowrap"}},["✓ "+S.selectedJob.company]):null,
+            S.selectedJob?span({style:{fontSize:"11px",fontWeight:"600",color:T.done.text,background:T.done.bg,border:`1px solid ${T.done.border}`,padding:"4px 10px",borderRadius:"8px",flexShrink:"0",whiteSpace:"nowrap"}},[ "✓ "+S.selectedJob.company]):null,
           ].filter(Boolean)),
-        ]):div({style:{fontSize:"13px",color:T.muted,marginBottom:"10px"}},["No jobs on your board yet — add some in the Job Board tab."]),
-        div({style:{borderTop:`1px solid ${T.div}`,margin:"12px 0",display:"flex",alignItems:"center",gap:"10px"}},[
-          span({style:{fontSize:"11px",color:T.muted,background:T.card,padding:"0 8px",marginLeft:"12px",flexShrink:"0"}},["or paste manually"]),
-        ]),
+        ]):div({style:{fontSize:"13px",color:T.muted,marginBottom:"10px"}},["No jobs on your board yet — add some in Find Jobs or Job Board."]),
+        div({style:{borderTop:`1px solid ${T.div}`,margin:"12px 0"}}),
         mkLabel("Job posting text"),
         mkTextarea(S.posting,v=>{S.posting=v;debounceSave("apply-posting",v);},140,"Paste the full job posting here…"),
       ]),
@@ -1299,7 +1309,7 @@ function _render(){
         const docSection=hasDocs?div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"12px 14px",marginBottom:"12px"}},[
           div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px"}},[
             div({style:{display:"flex",alignItems:"center",gap:"7px"}},[
-              span({style:{fontSize:"12px",fontWeight:"700",color:T.text}},["📄 Saved documents"]),
+              span({style:{fontSize:"12px",fontWeight:"700",color:T.text}},["Documents"]),
               app.savedDocsDate?span({style:{fontSize:"11px",color:T.muted}},[" — "+app.savedDocsDate]):null,
             ].filter(Boolean)),
             mkBtn("ghost","Load into Apply →",()=>{
@@ -1307,26 +1317,25 @@ function _render(){
               S.posting=app.title+" at "+app.company+"\nLocation: "+app.location+"\nType: "+app.type+(app.salary?"\nSalary: "+app.salary:"")+"\n\n"+(app.notes||"");
               if(app.savedResume){S.tailored=app.savedResume;lsSet("apply-tailored",app.savedResume);}
               if(app.savedCover){S.cover=app.savedCover;lsSet("apply-cover",app.savedCover);}
-              S.applyOut=app.savedResume?"resumepdf":"cover";
-              S.tab="apply";rerender();
+              S.applyOut=app.savedResume?"resumepdf":"cover";S.tab="apply";rerender();
             },{fontSize:"11px",padding:"5px 12px"}),
           ]),
           div({style:{display:"flex",gap:"8px",flexWrap:"wrap"}},[
-            app.savedResume?div({style:{flex:"1",minWidth:"180px",background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"10px 12px"}},[
-              div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"6px"}},["Tailored Resume"]),
-              div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",maxHeight:"48px",overflow:"hidden"}},[app.savedResume.substring(0,150)+"…"]),
-              div({style:{display:"flex",gap:"5px",marginTop:"8px",flexWrap:"wrap"}},[
-                mkBtn("ghost","View PDF",()=>{const pa=document.getElementById("print-area");pa.style.display="block";pa.innerHTML=buildPDFHTML(app.savedResume,S.ci);window.print();pa.style.display="none";},{fontSize:"11px",padding:"3px 9px"}),
-                mkBtn("ghost","Copy",()=>{navigator.clipboard.writeText(app.savedResume).catch(()=>{});},{fontSize:"11px",padding:"3px 9px"}),
-                mkBtn("ghost","⬇ .txt",()=>{const a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(app.savedResume);a.download=app.company.replace(/\s+/g,"_")+"_resume.txt";a.click();},{fontSize:"11px",padding:"3px 9px"}),
+            app.savedResume?div({style:{flex:"1",minWidth:"160px",background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"10px 12px"}},[
+              div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"5px"}},["Tailored Resume"]),
+              div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",maxHeight:"44px",overflow:"hidden"}},[app.savedResume.substring(0,130)+"…"]),
+              div({style:{display:"flex",gap:"5px",marginTop:"7px",flexWrap:"wrap"}},[
+                mkBtn("ghost","View PDF",()=>{const pa=document.getElementById("print-area");pa.style.display="block";pa.innerHTML=buildPDFHTML(app.savedResume,S.ci);window.print();pa.style.display="none";},{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","Copy",()=>navigator.clipboard.writeText(app.savedResume).catch(()=>{}),{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","⬇ .txt",()=>{const a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(app.savedResume);a.download=app.company.replace(/[\s]+/g,"_")+"_resume.txt";a.click();},{fontSize:"11px",padding:"3px 8px"}),
               ]),
             ]):null,
-            app.savedCover?div({style:{flex:"1",minWidth:"180px",background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"10px 12px"}},[
-              div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"6px"}},["Cover Letter"]),
-              div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",maxHeight:"48px",overflow:"hidden"}},[app.savedCover.substring(0,150)+"…"]),
-              div({style:{display:"flex",gap:"5px",marginTop:"8px",flexWrap:"wrap"}},[
-                mkBtn("ghost","Copy",()=>{navigator.clipboard.writeText(app.savedCover).catch(()=>{});},{fontSize:"11px",padding:"3px 9px"}),
-                mkBtn("ghost","⬇ .txt",()=>{const a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(app.savedCover);a.download=app.company.replace(/\s+/g,"_")+"_cover_letter.txt";a.click();},{fontSize:"11px",padding:"3px 9px"}),
+            app.savedCover?div({style:{flex:"1",minWidth:"160px",background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"10px 12px"}},[
+              div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"5px"}},["Cover Letter"]),
+              div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",maxHeight:"44px",overflow:"hidden"}},[app.savedCover.substring(0,130)+"…"]),
+              div({style:{display:"flex",gap:"5px",marginTop:"7px",flexWrap:"wrap"}},[
+                mkBtn("ghost","Copy",()=>navigator.clipboard.writeText(app.savedCover).catch(()=>{}),{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","⬇ .txt",()=>{const a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(app.savedCover);a.download=app.company.replace(/[\s]+/g,"_")+"_cover.txt";a.click();},{fontSize:"11px",padding:"3px 8px"}),
               ]),
             ]):null,
           ].filter(Boolean)),
@@ -1486,12 +1495,12 @@ function _render(){
   const showSetup=!hasKey&&!lsGet("setup-dismissed","");
   const setupModal=showSetup?div({style:{position:"fixed",inset:"0",background:"rgba(0,0,0,0.75)",zIndex:"200",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}},[
     div({style:{background:S.dark?"#161c27":"#fff",borderRadius:"16px",padding:"32px",maxWidth:"460px",width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,0.5)"}},[
-      div({style:{fontSize:"26px",marginBottom:"10px"}},["\u{1F680}"]),
+      div({style:{fontSize:"26px",marginBottom:"10px"}},["🚀"]),
       div({style:{fontSize:"18px",fontWeight:"700",color:T.text,marginBottom:"8px"}},["Welcome to ResumeAI"]),
-      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.7",marginBottom:"18px"}},["AI-powered resume polishing, job tailoring, and interview prep \u2014 all running locally on your device. To enable the AI you need a free Anthropic API key."]),
+      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.7",marginBottom:"18px"}},["AI-powered resume polishing, job tailoring, and interview prep — all running locally on your device. To enable the AI you need a free Anthropic API key."]),
       div({style:{background:S.dark?"#0d1117":"#f4f6fa",border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"18px"}},[
         div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:"10px"}},["One-time setup"]),
-        ...[ ["1","Visit console.anthropic.com/settings/keys"],["2","Click Create Key and copy it"],["3","Paste it below and click Save"] ].map(([n,txt])=>
+        ...[["1","Visit console.anthropic.com/settings/keys"],["2","Click Create Key and copy it"],["3","Paste it below and click Save"]].map(([n,txt])=>
           div({style:{display:"flex",gap:"10px",alignItems:"center",marginBottom:"7px"}},[
             span({style:{width:"20px",height:"20px",borderRadius:"50%",background:"#2563eb",color:"#fff",fontSize:"10px",fontWeight:"700",display:"inline-flex",alignItems:"center",justifyContent:"center",flexShrink:"0"}},[n]),
             span({style:{fontSize:"13px",color:T.text}},[txt]),
@@ -1500,7 +1509,7 @@ function _render(){
       ]),
       div({style:{display:"flex",gap:"8px",marginBottom:"10px"}},[
         (()=>{
-          const inp=h("input",{style:{flex:"1",padding:"10px 12px",borderRadius:"8px",fontSize:"13px",border:`1px solid ${T.inB}`,background:T.inBg,color:T.text},placeholder:"sk-ant-api03-\u2026",type:"password"});
+          const inp=h("input",{style:{flex:"1",padding:"10px 12px",borderRadius:"8px",fontSize:"13px",border:`1px solid ${T.inB}`,background:T.inBg,color:T.text},placeholder:"sk-ant-api03-…",type:"password"});
           inp.value=S.apiKey||"";
           inp.addEventListener("input",e=>{S.apiKey=e.target.value;});
           inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&S.apiKey.trim()){lsSet("api-key",S.apiKey.trim());lsSet("setup-dismissed","1");rerender();}});
@@ -1508,18 +1517,21 @@ function _render(){
           return inp;
         })(),
         h("button",{style:{padding:"10px 18px",borderRadius:"8px",background:"#2563eb",color:"#fff",fontSize:"13px",fontWeight:"700",border:"none",cursor:"pointer",flexShrink:"0"},
-          onClick:()=>{if(S.apiKey.trim()){lsSet("api-key",S.apiKey.trim());lsSet("setup-dismissed","1");rerender();}else alert("Please paste your API key first.");}},["Save & start"]),
+          onClick:()=>{if(S.apiKey.trim()){lsSet("api-key",S.apiKey.trim());lsSet("setup-dismissed","1");rerender();}else alert("Please paste your API key first.");}},
+          ["Save & start"]),
       ]),
-      h("a",{href:"https://console.anthropic.com/settings/keys",target:"_blank",style:{fontSize:"12px",color:"#2563eb",display:"block",marginBottom:"12px"}},["Open Anthropic console \u2192"]),
+      h("a",{href:"https://console.anthropic.com/settings/keys",target:"_blank",style:{fontSize:"12px",color:"#2563eb",display:"block",marginBottom:"12px"}},["Open Anthropic console →"]),
       h("button",{style:{fontSize:"12px",color:T.muted,background:"transparent",border:"none",cursor:"pointer",textDecoration:"underline"},
-        onClick:()=>{lsSet("setup-dismissed","1");rerender();}},["Skip for now \u2014 I\u2019ll add it later"]),
+        onClick:()=>{lsSet("setup-dismissed","1");rerender();}},
+        ["Skip for now — I’ll add it later"]),
     ]),
   ]):null;
 
   const noKeyBanner=(!hasKey&&lsGet("setup-dismissed",""))?div({style:{background:T.warn.bg,borderBottom:`1px solid ${T.warn.border}`,padding:"8px 24px",display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},[
     span({style:{fontSize:"12px",color:T.warn.text}},["⚠ AI features require an API key — "]),
-    h("button",{style:{fontSize:"12px",color:T.warn.text,background:"transparent",border:"none",cursor:"pointer",textDecoration:"underline",padding:"0"},onClick:()=>{S.showApiKey=true;rerender();}},["add it here"]),
-    span({style:{fontSize:"12px",color:T.warn.text}},["  — visit "]),
+    h("button",{style:{fontSize:"12px",color:T.warn.text,background:"transparent",border:"none",cursor:"pointer",textDecoration:"underline",padding:"0"},onClick:()=>{S.showApiKey=true;rerender();}},
+      ["add it here"]),
+    span({style:{fontSize:"12px",color:T.warn.text}},[ " or visit "]),
     h("a",{href:"https://console.anthropic.com/settings/keys",target:"_blank",style:{fontSize:"12px",color:T.warn.text}},["console.anthropic.com"]),
   ]):null;
 
@@ -1535,5 +1547,24 @@ function _render(){
 loadAll();
 _render();
 </script>
-</body>
-</html>
+
+
+<div id="claude-static-indicator-container" style="position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); align-items: center; justify-content: center; padding: 6px 6px 6px 16px; background: rgb(250, 249, 245); border: 0.5px solid rgba(31, 30, 29, 0.3); border-radius: 14px; box-shadow: rgba(0, 0, 0, 0.15) 0px 40px 80px 0px; z-index: 2147483647; pointer-events: none; white-space: nowrap; user-select: none; font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; flex-shrink: 0; margin-right: 8px;">
+        <path d="M3.13946 10.6399L6.28757 8.87462L6.37405 8.73821L6.28757 8.6339H6.13189L5.60432 8.6018L3.80541 8.55366L2.24865 8.48947L0.735135 8.40923H0.492973L0.354595 8.32899L0.181622 8.1685L0.0345946 8.01605L0 7.85557L0.0345946 7.62287L0.138378 7.44634L0.224865 7.40622H0.354595L0.812973 7.44634L1.82486 7.51856L3.34703 7.62287L4.44541 7.68706L6.08 7.85557H6.33946L6.37405 7.75125L6.28757 7.68706L6.21838 7.62287L4.64432 6.55567L2.94054 5.4323L2.04973 4.78235L1.57405 4.45336L1.33189 4.14845L1.22811 3.92377L1.17622 3.69107L1.22811 3.47442L1.33189 3.28185L1.46162 3.13741L1.66054 2.99298H1.87676L2.24865 3.0331L2.39568 3.07322L2.99243 3.53059L4.26378 4.51755L5.92432 5.73721L6.16649 5.93781H6.27892V5.82548L6.16649 5.64092L5.26703 4.01204L4.30703 2.35105L3.87459 1.66098L3.76216 1.25176C3.7391 1.16082 3.69297 0.977332 3.69297 0.970913V0.762287L3.77946 0.505517L3.93513 0.240722L4.18595 0.0882648L4.4627 0H4.67892L4.83459 0.0240722L5.12865 0.0882648L5.4054 0.328987L5.82054 1.27583L6.48649 2.76028L7.52432 4.78235L7.82703 5.38415L7.99135 5.93781L8.05189 6.10632H8.15567V6.01003L8.24216 4.87061L8.39784 3.47442L8.55351 1.67703L8.6054 1.17151L8.85622 0.561685L8.9773 0.417252L9.21946 0.232698H9.35784L9.74703 0.417252L9.97189 0.665998L10.067 0.874624L10.0238 1.17151L9.83351 2.40722L9.46162 4.34102L9.21946 5.64092H9.35784L9.52216 5.47242L10.1795 4.60582L11.2778 3.22568L11.7622 2.68004L12.333 2.07823L12.6962 1.78937L13.0162 1.67703L13.3881 1.78937L13.7168 2.06219L13.8897 2.54363V2.76028L13.6649 3.32197L12.9557 4.22066L12.3676 4.98295L12.0043 5.56871L11.0011 7.02106V7.08526H11.1741L13.0768 6.67603L14.1059 6.49147L15.3341 6.28285L15.5762 6.34704L15.8876 6.53962L15.9481 6.80441L15.8876 7.12538L15.7319 7.34203L14.4173 7.66299L12.8778 7.97593L10.5854 8.51559C10.5705 8.51909 10.56 8.53236 10.56 8.54764C10.56 8.56468 10.573 8.57891 10.59 8.58044L11.6238 8.67402L12.0649 8.69809H13.1459L15.1611 8.85055L15.6886 9.19559L15.9481 9.39619L16 9.62086L15.9481 9.94985L15.8443 10.1023L15.4119 10.3029L15.1351 10.3591L14.0454 10.1023L11.4941 9.49248L10.6205 9.27583H10.4995V9.34804L11.2259 10.0622L12.5665 11.2658L14.2357 12.8225L14.3222 13.0953V13.2076L14.1059 13.5125L13.9243 13.5206L13.8811 13.4804L12.4108 12.3731L12.2984 12.325L11.84 11.8756L10.56 10.7924H10.4735V10.9047L10.7676 11.338L12.333 13.6891L12.4108 14.4112L12.2984 14.6439L11.8919 14.7884L11.667 14.7563L11.4508 14.7081L11.2605 14.5396L10.5254 13.4162L9.5827 11.9719L8.82162 10.672H8.79342C8.76039 10.672 8.73278 10.6972 8.7297 10.73L8.27676 15.5667L8.06919 15.8154L7.6454 16H7.58486L7.17838 15.6951L6.96216 15.1976L7.17838 14.2106L7.43784 12.9268L7.6454 11.9077L7.83567 10.6399L7.95187 10.2164C7.9548 10.2057 7.95069 10.1944 7.94161 10.1881C7.91157 10.1672 7.87034 10.1741 7.84878 10.2037L6.89297 11.5145L5.44 13.4804L4.28973 14.7081L4.01297 14.8205H3.80541L3.5373 14.5717V14.4514L3.58054 14.1304L3.84865 13.7372L5.44 11.7151L6.4 10.4554L7.01872 9.73222C7.04511 9.70139 7.04245 9.65523 7.0127 9.62763C7.00333 9.61894 6.98925 9.61773 6.97854 9.62471L2.75027 12.3811L1.99784 12.4774L1.66919 12.1725L1.71243 11.675L1.86811 11.5145L3.13946 10.6399Z" fill="#D97757"></path>
+      </svg>
+      <span style="vertical-align: middle; color: #141413; font-size: 14px; display: inline-block;">Claude is active in this tab group</span>
+      <div style="display: inline-block; width: 0.5px; height: 32px; background: rgba(31, 30, 29, 0.15); margin: 0 8px; vertical-align: middle;"></div>
+      <button id="claude-static-chat-button" style="position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 6px; background: transparent; border: none; cursor: pointer; pointer-events: auto; vertical-align: middle; width: 32px; height: 32px; border-radius: 8px; transition: background 0.2s;">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="#141413" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px; display: block;">
+          <path d="M10 2.5C14.1421 2.5 17.5 5.85786 17.5 10C17.5 14.1421 14.1421 17.5 10 17.5H3C2.79779 17.5 2.61549 17.3782 2.53809 17.1914C2.4607 17.0046 2.50349 16.7895 2.64648 16.6465L4.35547 14.9365C3.20124 13.6175 2.5 11.8906 2.5 10C2.5 5.85786 5.85786 2.5 10 2.5ZM10 3.5C6.41015 3.5 3.5 6.41015 3.5 10C3.5 11.7952 4.22659 13.4199 5.40332 14.5967L5.46582 14.6729C5.52017 14.7544 5.5498 14.8508 5.5498 14.9502C5.5498 15.0828 5.49709 15.2099 5.40332 15.3037L4.20703 16.5H10C13.5899 16.5 16.5 13.5899 16.5 10C16.5 6.41015 13.5899 3.5 10 3.5ZM13.29 9.30371C13.3986 9.05001 13.6925 8.93174 13.9463 9.04004C14.2 9.14863 14.3183 9.44253 14.21 9.69629C13.8506 10.536 13.1645 11.25 12.25 11.25C11.6372 11.25 11.128 10.9289 10.75 10.4648C10.372 10.9289 9.86276 11.25 9.25 11.25C8.63724 11.25 8.12801 10.9289 7.75 10.4648C7.37198 10.9289 6.86276 11.25 6.25 11.25C5.97386 11.25 5.75 11.0261 5.75 10.75C5.75 10.4739 5.97386 10.25 6.25 10.25C6.58764 10.25 7.00448 9.97056 7.29004 9.30371L7.32422 9.2373C7.41431 9.09121 7.5749 9 7.75 9C7.9501 9 8.13123 9.11975 8.20996 9.30371L8.32227 9.53516C8.59804 10.0359 8.95442 10.25 9.25 10.25C9.58764 10.25 10.0045 9.97056 10.29 9.30371L10.3242 9.2373C10.4143 9.09121 10.5749 9 10.75 9C10.9501 9 11.1312 9.11975 11.21 9.30371L11.3223 9.53516C11.598 10.0359 11.9544 10.25 12.25 10.25C12.5876 10.25 13.0045 9.97056 13.29 9.30371Z"></path>
+        </svg>
+        <span id="claude-static-chat-tooltip" style="position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%); padding: 6px 12px; background: #30302E; color: #FAF9F5; border-radius: 6px; font-size: 12px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">Open chat</span>
+      </button>
+      <button id="claude-static-close-button" style="position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 6px; background: transparent; border: none; cursor: pointer; pointer-events: auto; vertical-align: middle; width: 32px; height: 32px; margin-left: 4px; border-radius: 8px; transition: background 0.2s;">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px; display: block;">
+          <path d="M15.1464 4.14642C15.3417 3.95121 15.6582 3.95118 15.8534 4.14642C16.0486 4.34168 16.0486 4.65822 15.8534 4.85346L10.7069 9.99997L15.8534 15.1465C16.0486 15.3417 16.0486 15.6583 15.8534 15.8535C15.6826 16.0244 15.4186 16.0461 15.2245 15.918L15.1464 15.8535L9.99989 10.707L4.85338 15.8535C4.65813 16.0486 4.34155 16.0486 4.14634 15.8535C3.95115 15.6583 3.95129 15.3418 4.14634 15.1465L9.29286 9.99997L4.14634 4.85346C3.95129 4.65818 3.95115 4.34162 4.14634 4.14642C4.34154 3.95128 4.65812 3.95138 4.85338 4.14642L9.99989 9.29294L15.1464 4.14642Z" fill="#141413"></path>
+        </svg>
+        <span id="claude-static-close-tooltip" style="position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%); padding: 6px 12px; background: #30302E; color: #FAF9F5; border-radius: 6px; font-size: 12px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">Dismiss</span>
+      </button>
+    </div></body></html>
