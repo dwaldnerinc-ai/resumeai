@@ -715,15 +715,20 @@ function _render(){
     // ── STEP 1: Search keywords ──
     const step1Card=div({style:{...card_s,borderLeft:"3px solid #2563eb"}},[
       stepHeader("1","#2563eb","What are you looking for?","Enter a job title and location — this powers all three steps below"),
-      div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}},[
+      div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"12px"}},[
         div({},[mkLabel("Job title or keywords"),kwInp]),
         div({},[mkLabel("Location"),locInp]),
       ]),
-      !kw?div({style:{marginTop:"10px",display:"flex",alignItems:"center",gap:"6px",fontSize:"12px",color:T.muted}}):[
-        span({style:{fontSize:"14px"}},["⬆"]),
-        span({},[" Enter keywords above — then use steps 2 and 3 below"]),
-      ],
-    ]);
+      div({style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},[
+        (()=>{
+          const b=mkBtn("primary",S.load==="search"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Searching\u2026"));return w;})():"\u2726 Search jobs",()=>{runAISearch();});
+          b.disabled=S.load==="search";
+          return b;
+        })(),
+        kw?span({style:{fontSize:"12px",color:T.muted}},["or press Enter in either field"]):
+          span({style:{fontSize:"12px",color:T.muted}},["Enter a job title to search \u2014 this activates Steps 2 and 3"]),
+      ]),
+    ].filter(Boolean));
 
     // ── STEP 2: Search live boards ──
     const step2Card=div({style:{...card_s,borderLeft:"3px solid #0d9488",opacity:kw?"1":"0.55"}},[
@@ -897,15 +902,9 @@ function _render(){
 
     const step3Card=div({style:{...card_s,borderLeft:"3px solid #7c3aed",opacity:kw?"1":"0.55"}},[
       div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"14px"}},[
-        stepHeader("3","#7c3aed","AI job leads","Claude finds real companies hiring for your role — add any to your board"),
+        stepHeader("3","#7c3aed","AI job leads","Real companies hiring for your role — scored against your resume"),
         div({style:{fontSize:"11px",color:T.muted,background:T.inBg,border:"1px solid "+T.inB,borderRadius:"6px",padding:"3px 8px",flexShrink:"0"}},["✨ Uses API"]),
       ]),
-      div({style:{display:"flex",gap:"8px",alignItems:"center",marginBottom:"12px"}},[
-        (()=>{const b=mkBtn("purple",S.load==="search"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Searching\u2026"));return w;})():"\u2726 Get AI leads",runAISearch);b.disabled=S.load==="search"||!kw;return b;})(),
-        S.polished
-          ?span({style:{fontSize:"11px",color:T.done.text,display:"flex",alignItems:"center",gap:"4px"}},[span({style:{width:"6px",height:"6px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}}),"\u00a0Resume loaded \u2014 leads matched to your background"])
-          :span({style:{fontSize:"11px",color:T.muted}},["Polish your resume first for better-matched leads"]),
-      ].filter(Boolean)),
       aiBody,
     ]);
 
