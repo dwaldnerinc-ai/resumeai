@@ -527,12 +527,17 @@ function _render(){
         (()=>{
           const b=mkBtn("primary",S.load==="polish"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Polishing…"));return w;})():"✦ Polish resume",doPolish);
           b.disabled=S.load==="polish"||!S.raw.trim();
+          polishBtn=b;
           return b;
         })(),
         S.polished?span({style:{fontSize:"12px",color:T.done.text,background:T.done.bg,border:`1px solid ${T.done.border}`,padding:"3px 10px",borderRadius:"10px",fontWeight:"600"}},["✓ Already polished"]):null,
       ].filter(Boolean));
+      let polishBtn;
 
-      const ta=mkTextarea(S.raw,v=>{S.raw=v;debounceSave("resume-raw",v);},200,"Paste your resume text here…");
+      const ta=mkTextarea(S.raw,v=>{S.raw=v;debounceSave("resume-raw",v);
+        // Re-evaluate polish button disabled state on every keystroke
+        polishBtn.disabled=S.load==="polish"||!v.trim();
+      },200,"Paste your resume text here…");
       const errBanner=S.polishError?div({style:{marginTop:"10px",padding:"10px 14px",background:T.danger.bg,border:`1px solid ${T.danger.border}`,borderRadius:"8px",fontSize:"13px",color:T.danger.text}},["⚠ "+S.polishError]):null;
       tabBody=div({},[uploadWrap,ta,polishRow,errBanner].filter(Boolean));
 
