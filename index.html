@@ -104,7 +104,7 @@ const S={
   selectedJob:null, posting:"", tailored:"", cover:"", applyOut:"resume", genWhat:"both",
   apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
   searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
-  addedJobs:new Set(),
+  addedJobs:new Set(), aiSuggestions:[], aiSuggestionsError:"",
   intJob:null, intRound:"prescreen", intQs:[], mockQ:"", mockA:"", mockFb:"", intLoad:false,
   urlImport:"", urlImportPaste:"", urlImportStatus:"", showUrlPaste:false,
 };
@@ -679,119 +679,191 @@ function _render(){
 
   // ── TAB 2: FIND JOBS ──
   else if(S.tab==="search"){
-    const kwInput=(()=>{const i=h("input",{style:inp_s,placeholder:"e.g. Project Manager, Construction…"});i.value=S.searchKw;i.addEventListener("input",e=>{S.searchKw=e.target.value;});i.addEventListener("keydown",e=>{if(e.key==="Enter")searchBtn.click();});return i;})();
-    const locInput=(()=>{const i=h("input",{style:inp_s,placeholder:"e.g. Vancouver, BC"});i.value=S.searchLoc;i.addEventListener("input",e=>{S.searchLoc=e.target.value;});return i;})();
-    const filters=div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"12px"}},[
-      div({},[mkLabel("Keywords"),kwInput]),
-      div({},[mkLabel("Location"),locInput]),
-    ]);
-    const typeFilters=div({style:{marginBottom:"16px"}},[
-      mkLabel("Work type"),
-      div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},
-        ["Remote","Hybrid","On-site","Contract"].map(v=>
-          pillBtn(v,S.searchType.includes(v),"#0d9488",()=>{
-            S.searchType=S.searchType.includes(v)?S.searchType.filter(x=>x!==v):[...S.searchType,v];rerender();
-          },{padding:"6px 13px",borderRadius:"16px"})
-        )
-      ),
-    ]);
-    const searchBtn=(()=>{
-      const b=mkBtn("teal",S.load==="search"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Searching…"));return w;})():"⌕ Search jobs",async()=>{
-        if(S.load==="search")return;
-        S.load="search";S.searchDone=false;rerender();
-        await new Promise(r=>setTimeout(r,700));
-        let res=[...SEARCH_POOL];
-        const q=(kwInput.value||S.searchKw||"").toLowerCase().trim();
-        if(q)res=res.filter(j=>j.title.toLowerCase().includes(q)||j.tags.some(tg=>tg.toLowerCase().includes(q))||j.company.toLowerCase().includes(q));
-        if(S.searchType.length)res=res.filter(j=>S.searchType.includes(j.type));
-        res.sort((a,b)=>b.match-a.match);
-        S.searchResults=res;S.searchDone=true;S.load="";rerender();
-      });b.disabled=S.load==="search";return b;
+
+    // Quick-link job boards
+    const JOB_BOARDS=[
+      {name:"Indeed Canada",  icon:"🔍", color:"#2164f3", url:(kw,loc)=>`https://ca.indeed.com/jobs?q=${encodeURIComponent(kw)}&l=${encodeURIComponent(loc)}`},
+      {name:"LinkedIn",       icon:"💼", color:"#0a66c2", url:(kw,loc)=>`https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(kw)}&location=${encodeURIComponent(loc)}`},
+      {name:"WorkBC",         icon:"🍁", color:"#d4271c", url:(kw,loc)=>`https://www.workbc.ca/Search-Jobs.aspx?searchTerm=${encodeURIComponent(kw)}&location=${encodeURIComponent(loc)}`},
+      {name:"Glassdoor",      icon:"🪞", color:"#0caa41", url:(kw,loc)=>`https://www.glassdoor.ca/Job/jobs.htm?sc.keyword=${encodeURIComponent(kw)}&locT=C&locKeyword=${encodeURIComponent(loc)}`},
+      {name:"Government Jobs",icon:"🏛", color:"#7c3aed", url:(kw,loc)=>`https://jobs-emplois.gc.ca/en/search#q=${encodeURIComponent(kw)}`},
+      {name:"Charity Village", icon:"🤝", color:"#0d9488", url:(kw,loc)=>`https://charityvillage.com/search/?q=${encodeURIComponent(kw)}&location=${encodeURIComponent(loc)}`},
+    ];
+
+    // AI suggestions state
+    if(!S.aiSuggestions)S.aiSuggestions=[];
+    if(S.aiSuggestionsError===undefined)S.aiSuggestionsError="";
+
+    const kwInput=(()=>{
+      const i=h("input",{style:inp_s,placeholder:"e.g. Project Manager, Plumber, Sales Rep…"});
+      i.value=S.searchKw;
+      i.addEventListener("input",e=>{S.searchKw=e.target.value;});
+      i.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();runAISearch();}});
+      return i;
+    })();
+    const locInput=(()=>{
+      const i=h("input",{style:inp_s,placeholder:"e.g. Vancouver, BC"});
+      i.value=S.searchLoc;
+      i.addEventListener("input",e=>{S.searchLoc=e.target.value;});
+      i.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();runAISearch();}});
+      return i;
     })();
 
-    let resultsSection=div();
-    if(S.searchDone){
-      const jobCards=S.searchResults.map(job=>{
-        const added=S.addedJobs.has(job.id)||S.apps.some(a=>a.id===job.id);
-        const isExp=S.expandedApp==="s_"+job.id;
-        const card=div({style:{background:T.card,border:`1px solid ${isExp?T.active.border:T.cardB}`,borderRadius:"12px",padding:"16px 20px",marginBottom:"10px"}});
-        const addBtn=mkBtn(added?"ghost":"primary",added?"✓ On Board":"+ Add to Board",async()=>{
-          if(added)return;
-          if(!S.apps.some(a=>a.id===job.id)){
-            const na={id:job.id,company:job.company,title:job.title,location:job.location,type:job.type,salary:job.salary,url:job.url,status:"saved",appliedDate:"",notes:job.desc+"\n\nKey skills: "+job.tags.join(", ")};
-            S.apps=[na,...S.apps];lsSet("tracker-apps-v2",JSON.stringify(S.apps));
-          }
-          S.addedJobs.add(job.id);rerender();
-        },{fontSize:"12px",padding:"7px 14px",opacity:added?"0.7":"1"});
-        addBtn.disabled=added;
+    async function runAISearch(){
+      const kw=(kwInput.value||S.searchKw||"").trim();
+      const loc=(locInput.value||S.searchLoc||"").trim();
+      if(!kw||S.load==="search")return;
+      S.searchKw=kw;S.searchLoc=loc;
+      S.load="search";S.aiSuggestions=[];S.aiSuggestionsError="";S.searchDone=false;
+      rerender();
+      try{
+        const r=await callAI(
+          `You are a Canadian job market expert. The user is searching for jobs. Return ONLY a valid JSON array of 8 job leads. Each item must have: title (string), company (string — a real company that typically hires for this role in this location), location (string), type (one of: Remote/Hybrid/On-site/Contract), salaryRange (string, e.g. "$60,000–$80,000" or "~$25/hr"), whyGoodFit (1 sentence), searchTip (1 sentence tip for finding this type of role). No markdown, no backticks, no extra text.`,
+          `Job search: "${kw}" in "${loc||"Canada"}". ${S.polished?"Candidate background summary: "+S.polished.substring(0,400):""}`
+        );
+        try{
+          const parsed=JSON.parse(r.replace(/```json|```/g,"").trim());
+          S.aiSuggestions=parsed;S.searchDone=true;
+        }catch{S.aiSuggestionsError="Could not parse results. Try again.";}
+      }catch(e){S.aiSuggestionsError=e.message||"Search failed. Check your API key.";}
+      S.load="";rerender();
+    }
 
-        const header=div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"12px"}},[
-          div({style:{flex:"1",minWidth:"0",cursor:"pointer"},onClick:()=>{S.expandedApp=isExp?null:"s_"+job.id;rerender();}},[
-            div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"4px"}},[
-              span({style:{fontSize:"15px",fontWeight:"700"}},[job.title]),
-              span({style:{fontSize:"11px",fontWeight:"700",padding:"2px 9px",borderRadius:"10px",background:matchBg(job.match),color:matchColor(job.match)}},[job.match+"% match"]),
-              span({style:{fontSize:"11px",padding:"2px 8px",borderRadius:"9px",background:T.tag.bg,color:T.tag.text,border:`1px solid ${T.tag.border}`}},[job.type]),
-            ]),
-            div({style:{fontSize:"13px",color:T.sub,marginBottom:"6px"}},[
-              span({style:{fontWeight:"600",color:T.text}},[job.company])," · ",job.location,job.salary?" · ":"",job.salary?span({style:{color:T.text,fontWeight:"500"}},[job.salary]):"",
-            ]),
-            div({style:{display:"flex",gap:"5px",flexWrap:"wrap"}},job.tags.map(tg=>span({style:{fontSize:"11px",padding:"2px 8px",borderRadius:"8px",background:T.inBg,color:T.sub,border:`1px solid ${T.inB}`}},[tg]))),
-          ]),
-          div({style:{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"8px",flexShrink:"0"}},[
-            addBtn,
-            job.url?h("a",{href:job.url,target:"_blank",rel:"noreferrer",style:{fontSize:"11px",color:T.sub,textDecoration:"none"}},["View ↗"]):null,
-          ].filter(Boolean)),
-        ]);
-        card.appendChild(header);
-        if(isExp){
-          const exp=div({style:{marginTop:"12px",paddingTop:"12px",borderTop:`1px solid ${T.div}`}},[
-            h("p",{style:{fontSize:"13px",color:T.sub,lineHeight:"1.7",marginBottom:"12px"}},[job.desc]),
-            !added?mkBtn("primary","+ Add to Job Board",async()=>{
-              if(!S.apps.some(a=>a.id===job.id)){
-                const na={id:job.id,company:job.company,title:job.title,location:job.location,type:job.type,salary:job.salary,url:job.url,status:"saved",appliedDate:"",notes:job.desc+"\n\nKey skills: "+job.tags.join(", ")};
-                S.apps=[na,...S.apps];lsSet("tracker-apps-v2",JSON.stringify(S.apps));
-              }
-              S.addedJobs.add(job.id);rerender();
-            },{fontSize:"12px",padding:"7px 14px"}):null,
-          ].filter(Boolean));
-          card.appendChild(exp);
-        }
-        return card;
-      });
-      resultsSection=div({},[
-        div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px",flexWrap:"wrap",gap:"8px"}},[
-          span({style:{fontSize:"13px",color:T.sub}},[S.searchResults.length+" job"+(S.searchResults.length!==1?"s":"")+" found"]),
-          S.searchResults.length>0?span({style:{fontSize:"11px",color:T.muted}},["Sorted by match · click + Add to Board to save"]):null,
-        ].filter(Boolean)),
-        S.searchResults.length===0?div({style:{...card_s,textAlign:"center",padding:"36px",color:T.sub}},["No results. Try broader keywords."]):div({},[...jobCards]),
-        S.searchResults.length>0?div({style:{...card_s,marginTop:"8px",borderColor:S.dark?"#1e40af":"#93c5fd",background:S.dark?"#0c1e3e":"#eff6ff",padding:"14px 20px"}},[
-          span({style:{fontSize:"13px",color:S.dark?"#93c5fd":"#1d4ed8",fontWeight:"600"}},["Jobs added? "]),
-          mkBtn("primary","Go to Job Board →",()=>{S.tab="board";rerender();},{fontSize:"12px",padding:"6px 14px",marginLeft:"10px"}),
+    const kw=S.searchKw||"";
+    const loc=S.searchLoc||"Vancouver, BC";
+
+    // Search bar
+    const searchCard=div({style:card_s},[
+      div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"4px"}},["Find Jobs"]),
+      div({style:{fontSize:"13px",color:T.sub,marginBottom:"16px"}},["Get real AI-powered job leads and search live job boards — all in one place."]),
+      div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"14px"}},[
+        div({},[mkLabel("What are you looking for?"),kwInput]),
+        div({},[mkLabel("Location"),locInput]),
+      ]),
+      div({style:{display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap"}},[
+        (()=>{
+          const b=mkBtn("primary",S.load==="search"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Searching…"));return w;})():"✦ Get AI job leads",runAISearch);
+          b.disabled=S.load==="search";
+          return b;
+        })(),
+        S.polished?span({style:{fontSize:"12px",color:T.done.text,display:"flex",alignItems:"center",gap:"5px"}},[
+          span({style:{width:"7px",height:"7px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}}),
+          " Resume loaded — leads will match your background"
         ]):null,
-      ].filter(Boolean));
-    }else{
-      resultsSection=div({style:{...card_s,textAlign:"center",padding:"48px 24px",color:T.sub}},[
-        div({style:{fontSize:"32px",marginBottom:"10px"}},["⌕"]),
-        div({style:{fontSize:"15px",fontWeight:"600",color:T.text,marginBottom:"6px"}},["Search for relevant jobs"]),
-        div({style:{fontSize:"13px",lineHeight:"1.6"}},["Leave keywords blank to see all roles, or filter by type."]),
+      ].filter(Boolean)),
+    ]);
+
+    // Live board quick links
+    const boardLinks=div({style:card_s},[
+      div({style:{fontSize:"13px",fontWeight:"700",color:T.text,marginBottom:"4px"}},["Search live job boards"]),
+      div({style:{fontSize:"12px",color:T.muted,marginBottom:"12px"}},["Click any board to open your search directly — opens in a new tab."]),
+      div({style:{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"8px"}},[
+        ...JOB_BOARDS.map(board=>
+          h("a",{
+            href:kw?board.url(kw,loc):"#",
+            target:"_blank",rel:"noreferrer",
+            style:{
+              display:"flex",alignItems:"center",gap:"9px",
+              padding:"10px 14px",borderRadius:"10px",
+              border:`1px solid ${T.cardB}`,background:T.inBg,
+              textDecoration:"none",cursor:kw?"pointer":"not-allowed",
+              opacity:kw?"1":"0.5",transition:"border-color 0.15s",
+            },
+            onClick:e=>{if(!kw){e.preventDefault();kwInput.focus();}}
+          },[
+            span({style:{fontSize:"18px"}},[board.icon]),
+            div({},[
+              div({style:{fontSize:"12px",fontWeight:"600",color:T.text}},[board.name]),
+              div({style:{fontSize:"11px",color:T.muted}},[kw?`"${kw}" · ${loc}`:"Enter keywords first"]),
+            ]),
+          ])
+        ),
+      ]),
+      !kw?div({style:{marginTop:"10px",fontSize:"12px",color:T.muted,textAlign:"center"}},["Enter a job title above to activate the links"]):null,
+    ].filter(Boolean));
+
+    // AI results
+    let aiResults=div();
+    if(S.load==="search"){
+      aiResults=div({style:{...card_s,textAlign:"center",padding:"36px",color:T.sub}},[
+        div({style:{fontSize:"24px",marginBottom:"8px"}},["✦"]),
+        div({style:{fontSize:"14px",fontWeight:"600",color:T.text,marginBottom:"4px"}},["Finding job leads…"]),
+        div({style:{fontSize:"12px",color:T.muted}},["Claude is researching roles, companies, and tips for your search."]),
+      ]);
+    }else if(S.aiSuggestionsError){
+      aiResults=div({style:{...card_s,background:T.danger.bg,border:`1px solid ${T.danger.border}`,padding:"14px 18px"}},[
+        span({style:{fontSize:"13px",color:T.danger.text}},["⚠ "+S.aiSuggestionsError]),
+      ]);
+    }else if(S.searchDone&&S.aiSuggestions.length>0){
+      aiResults=div({},[
+        div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"12px",flexWrap:"wrap",gap:"8px"}},[
+          div({},[
+            div({style:{fontSize:"14px",fontWeight:"700",color:T.text}},[S.aiSuggestions.length+" job leads for “"+S.searchKw+"”"]),
+            div({style:{fontSize:"12px",color:T.muted,marginTop:"2px"}},["AI-generated leads based on your search. Click any to add to your board."]),
+          ]),
+          div({style:{display:"flex",gap:"6px",flexWrap:"wrap"}},[
+            ...JOB_BOARDS.slice(0,3).map(board=>
+              h("a",{href:board.url(kw,loc),target:"_blank",rel:"noreferrer",style:{fontSize:"11px",padding:"4px 10px",borderRadius:"8px",border:`1px solid ${T.cardB}`,background:T.inBg,color:T.sub,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"4px"}},[board.icon," ",board.name," ↗"])
+            ),
+          ]),
+        ]),
+        ...S.aiSuggestions.map((job,idx)=>{
+          const id="ai_"+idx+"_"+Date.now();
+          const already=S.apps.some(a=>a.title===job.title&&a.company===job.company);
+          const card=div({style:{background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"12px",padding:"16px 20px",marginBottom:"10px"}});
+
+          const addBtn=mkBtn(already?"ghost":"primary",already?"✓ On Board":"+ Add to Board",()=>{
+            if(already)return;
+            const newApp={
+              id:Date.now().toString()+"_"+idx,
+              company:job.company,title:job.title,location:job.location,
+              type:job.type||"On-site",salary:job.salaryRange||"",url:"",
+              status:"saved",appliedDate:"",
+              notes:`${job.whyGoodFit||""}\n\nSearch tip: ${job.searchTip||""}`,
+            };
+            S.apps=[newApp,...S.apps];lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+            rerender();
+          },{fontSize:"12px",padding:"7px 14px",opacity:already?"0.7":"1"});
+          addBtn.disabled=already;
+
+          // Search this specific role on live boards
+          const searchLinks=div({style:{display:"flex",gap:"6px",flexWrap:"wrap",marginTop:"10px"}},[
+            span({style:{fontSize:"11px",color:T.muted,alignSelf:"center"}},["Search: "]),
+            ...JOB_BOARDS.slice(0,4).map(board=>
+              h("a",{href:board.url(job.title+" "+job.company,job.location),target:"_blank",rel:"noreferrer",
+                style:{fontSize:"11px",padding:"3px 9px",borderRadius:"7px",border:`1px solid ${T.cardB}`,background:T.inBg,color:T.sub,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"3px"}},[board.icon," ",board.name])
+            ),
+          ]);
+
+          card.appendChild(div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"12px"}},[
+            div({style:{flex:"1",minWidth:"0"}},[
+              div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"4px"}},[
+                span({style:{fontSize:"14px",fontWeight:"700"}},[job.title]),
+                job.type?span({style:{fontSize:"11px",padding:"2px 8px",borderRadius:"9px",background:T.tag.bg,color:T.tag.text,border:`1px solid ${T.tag.border}`}},[job.type]):null,
+              ].filter(Boolean)),
+              div({style:{fontSize:"13px",color:T.sub,marginBottom:"6px"}},[
+                span({style:{fontWeight:"600",color:T.text}},[job.company]),
+                " · ",job.location,
+                job.salaryRange?span({style:{color:T.text,fontWeight:"500"}},[" · "+job.salaryRange]):null,
+              ].filter(Boolean)),
+              job.whyGoodFit?div({style:{fontSize:"12px",color:T.sub,lineHeight:"1.6",marginBottom:"4px"}},["\uD83D\uDCA1 "+job.whyGoodFit]):null,
+              job.searchTip?div({style:{fontSize:"12px",color:T.muted,lineHeight:"1.6",borderLeft:`2px solid ${T.div}`,paddingLeft:"8px"}},["\uD83D\uDD0D Tip: "+job.searchTip]):null,
+              searchLinks,
+            ].filter(Boolean)),
+            div({style:{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"8px",flexShrink:"0"}},[
+              addBtn,
+            ]),
+          ]));
+          return card;
+        }),
+        div({style:{...card_s,borderColor:S.dark?"#1e40af":"#93c5fd",background:S.dark?"#0c1e3e":"#eff6ff",padding:"14px 20px",marginTop:"4px"}},[
+          span({style:{fontSize:"13px",color:S.dark?"#93c5fd":"#1d4ed8",fontWeight:"600"}},["Added jobs to your board? "]),
+          mkBtn("primary","Go to Job Board →",()=>{S.tab="board";rerender();},{fontSize:"12px",padding:"6px 14px",marginLeft:"10px"}),
+        ]),
       ]);
     }
 
-    content=div({},[
-      div({style:card_s},[
-        div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"4px"}},["Find matching jobs"]),
-        div({style:{fontSize:"13px",color:T.sub,marginBottom:"16px"}},[S.polished?"Resume loaded — results scored against your background.":"Tip: polish your resume first for personalized match scores."]),
-        filters,typeFilters,
-        div({style:{display:"flex",gap:"10px",alignItems:"center",flexWrap:"wrap"}},[
-          searchBtn,
-          S.polished?div({style:{fontSize:"12px",color:T.sub,display:"flex",alignItems:"center",gap:"5px"}},[
-            span({style:{width:"7px",height:"7px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}}),
-            " Resume loaded"
-          ]):null,
-        ].filter(Boolean)),
-      ]),
-      resultsSection,
-    ]);
+    content=div({},[searchCard,boardLinks,aiResults]);
   }
 
   // ── TAB 3: JOB BOARD ──
