@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ResumeAI — Powered by Claude</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100vh;font-family:'Inter',system-ui,sans-serif}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fadein{animation:fadein .18s ease}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:#374151;border-radius:3px}
+textarea:focus,input:focus,select:focus{outline:none;border-color:#3b82f6!important;box-shadow:0 0 0 3px rgba(59,130,246,0.12)!important}
+button:active{transform:scale(0.97)}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;flex-shrink:0}
+
+/* ── PDF RESUME STYLES (DM Sans) ── */
+.pdf-wrap{background:#fff;color:#1a1a1a;font-family:'DM Sans',sans-serif;font-size:10.5pt;padding:36px 44px;max-width:800px;margin:0 auto;line-height:1.55}
+.pdf-name{font-size:22pt;font-weight:700;color:#0d2b4e;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:4px}
+.pdf-tagline{font-size:11pt;color:#2e6da4;font-weight:600;text-align:center;margin-bottom:8px}
+.pdf-contact{font-size:9.5pt;color:#555;display:flex;justify-content:center;flex-wrap:wrap;gap:4px 12px;margin-bottom:0}
+.pdf-divider{border:none;border-top:3px solid #1e3a6e;margin:14px 0 16px}
+.pdf-sec-title{font-size:9.5pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.09em;border-bottom:1.5px solid #d0d8e4;padding-bottom:4px;margin-bottom:7px;text-align:center}
+.pdf-exp-block{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #eef0f4}
+.pdf-exp-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.pdf-exp-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 12px;margin-bottom:4px}
+.pdf-exp-left{font-size:10.5pt;font-weight:700;color:#0d2b4e;flex:1 1 auto}
+.pdf-exp-right{font-size:9.5pt;color:#2e6da4;font-weight:600;flex-shrink:0;white-space:nowrap}
+.pdf-bullet{display:flex;gap:7px;margin-bottom:2px;font-size:10pt}
+.pdf-bullet-dot{color:#2e6da4;flex-shrink:0;margin-top:1px}
+.pdf-bullet-text{color:#222;line-height:1.55}
+.pdf-text-line{font-size:10pt;margin-bottom:3px;color:#222;line-height:1.55}
+.pdf-grid-table{width:100%;border-collapse:collapse;font-size:10pt}
+.pdf-grid-cell{padding:3px 4px 3px 0;width:33%;vertical-align:top}
+.pdf-grid-item{display:flex;gap:6px;align-items:flex-start}
+
+@media print{
+  body>*:not(#print-area){display:none!important}
+  #print-area{display:block!important;position:static}
+  .pdf-wrap{padding:20px 30px;max-width:none}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="print-area" style="display:none"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// DATA & CONSTANTS
+// ─────────────────────────────────────────────────────────
+const STATUSES=[
+  {key:"saved",    label:"Saved",    color:"#6b7280",bgd:"#1f2937",bgl:"#f3f4f6"},
+  {key:"applied",  label:"Applied",  color:"#2563eb",bgd:"#0c1e3e",bgl:"#dbeafe"},
+  {key:"interview",label:"Interview",color:"#d97706",bgd:"#1c1200",bgl:"#fef3c7"},
+  {key:"offer",    label:"Offer",    color:"#16a34a",bgd:"#052e16",bgl:"#dcfce7"},
+  {key:"rejected", label:"Rejected", color:"#dc2626",bgd:"#3b1212",bgl:"#fee2e2"},
+  {key:"withdrawn",label:"Withdrawn",color:"#7c3aed",bgd:"#1e1040",bgl:"#ede9fe"},
+];
+const smeta=k=>STATUSES.find(s=>s.key===k)||STATUSES[0];
+
+const SEED_APPS=[
+  {id:"s1",company:"Vancouver Airport Authority",title:"Senior Manager, Airside Operations",location:"Richmond, BC",type:"On-site",salary:"Competitive",url:"https://mail.jobbankcanada.com/display-job/9317970/Senior-Manager,-Airside-Operations.html",status:"saved",appliedDate:"",notes:"24/7 ops leadership, emergency response, regulatory compliance. Strong match: multi-site ops from TELUS."},
+  {id:"s2",company:"Vancouver Airport Authority",title:"Manager, Airside Standards & Compliance",location:"Richmond, BC",type:"On-site",salary:"$105,680–$158,520",url:"https://careers.yvr.ca/job/vancouver/manager-airside-standards-and-compliance/38253/91951111008",status:"saved",appliedDate:"",notes:"Safety programs, regulatory frameworks, airfield compliance. Address aviation experience gap in cover letter."},
+  {id:"s3",company:"Rayner Construction Services",title:"Senior Project Manager – Commercial Construction",location:"Vancouver, BC",type:"On-site",salary:"$120,000–$140,000",url:"https://www.glassdoor.ca/Job/vancouver-project-manager-jobs-SRCH_IL.0,9_IC2278756_KO10,25.htm",status:"saved",appliedDate:"",notes:"BC commercial construction. Subcontractor mgmt, financial discipline, client relationships."},
+  {id:"s4",company:"Outpost Recruitment",title:"Project Manager – Owner's Rep, Buildings",location:"Vancouver, BC",type:"Hybrid",salary:"$125,000–$155,000",url:"https://outpostrecruitment.com/job/project-manager-program-management/",status:"saved",appliedDate:"",notes:"PM consulting, owner's rep on commercial/residential/healthcare projects. PMP required."},
+  {id:"s5",company:"Community Living BC",title:"Senior Program Manager",location:"Vancouver, BC",type:"Hybrid",salary:"~$99,000+",url:"https://www.ziprecruiter.com/c/Community-Living-BC/Job/Senior-Program-Manager-Vancouver-Head-Office-2026.038/-in-Vancouver,BC",status:"saved",appliedDate:"",notes:"Portfolio PMO, Agile/Waterfall, governance focus. Min 1 day/week in office."},
+];
+
+const SEARCH_POOL=[
+  {id:"j1",title:"Senior Manager, Airside Operations",company:"Vancouver Airport Authority",location:"Richmond, BC",type:"On-site",salary:"Competitive",url:"https://mail.jobbankcanada.com/display-job/9317970/Senior-Manager,-Airside-Operations.html",desc:"Lead 24/7 airside operations, real-time decision-making, regulatory compliance and emergency response.",tags:["Operations","Leadership","Safety","Compliance"],match:92},
+  {id:"j2",title:"Manager, Airside Standards & Compliance",company:"Vancouver Airport Authority",location:"Richmond, BC",type:"On-site",salary:"$105,680–$158,520",url:"https://careers.yvr.ca/job/vancouver/manager-airside-standards-and-compliance/38253/91951111008",desc:"Govern safety programs, regulatory frameworks, and compliance across the airfield.",tags:["Compliance","Safety","Capital Projects","PMP"],match:88},
+  {id:"j3",title:"Senior Project Manager – Commercial Construction",company:"Rayner Construction Services",location:"Vancouver, BC",type:"On-site",salary:"$120,000–$140,000",url:"https://www.glassdoor.ca/Job/vancouver-project-manager-jobs-SRCH_IL.0,9_IC2278756_KO10,25.htm",desc:"Deliver commercial construction projects. Manage scope, schedule, budget, subcontractors and trade partners.",tags:["Construction","PMP","Subcontractors","Budget"],match:91},
+  {id:"j4",title:"Project Manager – Owner's Rep, Buildings",company:"Outpost Recruitment",location:"Vancouver, BC",type:"Hybrid",salary:"$125,000–$155,000",url:"https://outpostrecruitment.com/job/project-manager-program-management/",desc:"PM consulting managing commercial, residential and healthcare building projects.",tags:["PM Consulting","Buildings","Hybrid","PMP"],match:89},
+  {id:"j5",title:"Senior Program Manager",company:"Community Living BC",location:"Vancouver, BC",type:"Hybrid",salary:"~$99,000+",url:"https://www.ziprecruiter.com/c/Community-Living-BC/Job/Senior-Program-Manager-Vancouver-Head-Office-2026.038/-in-Vancouver,BC",desc:"Portfolio PMO role. Agile/Waterfall, stakeholder management, program governance.",tags:["Program Management","Agile","Governance","Hybrid"],match:84},
+  {id:"j6",title:"Manager, Operations Centre",company:"Vancouver Airport Authority",location:"Richmond, BC",type:"On-site",salary:"Competitive",url:"https://careers.yvr.ca/job/vancouver/manager-operations-centre/38253/71323151792",desc:"Oversee day-to-day airport operations. Lead multi-functional teams, manage incidents, emergency coordination.",tags:["Operations","Leadership","Emergency Response"],match:86},
+  {id:"j7",title:"Senior PM – Infrastructure Capital Projects",company:"BC Hydro",location:"Burnaby, BC",type:"Hybrid",salary:"$110,000–$130,000",url:"https://www.glassdoor.ca/",desc:"Lead infrastructure capital projects from planning through commissioning.",tags:["Infrastructure","Capital Projects","Hybrid"],match:83},
+  {id:"j8",title:"Program Manager – Digital Transformation",company:"Fortis BC",location:"Surrey, BC",type:"Hybrid",salary:"$115,000–$135,000",url:"https://www.glassdoor.ca/",desc:"Drive large-scale digital and operational transformation. Cross-functional teams, change management.",tags:["Program Management","Change Management","Lean Six Sigma"],match:81},
+  {id:"j9",title:"Project Manager – Business Governance",company:"Robert Half Client",location:"Remote – Vancouver",type:"Remote",salary:"$60–$75/hr",url:"https://www.roberthalf.com/ca/en/jobs/vancouver-bc/project-manager",desc:"Self-directed PM leading governance initiatives for a Vancouver enterprise client.",tags:["Remote","Governance","Program Management"],match:79},
+  {id:"j10",title:"Construction Manager – Civil Infrastructure",company:"Jacob Bros Construction",location:"Langley, BC",type:"On-site",salary:"$120,000–$160,000",url:"https://ca.linkedin.com/jobs/construction-project-manager-jobs-vancouver-bc",desc:"Manage civil infrastructure projects in Lower Mainland. Field teams, subcontractors, safety.",tags:["Civil","Construction","Field Leadership","Safety"],match:77},
+  {id:"j11",title:"Senior PM – Telecom Infrastructure",company:"Rogers Communications",location:"Vancouver, BC",type:"Hybrid",salary:"$105,000–$125,000",url:"https://ca.linkedin.com/jobs/rogers-communications-jobs",desc:"Lead telecom network infrastructure programs across BC. Vendor management, field teams.",tags:["Telecom","Infrastructure","Hybrid","Vendors"],match:90},
+  {id:"j12",title:"Operations Manager – Field Services",company:"TELUS",location:"Burnaby, BC",type:"Hybrid",salary:"$100,000–$120,000",url:"https://www.telus.com/en/about/careers",desc:"Oversee field service operations across Lower Mainland. Dispatch, vendor contracts, KPIs.",tags:["Telecom","Field Ops","Hybrid","KPI"],match:88},
+];
+
+const TONE_RULES={
+  natural:`VOICE (critical): Write like a confident human — not a corporate AI. Plain direct language. AVOID: spearheaded, leveraged, utilized, orchestrated, championed, fostered, robust, seamless, synergy, dynamic, innovative, results-driven, passionate, proven track record, end-to-end, holistic, transformative. Use simple verbs: Led, Built, Managed, Reduced, Saved, Improved, Delivered, Cut, Launched.`,
+  bold:`VOICE: Confident, direct, punchy. Short powerful bullets. No filler. No buzzwords. No passive voice.`,
+  polished:`VOICE: Professional and structured. Avoid extreme buzzwords. Strong action verbs, quantify where possible.`
+};
+
+// ─────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────
+const S={
+  dark:true, tab:"resume",
+  raw:"", polished:"", resumeView:"edit", tone:"natural",
+  ci:{name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""},
+  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false,
+  selectedJob:null, posting:"", tailored:"", cover:"", applyOut:"resume", genWhat:"both",
+  apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
+  searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
+  addedJobs:new Set(),
+  intJob:null, intRound:"prescreen", intQs:[], mockQ:"", mockA:"", mockFb:"", intLoad:false,
+  urlImport:"", urlImportPaste:"", urlImportStatus:"", showUrlPaste:false,
+};
+
+// ─────────────────────────────────────────────────────────
+// PERSISTENCE (localStorage)
+// ─────────────────────────────────────────────────────────
+function lsGet(k,fallback=null){try{const v=localStorage.getItem(k);return v!==null?v:fallback;}catch{return fallback;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch{}}
+function lsDel(k){try{localStorage.removeItem(k);}catch{}}
+
+let _saveTimer={};
+function debounceSave(key,val,delay=800){
+  clearTimeout(_saveTimer[key]);
+  _saveTimer[key]=setTimeout(()=>lsSet(key,val),delay);
+}
+
+function loadAll(){
+  const apps=lsGet("tracker-apps-v2");
+  S.apps=apps?JSON.parse(apps):[...SEED_APPS];
+  if(!apps)lsSet("tracker-apps-v2",JSON.stringify(SEED_APPS));
+
+  const raw=lsGet("resume-raw",""); S.raw=raw;
+  const pol=lsGet("resume-polished",""); S.polished=pol;
+  if(pol)S.resumeView="preview";
+  const ci=lsGet("resume-ci"); if(ci)S.ci=JSON.parse(ci);
+  const tone=lsGet("resume-tone"); if(tone)S.tone=tone;
+  const dark=lsGet("app-dark"); if(dark!==null)S.dark=(dark==="true");
+  const posting=lsGet("apply-posting",""); S.posting=posting;
+  S.apiKey=lsGet("api-key","")||"";
+  const tailored=lsGet("apply-tailored",""); S.tailored=tailored;
+  const cover=lsGet("apply-cover",""); S.cover=cover;
+  if(tailored||cover) S.applyOut=cover&&!tailored?"cover":"resume";
+  S.storageReady=true;
+}
+
+// ─────────────────────────────────────────────────────────
+// THEME
+// ─────────────────────────────────────────────────────────
+function t(){
+  const d=S.dark;
+  return d?{
+    appBg:"#0d1117",hBg:"#161c27",hBorder:"#21293a",
+    card:"#161c27",cardB:"#21293a",inBg:"#0d1117",inB:"#21293a",
+    text:"#e8edf5",sub:"#8b95a8",muted:"#4b5563",
+    active:{bg:"#0c1e3e",border:"#1e40af",text:"#93c5fd"},
+    done:{bg:"#052e16",border:"#166534",text:"#4ade80"},
+    idle:{bg:"#161c27",border:"#21293a",text:"#4b5563"},
+    outBg:"#0d1117",outB:"#21293a",
+    ghost:{bg:"#1f2937",border:"#374151",text:"#d1d5db"},
+    danger:{bg:"#3b1212",border:"#7f1d1d",text:"#f87171"},
+    warn:{bg:"#1c1200",border:"#854d0e",text:"#fbbf24"},
+    tag:{bg:"#0c1e3e",text:"#93c5fd",border:"#1e40af"},
+    div:"#21293a",cmpB:"#1e3a5f",cmpL:"#93c5fd",
+  }:{
+    appBg:"#f4f6fa",hBg:"#fff",hBorder:"#e2e6ee",
+    card:"#fff",cardB:"#e2e6ee",inBg:"#f8f9fc",inB:"#d1d9e6",
+    text:"#111827",sub:"#6b7280",muted:"#9ca3af",
+    active:{bg:"#eff6ff",border:"#93c5fd",text:"#1d4ed8"},
+    done:{bg:"#f0fdf4",border:"#86efac",text:"#15803d"},
+    idle:{bg:"#f9fafb",border:"#e5e7eb",text:"#6b7280"},
+    outBg:"#f8f9fc",outB:"#e2e6ee",
+    ghost:{bg:"#f3f4f6",border:"#d1d9e6",text:"#374151"},
+    danger:{bg:"#fee2e2",border:"#fca5a5",text:"#dc2626"},
+    warn:{bg:"#fffbeb",border:"#fcd34d",text:"#92400e"},
+    tag:{bg:"#eff6ff",text:"#1d4ed8",border:"#bfdbfe"},
+    div:"#e2e6ee",cmpB:"#bfdbfe",cmpL:"#2563eb",
+  };
+}
+
+// ─────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────
+function h(tag,attrs={},children=[]){
+  const el=document.createElement(tag);
+  for(const[k,v]of Object.entries(attrs)){
+    if(k==="style"&&typeof v==="object")Object.assign(el.style,v);
+    else if(k.startsWith("on"))el.addEventListener(k.slice(2).toLowerCase(),v);
+    else if(k==="className")el.className=v;
+    else if(k==="htmlFor")el.htmlFor=v;
+    else if(k==="disabled")el.disabled=v;
+    else if(k==="value"&&(tag==="input"||tag==="textarea"||tag==="select"))el.value=v;
+    else if(k==="placeholder")el.placeholder=v;
+    else if(k==="type")el.type=v;
+    else if(k==="href"){el.href=v;}
+    else if(k==="target")el.target=v;
+    else if(k==="rel")el.rel=v;
+    else el.setAttribute(k,v);
+  }
+  for(const c of children){
+    if(c===null||c===undefined)continue;
+    if(typeof c==="string"||typeof c==="number")el.appendChild(document.createTextNode(String(c)));
+    else el.appendChild(c);
+  }
+  return el;
+}
+function div(attrs={},children=[])     {return h("div",attrs,children);}
+function span(attrs={},children=[])    {return h("span",attrs,children);}
+function btn(label,style_obj={},onclick=()=>{}){
+  const b=h("button",{style:{cursor:"pointer",...style_obj},onClick:onclick});
+  if(typeof label==="string")b.textContent=label;
+  else if(label instanceof Element)b.appendChild(label);
+  return b;
+}
+function txt(content,style_obj={}){return span({style:style_obj},[content]);}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+async function callAI(sys,usr){
+  const key=(S.apiKey||lsGet("api-key","")).trim();
+  if(!key){S.apiKeyError=true;rerender();throw new Error("No API key — click the key button to add one.");}
+  const hdrs=new Headers();
+  hdrs.append("Content-Type","application/json");
+  hdrs.append("x-api-key",key);
+  hdrs.append("anthropic-version","2023-06-01");
+  const r=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:hdrs,
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:4000,system:sys,messages:[{role:"user",content:usr}]})
+  });
+  const d=await r.json();
+  if(d.error)throw new Error(d.error.message||"API error");
+  return d.content?.map(b=>b.text||"").join("")||"";
+}
+
+function spinEl(){
+  return span({className:"spin"});
+}
+
+function isDone(s){
+  return {resume:!!S.polished,search:S.searchDone,board:S.apps.length>0,apply:!!(S.tailored||S.cover),tracker:S.apps.some(a=>a.status!=="saved"),interview:S.intQs.length>0}[s]||false;
+}
+
+function matchColor(m){return m>=90?"#16a34a":m>=80?"#2563eb":m>=70?"#d97706":"#6b7280";}
+function matchBg(m){const d=S.dark;return m>=90?(d?"#052e16":"#f0fdf4"):m>=80?(d?"#0c1e3e":"#eff6ff"):m>=70?(d?"#1c1200":"#fffbeb"):(d?"#1f2937":"#f3f4f6");}
+
+// ─────────────────────────────────────────────────────────
+// PDF RESUME RENDERER
+// ─────────────────────────────────────────────────────────
+function buildPDFHTML(text,ci){
+  const name=ci.name||"Your Name";
+  const tagline=ci.tagline||"Senior Program Manager | Operations Manager | Project Manager";
+  const phone=ci.phone||"(xxx) xxx-xxxx";
+  const email=ci.email||"yourname@email.com";
+  const location=ci.location||"Vancouver, BC";
+  const linkedin=ci.linkedin||"linkedin.com/in/yourprofile";
+
+  // Parse sections
+  const sections=[];
+  let cur=null;
+  text.split("\n").forEach(line=>{
+    const tr=line.trim();
+    if(!tr)return;
+    const isH=/^[A-Z][A-Z\s&\/]{4,}$/.test(tr)&&tr.length<60;
+    if(isH){if(cur)sections.push(cur);cur={title:tr,items:[]};}
+    else if(cur){
+      if(tr.startsWith("•")||tr.startsWith("–")||tr.startsWith("-"))cur.items.push({type:"bullet",text:tr.replace(/^[•–\-]\s*/,"")});
+      else cur.items.push({type:"text",text:tr});
+    }else{if(!cur)cur={title:"__hdr__",items:[]};cur.items.push({type:"text",text:tr});}
+  });
+  if(cur)sections.push(cur);
+  const rest=sections.filter(s=>s.title!=="__hdr__");
+
+  function renderExp(items){
+    const blocks=[];let block=null;
+    const isSubLine=(tx)=>/\d{4}/.test(tx)||tx.includes(" – ")||tx.includes(" - ")||tx.includes("Present")||tx.includes("present")||(tx.length<70&&block&&block.bullets.length===0&&block.left);
+    items.forEach(it=>{
+      if(it.type==="bullet"){if(!block)block={left:"",right:"",bullets:[]};block.bullets.push(it.text);}
+      else{const tr=it.text.trim();if(!block){block={left:tr,right:"",bullets:[]};}
+      else if(block.bullets.length===0&&block.left&&!block.right&&isSubLine(tr)){block.right=tr;}
+      else{if(block.left||block.bullets.length>0)blocks.push(block);block={left:tr,right:"",bullets:[]};}}
+    });
+    if(block&&(block.left||block.bullets.length>0))blocks.push(block);
+    return blocks.map((b,i)=>{
+      const isLast=i===blocks.length-1;
+      return `<div class="pdf-exp-block"${isLast?' style="border-bottom:none;margin-bottom:0;padding-bottom:0"':''}>
+        ${(b.left||b.right)?`<div class="pdf-exp-header">
+          <span class="pdf-exp-left">${esc(b.left)}</span>
+          ${b.right?`<span class="pdf-exp-right">${esc(b.right)}</span>`:""}
+        </div>`:""}
+        ${b.bullets.map(bl=>`<div class="pdf-bullet"><span class="pdf-bullet-dot">▪</span><span class="pdf-bullet-text">${esc(bl)}</span></div>`).join("")}
+      </div>`;
+    }).join("");
+  }
+
+  function renderGrid(items){
+    const entries=items.map(it=>it.text).filter(Boolean);
+    while(entries.length%3!==0)entries.push("");
+    const rows=[];
+    for(let i=0;i<entries.length;i+=3)rows.push(entries.slice(i,i+3));
+    return`<table class="pdf-grid-table"><tbody>${rows.map(row=>`<tr>${row.map(cell=>`<td class="pdf-grid-cell">${cell?`<div class="pdf-grid-item"><span class="pdf-bullet-dot">▪</span><span>${esc(cell)}</span></div>`:""}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  }
+
+  const GRID_KEYS=["EXPERTISE","SKILLS","CERTIF"];
+  const sectionsHTML=rest.map(sec=>{
+    const isGrid=GRID_KEYS.some(k=>sec.title.toUpperCase().includes(k));
+    const isExp=sec.title.includes("EXPERIENCE");
+    let bodyHTML="";
+    if(isExp)bodyHTML=renderExp(sec.items);
+    else if(isGrid)bodyHTML=renderGrid(sec.items);
+    else bodyHTML=sec.items.map(it=>it.type==="bullet"
+      ?`<div class="pdf-bullet"><span class="pdf-bullet-dot">▪</span><span class="pdf-bullet-text">${esc(it.text)}</span></div>`
+      :`<div class="pdf-text-line">${esc(it.text)}</div>`
+    ).join("");
+    return`<div style="margin-bottom:13px"><div class="pdf-sec-title">${esc(sec.title)}</div>${bodyHTML}</div>`;
+  }).join("");
+
+  return`<div class="pdf-wrap">
+    <div class="pdf-name">${esc(name)}</div>
+    <div class="pdf-tagline">${esc(tagline)}</div>
+    <div class="pdf-contact">
+      <span>📍 ${esc(location)}</span><span style="color:#ccc">|</span>
+      <span>📞 ${esc(phone)}</span><span style="color:#ccc">|</span>
+      <span>✉ ${esc(email)}</span><span style="color:#ccc">|</span>
+      <span>🔗 ${esc(linkedin)}</span>
+    </div>
+    <hr class="pdf-divider"/>
+    ${sectionsHTML}
+  </div>`;
+}
+
+// ─────────────────────────────────────────────────────────
+// RENDER ENGINE
+// ─────────────────────────────────────────────────────────
+let renderTimeout=null;
+function rerender(){
+  clearTimeout(renderTimeout);
+  renderTimeout=setTimeout(_render,0);
+}
+
+function _render(){
+  const T=t();
+  const app=document.getElementById("app");
+
+  // Apply theme to body
+  document.body.style.background=T.appBg;
+  document.body.style.color=T.text;
+
+  const card_s={background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"14px",padding:"22px 24px",marginBottom:"18px"};
+  const lbl_s={fontSize:"11px",color:T.muted,marginBottom:"6px",display:"block",textTransform:"uppercase",letterSpacing:"0.07em",fontWeight:"600"};
+  const ta_s=(h=160)=>({width:"100%",minHeight:h+"px",background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"9px",color:T.text,padding:"12px 14px",fontSize:"13px",lineHeight:"1.7",resize:"vertical",boxSizing:"border-box",fontFamily:"ui-monospace,monospace"});
+  const inp_s={background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"8px",color:T.text,padding:"9px 13px",fontSize:"13px",fontFamily:"inherit",width:"100%",boxSizing:"border-box"};
+  const out_s={background:T.outBg,border:`1px solid ${T.outB}`,borderRadius:"9px",padding:"14px 16px",fontSize:"13px",lineHeight:"1.85",color:T.text,whiteSpace:"pre-wrap",maxHeight:"460px",overflowY:"auto",fontFamily:"ui-monospace,monospace"};
+
+  function mkBtn(variant,label,onclick,extra={}){
+    const map={primary:{bg:"#2563eb",c:"#fff"},purple:{bg:"#7c3aed",c:"#fff"},teal:{bg:"#0d9488",c:"#fff"},green:{bg:"#16a34a",c:"#fff"}};
+    const v=map[variant];
+    let s={padding:"9px 20px",borderRadius:"8px",border:v?"none":`1px solid ${T.ghost.border}`,cursor:"pointer",fontSize:"13px",fontWeight:"600",background:v?v.bg:T.ghost.bg,color:v?v.c:T.ghost.text,display:"inline-flex",alignItems:"center",gap:"7px",...extra};
+    if(variant==="danger")s={padding:"7px 14px",borderRadius:"7px",border:`1px solid ${T.danger.border}`,cursor:"pointer",fontSize:"12px",fontWeight:"600",background:T.danger.bg,color:T.danger.text,display:"inline-flex",alignItems:"center",gap:"6px",...extra};
+    const b=h("button",{style:s,onClick:onclick});
+    if(label instanceof Element)b.appendChild(label);
+    else b.textContent=label;
+    return b;
+  }
+
+  function pillBtn(label,active,color,onclick,extra={}){
+    const b=h("button",{style:{padding:"6px 14px",borderRadius:"8px",border:`1.5px solid ${active?color:T.cardB}`,background:active?(S.dark?color+"22":color+"18"):"transparent",color:active?color:T.sub,fontSize:"12px",cursor:"pointer",fontWeight:active?"600":"400",...extra},onClick:onclick});
+    b.textContent=label;
+    return b;
+  }
+
+  function stepColor(key){
+    return isDone(key)?T.done:S.tab===key?T.active:T.idle;
+  }
+
+  function mkLabel(text){
+    const l=h("label",{style:lbl_s});l.textContent=text;return l;
+  }
+  function mkInput(val,onchange,extra={}){
+    const i=h("input",{style:inp_s,value:val,...extra});
+    i.addEventListener("input",e=>onchange(e.target.value));
+    return i;
+  }
+  function mkSelect(val,options,onchange){
+    const s=h("select",{style:inp_s});
+    options.forEach(([v,l])=>{const o=h("option",{value:v});o.textContent=l;if(v===val)o.selected=true;s.appendChild(o);});
+    s.addEventListener("change",e=>onchange(e.target.value));
+    return s;
+  }
+  function mkTextarea(val,onchange,heightPx=160,placeholder=""){
+    const ta=h("textarea",{style:ta_s(heightPx),placeholder});
+    ta.value=val;
+    ta.addEventListener("input",e=>onchange(e.target.value));
+    return ta;
+  }
+
+  // ── HEADER ──
+  const TABS=[["resume","1","Resume"],["search","2","Find Jobs"],["board","3","Job Board"],["apply","4","Apply"],["tracker","5","Tracker"],["interview","6","Interview Prep"]];
+
+  const hasKey=!!S.apiKey;
+  const header=div({style:{background:T.hBg,borderBottom:`1px solid ${T.hBorder}`,padding:"0 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:"0",zIndex:"10",minHeight:"54px",flexWrap:"wrap",gap:"8px",paddingTop:"8px",paddingBottom:"8px"}},[
+    div({style:{display:"flex",alignItems:"center",gap:"10px"}},[
+      div({style:{width:"28px",height:"28px",background:"#2563eb",borderRadius:"7px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px",fontWeight:"700",color:"#fff",cursor:"pointer"},title:"Reload",onClick:()=>location.reload()},["R"]),
+      span({style:{fontSize:"15px",fontWeight:"700",letterSpacing:"-0.01em"}},["ResumeAI"]),
+      span({style:{fontSize:"11px",color:T.muted,marginLeft:"2px"}},["powered by Claude"]),
+    ]),
+    div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},[
+      S.storageReady?div({style:{fontSize:"11px",color:T.muted,display:"flex",alignItems:"center",gap:"4px"}},[
+        span({style:{width:"6px",height:"6px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}}),
+        " Auto-saved"
+      ]):span(),
+      div({style:{display:"flex",alignItems:"center",gap:"6px"}},[
+        h("button",{style:{padding:"5px 11px",borderRadius:"20px",fontSize:"11px",cursor:"pointer",border:`1px solid ${hasKey?T.done.border:T.warn.border}`,background:hasKey?T.done.bg:T.warn.bg,color:hasKey?T.done.text:T.warn.text,display:"flex",alignItems:"center",gap:"5px"},onClick:()=>{S.showApiKey=!S.showApiKey;rerender();}},[hasKey?"🔑 Key set":"🔑 Add API key"]),
+        S.showApiKey?div({style:{display:"flex",alignItems:"center",gap:"6px"}},[
+          (()=>{const inp=h("input",{style:{padding:"5px 10px",borderRadius:"8px",fontSize:"12px",width:"240px",border:`1px solid ${T.inB}`,background:T.inBg,color:T.text},placeholder:"sk-ant-api03-…",type:"password"});inp.value=S.apiKey;inp.addEventListener("input",e=>S.apiKey=e.target.value);inp.addEventListener("keydown",e=>{if(e.key==="Enter"){lsSet("api-key",S.apiKey.trim());S.showApiKey=false;S.apiKeyError=false;rerender();}});setTimeout(()=>inp.focus(),50);return inp;})(),
+          h("button",{style:{padding:"5px 12px",borderRadius:"8px",fontSize:"12px",cursor:"pointer",border:"none",background:"#2563eb",color:"#fff",fontWeight:"600"},onClick:()=>{lsSet("api-key",S.apiKey.trim());S.showApiKey=false;S.apiKeyError=false;rerender();}},["Save"]),
+        ]):null,
+      ].filter(Boolean)),
+      h("button",{style:{padding:"5px 13px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:T.card,color:T.sub,fontSize:"12px",cursor:"pointer",display:"flex",alignItems:"center",gap:"5px"},onClick:()=>{S.dark=!S.dark;lsSet("app-dark",String(S.dark));rerender();}},[S.dark?"☀ Light":"☾ Dark"]),
+      h("button",{style:{padding:"5px 10px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:"transparent",color:T.muted,fontSize:"11px",cursor:"pointer"},onClick:()=>{if(!confirm("Clear all saved data and start fresh?"))return;["tracker-apps-v2","resume-raw","resume-polished","resume-ci","resume-tone","apply-posting","apply-tailored","apply-cover"].forEach(lsDel);S.raw="";S.polished="";S.ci={name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""};S.tone="natural";S.posting="";S.tailored="";S.cover="";S.apps=[...SEED_APPS];S.resumeView="edit";lsSet("tracker-apps-v2",JSON.stringify(SEED_APPS));rerender();}},["Reset"]),
+    ]),
+  ]);
+
+  // ── TAB BAR ──
+  const tabBar=div({style:{display:"flex",gap:"7px",marginBottom:"24px",flexWrap:"wrap"}},
+    TABS.map(([key,num,label])=>{
+      const c=stepColor(key);
+      const done=isDone(key);
+      const b=h("button",{style:{padding:"7px 16px",borderRadius:"20px",border:`1.5px solid ${c.border}`,background:c.bg,color:c.text,fontSize:"13px",cursor:"pointer",display:"flex",alignItems:"center",gap:"6px",fontWeight:S.tab===key?"600":"500"},onClick:()=>{S.tab=key;rerender();}});
+      const badge=span({style:{width:"18px",height:"18px",borderRadius:"50%",background:done?"#16a34a":S.tab===key?"#2563eb":T.muted,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:"10px",color:"#fff",flexShrink:"0",fontWeight:"700"}},[done?"✓":num]);
+      b.appendChild(badge);
+      b.appendChild(document.createTextNode(" "+label));
+      if(key==="tracker"&&S.apps.length>0){
+        const ct=span({style:{fontSize:"10px",fontWeight:"700",padding:"1px 6px",borderRadius:"8px",background:S.dark?"#0c1e3e":"#dbeafe",color:S.dark?"#93c5fd":"#1d4ed8"}},[String(S.apps.length)]);
+        b.appendChild(ct);
+      }
+      return b;
+    })
+  );
+
+  // ── TAB CONTENT ──
+  let content=div();
+
+  // ── TAB 1: RESUME ──
+  if(S.tab==="resume"){
+    const viewToggle=div({style:{display:"flex",gap:"6px"}},["edit","preview"].map(v=>
+      pillBtn(v==="edit"?"Edit":"PDF Preview",S.resumeView===v,"#2563eb",()=>{S.resumeView=v;rerender();},{padding:"6px 14px",borderRadius:"7px"})
+    ));
+
+    // Shared polish action (used in both edit and preview views)
+    async function doPolish(){
+      if(!S.raw.trim()||S.load==="polish")return;
+      S.load="polish";S.polishError="";rerender();
+      try{
+        const r=await callAI(
+          `Professional resume writer. Rewrite into clean ATS-friendly plain text.\n${TONE_RULES[S.tone]}\nALL CAPS headers, • bullets. Sections: PROFESSIONAL SUMMARY, AREAS OF EXPERTISE, TECHNICAL SKILLS, PROFESSIONAL EXPERIENCE, CERTIFICATIONS. No tables/columns. Output ONLY resume text.\n\nFor PROFESSIONAL EXPERIENCE, format each role as two consecutive lines followed by bullets:\nLine 1: Job Title — Company Name, Location\nLine 2: Month Year – Month Year (or Present)\n• Achievement bullet\n\nRepeat this exact pattern for every role, including multiple roles at the same employer. Never group or nest roles.`,
+          `Rewrite:\n\n${S.raw}`
+        );
+        if(r&&r.trim().length>50){S.polished=r;lsSet("resume-polished",r);S.resumeView="preview";S.polishError="";}
+        else{S.polishError="Empty response — check your API key has credits.";}
+      }catch(e){S.polishError=e.message||"API error. Check your key and try again.";console.error("Polish error:",e);}
+      S.load="";rerender();
+    }
+
+    // Refine action — apply plain-English instruction to polished resume
+    async function doRefine(){
+      if(!S.polished||!S.refineText.trim()||S.load==="refine")return;
+      S.load="refine";rerender();
+      try{
+        const r=await callAI(
+          `You are editing a resume. The user will give you an instruction. Apply it precisely and return the COMPLETE updated resume text — same format, ALL CAPS section headers, • bullets. Do not summarise, truncate, or add commentary. Output ONLY the resume text.`,
+          `INSTRUCTION: ${S.refineText}\n\nRESUME:\n${S.polished}`
+        );
+        S.polished=r;lsSet("resume-polished",r);
+        S.refineText="";
+      }catch{/* leave polished as-is on error */}
+      S.load="";rerender();
+    }
+
+
+    function mkToneRow(){
+      return div({style:{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap"}},[
+        span({style:{fontSize:"11px",color:T.muted,fontWeight:"600",textTransform:"uppercase",letterSpacing:"0.06em",marginRight:"2px"}},["Tone:"]),
+        ...[["natural","Human","#0d9488"],["bold","Bold","#7c3aed"],["polished","Formal","#2563eb"]].map(([v,l,c])=>
+          pillBtn(l,S.tone===v,c,()=>{S.tone=v;lsSet("resume-tone",v);rerender();},{padding:"5px 12px",borderRadius:"16px"})
+        )
+      ]);
+    }
+
+    let tabBody;
+    if(S.resumeView==="edit"){
+      // PDF upload button
+      const uploadWrap=div({style:{marginBottom:"10px",display:"flex",alignItems:"center",gap:"10px",padding:"10px 14px",background:T.inBg,border:`1px dashed ${T.inB}`,borderRadius:"9px"}});
+      const fileInput=h("input",{type:"file",style:{display:"none"}});
+      fileInput.accept=".pdf";
+      fileInput.addEventListener("change",async e=>{
+        const file=e.target.files[0];
+        if(!file)return;
+        S.load="pdf";rerender();
+        try{
+          const arrayBuffer=await file.arrayBuffer();
+          // Use PDF.js from CDN (loaded lazily)
+          if(!window.pdfjsLib){
+            await new Promise((res,rej)=>{
+              const s=document.createElement("script");
+              s.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+              s.onload=res;s.onerror=rej;document.head.appendChild(s);
+            });
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+          }
+          const pdf=await window.pdfjsLib.getDocument({data:arrayBuffer}).promise;
+          let text="";
+          for(let i=1;i<=pdf.numPages;i++){
+            const page=await pdf.getPage(i);
+            const content=await page.getTextContent();
+            const pageText=content.items.map(item=>item.str).join(" ");
+            text+=pageText+"\n";
+          }
+          S.raw=text.trim();
+          lsSet("resume-raw",S.raw);
+        }catch(err){
+          S.raw="Error reading PDF. Try copy-pasting the text instead.";
+        }
+        S.load="";
+        fileInput.value="";
+        rerender();
+      });
+      uploadWrap.appendChild(fileInput);
+      const uploadBtn=h("button",{style:{padding:"6px 14px",borderRadius:"8px",border:`1px solid ${T.cardB}`,background:T.card,color:T.sub,fontSize:"12px",cursor:"pointer",fontWeight:"600",display:"flex",alignItems:"center",gap:"6px"},onClick:()=>fileInput.click()},[
+        span({style:{fontSize:"15px"}},["📄"]),
+        S.load==="pdf"?"Reading PDF…":"Upload PDF resume"
+      ]);
+      uploadWrap.appendChild(uploadBtn);
+      uploadWrap.appendChild(span({style:{fontSize:"12px",color:T.muted}},["— or paste text below"]));
+
+      const polishRow=div({style:{marginTop:"12px",display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap"}},[
+        mkToneRow(),
+        (()=>{
+          const b=mkBtn("primary",S.load==="polish"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Polishing…"));return w;})():"✦ Polish resume",doPolish);
+          b.disabled=S.load==="polish"||!S.raw.trim();
+          return b;
+        })(),
+        S.polished?span({style:{fontSize:"12px",color:T.done.text,background:T.done.bg,border:`1px solid ${T.done.border}`,padding:"3px 10px",borderRadius:"10px",fontWeight:"600"}},["✓ Already polished"]):null,
+      ].filter(Boolean));
+
+      const ta=mkTextarea(S.raw,v=>{S.raw=v;debounceSave("resume-raw",v);},200,"Paste your resume text here…");
+      const errBanner=S.polishError?div({style:{marginTop:"10px",padding:"10px 14px",background:T.danger.bg,border:`1px solid ${T.danger.border}`,borderRadius:"8px",fontSize:"13px",color:T.danger.text}},["⚠ "+S.polishError]):null;
+      tabBody=div({},[uploadWrap,ta,polishRow,errBanner].filter(Boolean));
+
+    }else{
+      // PDF Preview
+      if(!S.polished){
+        tabBody=div({style:{color:T.muted,fontSize:"13px",padding:"20px 0"}},["Polish your resume first to see the PDF preview."]);
+      }else{
+        const ciFields=[["name","Full Name","e.g. John Smith"],["tagline","Title / Tagline","e.g. Senior Program Manager | PMP"],["phone","Phone","e.g. (604) 555-1234"],["email","Email","e.g. john@email.com"],["location","Location","e.g. Vancouver, BC"],["linkedin","LinkedIn","linkedin.com/in/yourprofile"]];
+        const ciBox=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"14px"}},[
+          div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:S.showCi?"12px":"0"}},[
+            span({style:{fontSize:"12px",fontWeight:"600",color:T.sub}},["Contact info for header"]),
+            h("button",{style:{fontSize:"11px",color:T.sub,background:"transparent",border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"3px 10px",cursor:"pointer"},onClick:()=>{S.showCi=!S.showCi;rerender();}},[S.showCi?"Hide":"Edit"]),
+          ]),
+          !S.showCi?span({style:{fontSize:"11px",color:T.muted,marginTop:"4px",display:"block"}},[`${S.ci.name||"Your Name"} · ${S.ci.email||"yourname@email.com"} · ${S.ci.phone||"(xxx) xxx-xxxx"}`]):
+          div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginTop:"8px"}},
+            ciFields.map(([f,lb,ph])=>div({},[
+              mkLabel(lb),
+              (()=>{const i=mkInput(S.ci[f]||"",v=>{S.ci={...S.ci,[f]:v};lsSet("resume-ci",JSON.stringify(S.ci));rerender();},{placeholder:ph});return i;})()
+            ]))
+          ),
+        ]);
+
+        // Re-polish bar — visible when already polished
+        const repolishBar=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"12px 16px",marginBottom:"14px",display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},[
+          span({style:{fontSize:"12px",color:T.sub,fontWeight:"600",flexShrink:"0"}},["Re-polish as:"]),
+          mkToneRow(),
+          (()=>{
+            const b=mkBtn("primary",S.load==="polish"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Re-polishing…"));return w;})():"↺ Re-polish",doPolish,{padding:"7px 16px",fontSize:"12px"});
+            b.disabled=S.load==="polish"||!S.raw.trim();
+            return b;
+          })(),
+        ]);
+
+        // Refine box — plain-English edits applied to the polished resume
+        const refineBox=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"12px 16px",marginBottom:"14px"}},[
+          div({style:{fontSize:"12px",fontWeight:"600",color:T.sub,marginBottom:"8px",display:"flex",alignItems:"center",gap:"6px"}},[
+            span({style:{fontSize:"14px"}},["✏️"]),
+            "Refine with a quick instruction",
+          ]),
+          div({style:{display:"flex",gap:"8px",alignItems:"flex-start"}},[
+            (()=>{
+              const inp=h("input",{style:{...inp_s,flex:"1",fontSize:"13px"},placeholder:'e.g. "Change all locations to Vancouver, BC" or "Make the summary shorter"'});
+              inp.value=S.refineText;
+              inp.addEventListener("input",e=>S.refineText=e.target.value);
+              inp.addEventListener("keydown",async e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();await doRefine();}});
+              return inp;
+            })(),
+            (()=>{
+              const b=mkBtn("teal",S.load==="refine"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Applying…"));return w;})():"Apply",doRefine,{padding:"9px 16px",fontSize:"13px",flexShrink:"0"});
+              b.disabled=S.load==="refine"||!S.refineText.trim()||!S.polished;
+              return b;
+            })(),
+          ]),
+          div({style:{marginTop:"8px",display:"flex",gap:"6px",flexWrap:"wrap"}},
+            ['Change all locations to Vancouver, BC','Remove buzzwords','Shorten the summary','Add more quantified results'].map(hint=>
+              h("button",{style:{fontSize:"11px",padding:"3px 10px",borderRadius:"12px",border:`1px solid ${T.cardB}`,background:"transparent",color:T.muted,cursor:"pointer"},onClick:()=>{S.refineText=hint;rerender();}},[ hint ])
+            )
+          ),
+        ]);
+
+
+        const actionRow=div({style:{display:"flex",gap:"8px",marginBottom:"14px",justifyContent:"flex-end"}},[
+          (()=>{const b=mkBtn("ghost",S.copied==="resume"?"✓ Copied":"Copy text",()=>{
+            navigator.clipboard.writeText(S.polished).catch(()=>{});
+            S.copied="resume";setTimeout(()=>{S.copied="";rerender();},2000);rerender();
+          },{padding:"6px 14px",fontSize:"12px"});return b;})(),
+          mkBtn("ghost","Print / Save PDF",()=>{
+            const pa=document.getElementById("print-area");
+            pa.style.display="block";
+            pa.innerHTML=buildPDFHTML(S.polished,S.ci);
+            window.print();
+            pa.style.display="none";
+          },{padding:"6px 14px",fontSize:"12px"}),
+        ]);
+
+        const previewBox=div({style:{border:`1px solid ${T.cardB}`,borderRadius:"10px",overflow:"hidden"}});
+        previewBox.innerHTML=buildPDFHTML(S.polished,S.ci);
+        tabBody=div({},[ciBox,repolishBar,actionRow,previewBox,refineBox]);
+      }
+    }
+
+    content=div({},[
+      div({style:card_s},[
+        div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px",flexWrap:"wrap",gap:"10px"}},[
+          div({},[
+            div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"3px"}},["Your resume"]),
+            div({style:{fontSize:"13px",color:T.sub}},["Upload a PDF or paste text — then polish with AI."]),
+          ]),
+          viewToggle,
+        ]),
+        tabBody,
+      ]),
+      S.polished?div({style:{...card_s,borderColor:S.dark?"#1e40af":"#93c5fd",background:S.dark?"#0c1e3e":"#eff6ff",padding:"14px 20px"}},[
+        div({style:{fontSize:"13px",color:S.dark?"#93c5fd":"#1d4ed8",fontWeight:"600",marginBottom:"6px"}},["Resume polished — find your jobs next"]),
+        mkBtn("primary","Go to Find Jobs →",()=>{S.tab="search";rerender();},{fontSize:"13px"}),
+      ]):null,
+    ].filter(Boolean));
+  }
+
+  // ── TAB 2: FIND JOBS ──
+  else if(S.tab==="search"){
+    const filters=div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"12px"}},[
+      div({},[mkLabel("Keywords"),mkInput(S.searchKw,v=>S.searchKw=v,{placeholder:"e.g. Project Manager, Construction…"})]),
+      div({},[mkLabel("Location"),mkInput(S.searchLoc,v=>S.searchLoc=v,{placeholder:"e.g. Vancouver, BC"})]),
+    ]);
+    const typeFilters=div({style:{marginBottom:"16px"}},[
+      mkLabel("Work type"),
+      div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},
+        ["Remote","Hybrid","On-site","Contract"].map(v=>
+          pillBtn(v,S.searchType.includes(v),"#0d9488",()=>{
+            S.searchType=S.searchType.includes(v)?S.searchType.filter(x=>x!==v):[...S.searchType,v];rerender();
+          },{padding:"6px 13px",borderRadius:"16px"})
+        )
+      ),
+    ]);
+    const searchBtn=(()=>{
+      const b=mkBtn("teal",S.load==="search"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Searching…"));return w;})():"⌕ Search jobs",async()=>{
+        if(S.load==="search")return;
+        S.load="search";S.searchDone=false;rerender();
+        await new Promise(r=>setTimeout(r,700));
+        let res=[...SEARCH_POOL];
+        const q=(S.searchKw||"").toLowerCase();
+        if(q)res=res.filter(j=>j.title.toLowerCase().includes(q)||j.tags.some(tg=>tg.toLowerCase().includes(q))||j.company.toLowerCase().includes(q));
+        if(S.searchType.length)res=res.filter(j=>S.searchType.includes(j.type));
+        res.sort((a,b)=>b.match-a.match);
+        S.searchResults=res;S.searchDone=true;S.load="";rerender();
+      });b.disabled=S.load==="search";return b;
+    })();
+
+    let resultsSection=div();
+    if(S.searchDone){
+      const jobCards=S.searchResults.map(job=>{
+        const added=S.addedJobs.has(job.id)||S.apps.some(a=>a.id===job.id);
+        const isExp=S.expandedApp==="s_"+job.id;
+        const card=div({style:{background:T.card,border:`1px solid ${isExp?T.active.border:T.cardB}`,borderRadius:"12px",padding:"16px 20px",marginBottom:"10px"}});
+        const addBtn=mkBtn(added?"ghost":"primary",added?"✓ On Board":"+ Add to Board",async()=>{
+          if(added)return;
+          if(!S.apps.some(a=>a.id===job.id)){
+            const na={id:job.id,company:job.company,title:job.title,location:job.location,type:job.type,salary:job.salary,url:job.url,status:"saved",appliedDate:"",notes:job.desc+"\n\nKey skills: "+job.tags.join(", ")};
+            S.apps=[na,...S.apps];lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+          }
+          S.addedJobs.add(job.id);rerender();
+        },{fontSize:"12px",padding:"7px 14px",opacity:added?"0.7":"1"});
+        addBtn.disabled=added;
+
+        const header=div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"12px"}},[
+          div({style:{flex:"1",minWidth:"0",cursor:"pointer"},onClick:()=>{S.expandedApp=isExp?null:"s_"+job.id;rerender();}},[
+            div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"4px"}},[
+              span({style:{fontSize:"15px",fontWeight:"700"}},[job.title]),
+              span({style:{fontSize:"11px",fontWeight:"700",padding:"2px 9px",borderRadius:"10px",background:matchBg(job.match),color:matchColor(job.match)}},[job.match+"% match"]),
+              span({style:{fontSize:"11px",padding:"2px 8px",borderRadius:"9px",background:T.tag.bg,color:T.tag.text,border:`1px solid ${T.tag.border}`}},[job.type]),
+            ]),
+            div({style:{fontSize:"13px",color:T.sub,marginBottom:"6px"}},[
+              span({style:{fontWeight:"600",color:T.text}},[job.company])," · ",job.location,job.salary?" · ":"",job.salary?span({style:{color:T.text,fontWeight:"500"}},[job.salary]):"",
+            ]),
+            div({style:{display:"flex",gap:"5px",flexWrap:"wrap"}},job.tags.map(tg=>span({style:{fontSize:"11px",padding:"2px 8px",borderRadius:"8px",background:T.inBg,color:T.sub,border:`1px solid ${T.inB}`}},[tg]))),
+          ]),
+          div({style:{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"8px",flexShrink:"0"}},[
+            addBtn,
+            job.url?h("a",{href:job.url,target:"_blank",rel:"noreferrer",style:{fontSize:"11px",color:T.sub,textDecoration:"none"}},["View ↗"]):null,
+          ].filter(Boolean)),
+        ]);
+        card.appendChild(header);
+        if(isExp){
+          const exp=div({style:{marginTop:"12px",paddingTop:"12px",borderTop:`1px solid ${T.div}`}},[
+            h("p",{style:{fontSize:"13px",color:T.sub,lineHeight:"1.7",marginBottom:"12px"}},[job.desc]),
+            !added?mkBtn("primary","+ Add to Job Board",async()=>{
+              if(!S.apps.some(a=>a.id===job.id)){
+                const na={id:job.id,company:job.company,title:job.title,location:job.location,type:job.type,salary:job.salary,url:job.url,status:"saved",appliedDate:"",notes:job.desc+"\n\nKey skills: "+job.tags.join(", ")};
+                S.apps=[na,...S.apps];lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+              }
+              S.addedJobs.add(job.id);rerender();
+            },{fontSize:"12px",padding:"7px 14px"}):null,
+          ].filter(Boolean));
+          card.appendChild(exp);
+        }
+        return card;
+      });
+      resultsSection=div({},[
+        div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px",flexWrap:"wrap",gap:"8px"}},[
+          span({style:{fontSize:"13px",color:T.sub}},[S.searchResults.length+" job"+(S.searchResults.length!==1?"s":"")+" found"]),
+          S.searchResults.length>0?span({style:{fontSize:"11px",color:T.muted}},["Sorted by match · click + Add to Board to save"]):null,
+        ].filter(Boolean)),
+        S.searchResults.length===0?div({style:{...card_s,textAlign:"center",padding:"36px",color:T.sub}},["No results. Try broader keywords."]):div({},[...jobCards]),
+        S.searchResults.length>0?div({style:{...card_s,marginTop:"8px",borderColor:S.dark?"#1e40af":"#93c5fd",background:S.dark?"#0c1e3e":"#eff6ff",padding:"14px 20px"}},[
+          span({style:{fontSize:"13px",color:S.dark?"#93c5fd":"#1d4ed8",fontWeight:"600"}},["Jobs added? "]),
+          mkBtn("primary","Go to Job Board →",()=>{S.tab="board";rerender();},{fontSize:"12px",padding:"6px 14px",marginLeft:"10px"}),
+        ]):null,
+      ].filter(Boolean));
+    }else{
+      resultsSection=div({style:{...card_s,textAlign:"center",padding:"48px 24px",color:T.sub}},[
+        div({style:{fontSize:"32px",marginBottom:"10px"}},["⌕"]),
+        div({style:{fontSize:"15px",fontWeight:"600",color:T.text,marginBottom:"6px"}},["Search for relevant jobs"]),
+        div({style:{fontSize:"13px",lineHeight:"1.6"}},["Leave keywords blank to see all roles, or filter by type."]),
+      ]);
+    }
+
+    content=div({},[
+      div({style:card_s},[
+        div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"4px"}},["Find matching jobs"]),
+        div({style:{fontSize:"13px",color:T.sub,marginBottom:"16px"}},[S.polished?"Resume loaded — results scored against your background.":"Tip: polish your resume first for personalized match scores."]),
+        filters,typeFilters,
+        div({style:{display:"flex",gap:"10px",alignItems:"center",flexWrap:"wrap"}},[
+          searchBtn,
+          S.polished?div({style:{fontSize:"12px",color:T.sub,display:"flex",alignItems:"center",gap:"5px"}},[
+            span({style:{width:"7px",height:"7px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}}),
+            " Resume loaded"
+          ]):null,
+        ].filter(Boolean)),
+      ]),
+      resultsSection,
+    ]);
+  }
+
+  // ── TAB 3: JOB BOARD ──
+  else if(S.tab==="board"){
+    function buildAppCard(app){
+      const sm=smeta(app.status);const sbg=S.dark?sm.bgd:sm.bgl;const exp=S.expandedApp===app.id;
+      const card=div({style:{background:T.card,border:`1px solid ${exp?T.active.border:T.cardB}`,borderRadius:"11px",padding:"14px 18px",marginBottom:"10px"}});
+      const statusSel=h("select",{style:{fontSize:"11px",padding:"4px 8px",borderRadius:"7px",border:`1px solid ${T.cardB}`,background:sbg,color:sm.color,cursor:"pointer",fontFamily:"inherit",fontWeight:"600",flexShrink:"0"}});
+      STATUSES.forEach(s=>{const o=h("option",{value:s.key});o.textContent=s.label;if(s.key===app.status)o.selected=true;statusSel.appendChild(o);});
+      statusSel.addEventListener("change",async e=>{S.apps=S.apps.map(a=>a.id===app.id?{...a,status:e.target.value}:a);lsSet("tracker-apps-v2",JSON.stringify(S.apps));rerender();});
+      const row=div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"10px"}},[
+        div({style:{flex:"1",cursor:"pointer"},onClick:()=>{S.expandedApp=exp?null:app.id;rerender();}},[
+          div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"3px"}},[
+            span({style:{fontSize:"14px",fontWeight:"700"}},[app.title]),
+            span({style:{fontSize:"11px",fontWeight:"700",padding:"2px 8px",borderRadius:"9px",background:sbg,color:sm.color}},[sm.label]),
+            span({style:{fontSize:"11px",padding:"2px 8px",borderRadius:"9px",background:T.tag.bg,color:T.tag.text,border:`1px solid ${T.tag.border}`}},[app.type]),
+          ]),
+          div({style:{fontSize:"12px",color:T.sub}},[span({style:{fontWeight:"600",color:T.text}},[app.company]),app.location?" · "+app.location:"",app.salary?" · ":"",(app.salary?span({style:{color:T.text,fontWeight:"500"}},[app.salary]):null)].filter(Boolean)),
+        ]),
+        statusSel,
+      ]);
+      card.appendChild(row);
+      if(exp){
+        const actions=div({style:{marginTop:"12px",paddingTop:"12px",borderTop:`1px solid ${T.div}`}},[
+          app.notes?h("p",{style:{fontSize:"12px",color:T.sub,lineHeight:"1.7",marginBottom:"12px"}},[app.notes]):null,
+          div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
+            mkBtn("primary","✦ Generate application →",()=>{
+              S.selectedJob=app;
+              S.posting=`${app.title} at ${app.company}\nLocation: ${app.location}\nType: ${app.type}${app.salary?"\nSalary: "+app.salary:""}\n\n${app.notes||""}`;
+              S.tailored="";S.cover="";S.tab="apply";rerender();
+            },{fontSize:"12px",padding:"6px 14px"}),
+            mkBtn("teal","Prep interview →",()=>{S.intJob=app.id;S.tab="interview";rerender();},{fontSize:"12px",padding:"6px 14px"}),
+            mkBtn("ghost","Edit",()=>{S.fd={...app};S.editId=app.id;S.showForm=true;rerender();},{fontSize:"12px",padding:"6px 14px"}),
+            app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",style:{padding:"6px 14px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:T.ghost.text,textDecoration:"none",display:"inline-flex",alignItems:"center"}},["View posting ↗"]):null,
+            mkBtn("danger","Remove",async()=>{if(!confirm("Remove?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();}),
+          ].filter(Boolean)),
+        ].filter(Boolean));
+        card.appendChild(actions);
+      }
+      return card;
+    }
+
+    function buildForm(){
+      const EMPTY={id:"",company:"",title:"",location:"",type:"Hybrid",salary:"",url:"",status:"saved",appliedDate:new Date().toISOString().slice(0,10),notes:""};
+      if(!S.fd.id)S.fd={...EMPTY,id:Date.now().toString()};
+      const f=S.fd;
+      return div({style:{...card_s,border:`1.5px solid ${T.active.border}`}},[
+        div({style:{fontSize:"13px",fontWeight:"700",marginBottom:"12px"}},[S.editId?"Edit job":"Add job"]),
+        div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}},[
+          div({},[mkLabel("Company"),(()=>{const i=mkInput(f.company||"",v=>{S.fd.company=v;});i.placeholder="Company";return i;})()]),
+          div({},[mkLabel("Job Title"),(()=>{const i=mkInput(f.title||"",v=>{S.fd.title=v;});i.placeholder="Title";return i;})()]),
+          div({},[mkLabel("Location"),(()=>{const i=mkInput(f.location||"",v=>{S.fd.location=v;});i.placeholder="City, Province";return i;})()]),
+          div({},[mkLabel("Salary"),(()=>{const i=mkInput(f.salary||"",v=>{S.fd.salary=v;});i.placeholder="e.g. $120K";return i;})()]),
+          div({},[mkLabel("Type"),mkSelect(f.type||"Hybrid",[["Remote","Remote"],["Hybrid","Hybrid"],["On-site","On-site"],["Contract","Contract"]],v=>S.fd.type=v)]),
+          div({},[mkLabel("URL"),(()=>{const i=mkInput(f.url||"",v=>{S.fd.url=v;});i.placeholder="https://…";return i;})()]),
+        ]),
+        div({style:{marginBottom:"10px"}},[mkLabel("Notes"),mkTextarea(f.notes||"",v=>S.fd.notes=v,70,"Key requirements…")]),
+        div({style:{display:"flex",gap:"8px"}},[
+          (()=>{const b=mkBtn("primary",S.editId?"Save":"Add",async()=>{
+            if(!S.fd.company||!S.fd.title)return;
+            if(S.editId)S.apps=S.apps.map(a=>a.id===S.editId?{...S.fd}:a);
+            else S.apps=[{...S.fd},...S.apps];
+            lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+            S.showForm=false;S.editId=null;rerender();
+          },{fontSize:"12px",padding:"7px 16px"});b.disabled=!S.fd.company||!S.fd.title;return b;})(),
+          mkBtn("ghost","Cancel",()=>{S.showForm=false;S.editId=null;rerender();},{fontSize:"12px",padding:"7px 16px"}),
+        ]),
+      ]);
+    }
+
+    // ── URL IMPORT ──
+    async function importFromUrl(){
+      const url=S.urlImport.trim();
+      if(!url||S.load==="urlimport")return;
+      S.load="urlimport";S.urlImportStatus="";S.showUrlPaste=false;rerender();
+      try{
+        const result=await callAI(
+          `You are a job posting parser. The user will give you a job posting URL. Use your knowledge to extract the job details. Return ONLY a valid JSON object with these exact keys: title, company, location, type (one of: Remote/Hybrid/On-site/Contract), salary (or empty string), notes (2-3 sentence summary of the role and key requirements). No markdown, no backticks, no extra text.`,
+          `Extract job details from this posting URL: ${url}\n\nIf you cannot access the URL or determine the details, return: {"error":"Could not fetch job details from this URL"}`
+        );
+        let parsed;
+        try{ parsed=JSON.parse(result.replace(/```json|```/g,"").trim()); }
+        catch{ parsed={error:"Could not parse response"}; }
+
+        if(parsed.error||!parsed.title){
+          S.urlImportStatus="error";S.showUrlPaste=true;
+        }else{
+          const newApp={
+            id:Date.now().toString(),
+            company:parsed.company||"",
+            title:parsed.title||"",
+            location:parsed.location||"",
+            type:parsed.type||"On-site",
+            salary:parsed.salary||"",
+            url:url,
+            status:"saved",
+            appliedDate:"",
+            notes:parsed.notes||"",
+          };
+          S.apps=[newApp,...S.apps];
+          lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+          S.urlImport="";S.urlImportStatus="success";S.urlImportPaste="";
+          setTimeout(()=>{S.urlImportStatus="";rerender();},3000);
+        }
+      }catch{
+        S.urlImportStatus="error";S.showUrlPaste=true;
+      }
+      S.load="";rerender();
+    }
+
+    async function importFromPaste(){
+      const text=S.urlImportPaste.trim();
+      const url=S.urlImport.trim();
+      if(!text||S.load==="urlimport")return;
+      S.load="urlimport";rerender();
+      try{
+        const result=await callAI(
+          `You are a job posting parser. Extract job details from this pasted job description. Return ONLY a valid JSON object with these exact keys: title, company, location, type (one of: Remote/Hybrid/On-site/Contract), salary (or empty string), notes (2-3 sentence summary of role and key requirements). No markdown, no backticks, no extra text.`,
+          `Job posting text:\n\n${text}`
+        );
+        let parsed;
+        try{ parsed=JSON.parse(result.replace(/```json|```/g,"").trim()); }
+        catch{ parsed={error:"parse fail"}; }
+
+        if(!parsed.error&&parsed.title){
+          const newApp={id:Date.now().toString(),company:parsed.company||"",title:parsed.title||"",location:parsed.location||"",type:parsed.type||"On-site",salary:parsed.salary||"",url:url||"",status:"saved",appliedDate:"",notes:parsed.notes||""};
+          S.apps=[newApp,...S.apps];lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+          S.urlImport="";S.urlImportPaste="";S.urlImportStatus="success";S.showUrlPaste=false;
+          setTimeout(()=>{S.urlImportStatus="";rerender();},3000);
+        }
+      }catch{}
+      S.load="";rerender();
+    }
+
+    const urlCard=div({style:{...card_s,marginBottom:"18px"}},[
+      div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"4px"}},["Add job from URL"]),
+      div({style:{fontSize:"13px",color:T.sub,marginBottom:"14px"}},["Paste a job posting link — Claude will extract the details and add it to your board."]),
+      div({style:{display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap"}},[
+        (()=>{
+          const inp=h("input",{style:{...inp_s,flex:"1",minWidth:"200px"},placeholder:"https://ca.indeed.com/viewjob?jk=… or any job URL"});
+          inp.value=S.urlImport;
+          inp.addEventListener("input",e=>{S.urlImport=e.target.value;S.urlImportStatus="";});
+          inp.addEventListener("keydown",e=>{if(e.key==="Enter")importFromUrl();});
+          return inp;
+        })(),
+        (()=>{
+          const b=mkBtn("primary",S.load==="urlimport"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Fetching…"));return w;})():"Import job",importFromUrl,{flexShrink:"0"});
+          b.disabled=S.load==="urlimport"||!S.urlImport.trim();
+          return b;
+        })(),
+      ]),
+      S.urlImportStatus==="success"?div({style:{marginTop:"10px",fontSize:"13px",color:T.done.text,background:T.done.bg,border:`1px solid ${T.done.border}`,padding:"8px 12px",borderRadius:"8px",fontWeight:"600"}},["✓ Job added to your board!"]):null,
+      S.urlImportStatus==="error"?div({style:{marginTop:"10px",fontSize:"13px",color:T.warn.text,background:T.warn.bg,border:`1px solid ${T.warn.border}`,padding:"8px 12px",borderRadius:"8px"}},[
+        "⚠ Couldn't read that page directly (most job sites block automated access). ",
+        h("button",{style:{color:T.warn.text,background:"transparent",border:"none",cursor:"pointer",textDecoration:"underline",fontSize:"13px",padding:"0"},onClick:()=>{S.showUrlPaste=!S.showUrlPaste;rerender();}},["Paste the job text instead →"]),
+      ]):null,
+      S.showUrlPaste?div({style:{marginTop:"10px"}},[
+        div({style:{fontSize:"12px",color:T.muted,marginBottom:"6px"}},["Copy the job description text from the page and paste it here:"]),
+        mkTextarea(S.urlImportPaste,v=>S.urlImportPaste=v,100,"Paste the full job posting text here…"),
+        div({style:{marginTop:"8px"}},[
+          (()=>{
+            const b=mkBtn("teal","Parse & add to board",importFromPaste,{fontSize:"12px",padding:"7px 14px"});
+            b.disabled=S.load==="urlimport"||!S.urlImportPaste.trim();
+            return b;
+          })(),
+        ]),
+      ]):null,
+    ].filter(Boolean));
+
+    content=div({},[
+      urlCard,
+      div({style:card_s},[
+        div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}},[
+          div({},[div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"3px"}},["Your job board"]),div({style:{fontSize:"13px",color:T.sub}},["Jobs you've saved. Click any to generate your application."])]),
+          mkBtn("primary","+ Add manually",()=>{S.fd={};S.editId=null;S.showForm=true;rerender();},{fontSize:"12px",padding:"7px 14px"}),
+        ]),
+        S.apps.length===0?div({style:{textAlign:"center",padding:"36px",color:T.sub,fontSize:"13px"}},["No jobs yet. Import from a URL above or go to Find Jobs."]):null,
+        ...S.apps.map(buildAppCard),
+      ].filter(Boolean)),
+      S.showForm?buildForm():null,
+    ].filter(Boolean));
+  }
+
+  // ── TAB 4: APPLY ──
+  else if(S.tab==="apply"){
+    const warnBanner=S.selectedJob
+      ?div({style:{...card_s,borderColor:S.dark?"#166534":"#86efac",background:S.dark?"#052e16":"#f0fdf4",padding:"14px 20px",marginBottom:"16px"}},[
+        span({style:{fontSize:"13px",fontWeight:"600",color:S.dark?"#4ade80":"#15803d"}},["✓ Selected: "]),
+        span({style:{fontSize:"13px",color:S.dark?"#bbf7d0":"#166534"}},[S.selectedJob.title+" at "+S.selectedJob.company]),
+      ])
+      :div({style:{background:T.warn.bg,border:`1px solid ${T.warn.border}`,borderRadius:"10px",padding:"11px 16px",marginBottom:"16px",fontSize:"13px",color:T.warn.text}},["⚠ No job selected — pick one from Job Board, or paste a posting below."]);
+
+    const genChoices=div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"20px",marginBottom:"16px"}},[
+      div({},[mkLabel("Generate"),div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
+        ...[ ["both","Resume + Cover Letter"],["resume","Resume only"],["cover","Cover Letter only"] ].map(([v,l])=>pillBtn(l,S.genWhat===v,"#2563eb",()=>{S.genWhat=v;rerender();},{padding:"6px 13px",borderRadius:"8px"}))
+      ])]),
+      div({},[mkLabel("Tone"),div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
+        ...[["natural","Human & natural","#0d9488"],["bold","Bold & direct","#7c3aed"],["polished","Formal","#2563eb"]].map(([v,l,c])=>pillBtn(l,S.tone===v,c,()=>{S.tone=v;lsSet("resume-tone",v);rerender();},{padding:"6px 13px",borderRadius:"8px"}))
+      ]),span({style:{fontSize:"11px",color:T.muted,marginTop:"6px",display:"block"}},[S.tone==="natural"?"Sounds human — plain language, no buzzwords.":S.tone==="bold"?"Short, punchy, zero filler.":"Professional and structured."])]),
+    ]);
+
+    const genBtn=(()=>{
+      const b=mkBtn("purple",S.load==="gen"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Generating…"));return w;})():"✦ Generate tailored documents",async()=>{
+        const base=S.polished||S.raw;
+        if(!base.trim()||!S.posting.trim()||S.load==="gen")return;
+        S.load="gen";S.tailored="";S.cover="";rerender();
+        try{
+          if(S.genWhat!=="cover"){const r=await callAI(`Resume writer. Tailor this resume to the job posting.\n${TONE_RULES[S.tone]}\n\nRULES — read carefully:\n1. NEVER invent, add, or imply experience the candidate does not have. Do not insert industry names, project types, sector references, or responsibilities that are not already in the resume.\n2. Transferable skills (managing teams, delivering projects, stakeholder communication, budgets, process improvement) apply across all industries — use them as-is without adding an industry label.\n3. Tailor by: reordering bullets to lead with the most relevant, adjusting the summary to speak to this role, and naturally weaving in keywords from the posting where they genuinely match existing experience.\n4. If the job asks for something the candidate clearly has no background in, simply omit that gap — do not fill it with fabricated content.\n5. ALL CAPS section headers, • bullets. Output ONLY the resume text.`,`JOB:\n${S.posting}\n\nRESUME:\n${base}`);S.tailored=r;lsSet("apply-tailored",r);}
+          if(S.genWhat!=="resume"){const r=await callAI(`Cover letter writer.\n${TONE_RULES[S.tone]}\nOpen specifically — not "I am writing to apply". Para 1: why this role/company. Para 2: 2-3 concrete matching experiences drawn only from the candidate's actual background — never invent industry experience they don't have; transferable skills are enough. Para 3: confident close. Under 320 words. No hollow phrases. Output ONLY cover letter.`,`JOB:\n${S.posting}\n\nRESUME:\n${base}`);S.cover=r;lsSet("apply-cover",r);}
+          S.applyOut=S.genWhat==="cover"?"cover":"resume";
+        }catch{S.tailored="Error. Try again.";}
+        S.load="";rerender();
+      });
+      b.disabled=S.load==="gen"||!S.posting.trim()||(!S.polished&&!S.raw.trim());
+      return b;
+    })();
+
+    let outputSection=null;
+    if(S.tailored||S.cover){
+
+      // helpers for export
+      function exportTxt(text,filename){
+        const a=document.createElement("a");
+        a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(text);
+        a.download=filename;a.click();
+      }
+      function exportPdf(text){
+        const pa=document.getElementById("print-area");
+        pa.style.display="block";
+        pa.innerHTML=buildPDFHTML(text,S.ci);
+        window.print();
+        pa.style.display="none";
+      }
+
+      const tabs=div({style:{display:"flex",gap:"6px",marginBottom:"16px",borderBottom:`1px solid ${T.div}`,paddingBottom:"12px",flexWrap:"wrap",alignItems:"center"}},[
+        S.tailored?pillBtn("Tailored Resume",S.applyOut==="resume","#2563eb",()=>{S.applyOut="resume";rerender();},{padding:"6px 14px",borderRadius:"7px"}):null,
+        S.tailored?pillBtn("PDF Preview",S.applyOut==="resumepdf","#2563eb",()=>{S.applyOut="resumepdf";rerender();},{padding:"6px 14px",borderRadius:"7px"}):null,
+        S.cover?pillBtn("Cover Letter",S.applyOut==="cover","#2563eb",()=>{S.applyOut="cover";rerender();},{padding:"6px 14px",borderRadius:"7px"}):null,
+        (S.tailored&&(S.polished||S.raw))?pillBtn("Side-by-side",S.applyOut==="compare","#2563eb",()=>{S.applyOut="compare";rerender();},{padding:"6px 14px",borderRadius:"7px"}):null,
+        div({style:{marginLeft:"auto",display:"flex",gap:"7px",flexWrap:"wrap"}},[
+          // Tailored resume raw view actions
+          S.applyOut==="resume"&&S.tailored?mkBtn("ghost",S.copied==="tailored"?"✓ Copied":"Copy text",()=>{navigator.clipboard.writeText(S.tailored).catch(()=>{});S.copied="tailored";setTimeout(()=>{S.copied="";rerender();},2000);rerender();},{fontSize:"12px",padding:"6px 12px"}):null,
+          S.applyOut==="resume"&&S.tailored?mkBtn("ghost","⬇ Save .txt",()=>exportTxt(S.tailored,(S.selectedJob?S.selectedJob.company.replace(/\s+/g,"_"):"resume")+"_tailored.txt"),{fontSize:"12px",padding:"6px 12px"}):null,
+          // PDF preview actions
+          S.applyOut==="resumepdf"&&S.tailored?mkBtn("ghost",S.copied==="tailoredpdf"?"✓ Copied":"Copy text",()=>{navigator.clipboard.writeText(S.tailored).catch(()=>{});S.copied="tailoredpdf";setTimeout(()=>{S.copied="";rerender();},2000);rerender();},{fontSize:"12px",padding:"6px 12px"}):null,
+          S.applyOut==="resumepdf"&&S.tailored?mkBtn("ghost","⬇ Save .txt",()=>exportTxt(S.tailored,(S.selectedJob?S.selectedJob.company.replace(/\s+/g,"_"):"resume")+"_tailored.txt"),{fontSize:"12px",padding:"6px 12px"}):null,
+          S.applyOut==="resumepdf"&&S.tailored?mkBtn("ghost","🖨 Print / PDF",()=>exportPdf(S.tailored),{fontSize:"12px",padding:"6px 12px"}):null,
+          // Cover letter actions
+          S.applyOut==="cover"&&S.cover?mkBtn("ghost",S.copied==="cover"?"✓ Copied":"Copy text",()=>{navigator.clipboard.writeText(S.cover).catch(()=>{});S.copied="cover";setTimeout(()=>{S.copied="";rerender();},2000);rerender();},{fontSize:"12px",padding:"6px 12px"}):null,
+          S.applyOut==="cover"&&S.cover?mkBtn("ghost","⬇ Save .txt",()=>exportTxt(S.cover,(S.selectedJob?S.selectedJob.company.replace(/\s+/g,"_"):"cover")+"_cover_letter.txt"),{fontSize:"12px",padding:"6px 12px"}):null,
+          S.selectedJob?mkBtn("green","✓ Mark as Applied",()=>{S.apps=S.apps.map(a=>a.id===S.selectedJob.id?{...a,status:"applied"}:a);lsSet("tracker-apps-v2",JSON.stringify(S.apps));S.tab="tracker";rerender();},{fontSize:"12px",padding:"6px 12px"}):null,
+        ].filter(Boolean)),
+      ].filter(Boolean));
+
+      let body=div();
+      if(S.applyOut==="resume"&&S.tailored){
+        body=div({},[
+          div({style:out_s},[S.tailored]),
+        ]);
+      }else if(S.applyOut==="resumepdf"&&S.tailored){
+        const jobSlug=S.selectedJob?S.selectedJob.company.replace(/[^a-z0-9]/gi,"_").toLowerCase():"tailored";
+
+        // Contact info box (same as main resume tab)
+        const ciFields=[["name","Full Name","e.g. John Smith"],["tagline","Title / Tagline","e.g. Senior Program Manager | PMP"],["phone","Phone","e.g. (604) 555-1234"],["email","Email","e.g. john@email.com"],["location","Location","e.g. Vancouver, BC"],["linkedin","LinkedIn","linkedin.com/in/yourprofile"]];
+        const ciBox=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"12px 16px",marginBottom:"12px"}},[
+          div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:S.showCi?"12px":"0"}},[
+            span({style:{fontSize:"12px",fontWeight:"600",color:T.sub}},["Contact info for header"]),
+            h("button",{style:{fontSize:"11px",color:T.sub,background:"transparent",border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"3px 10px",cursor:"pointer"},onClick:()=>{S.showCi=!S.showCi;rerender();}},[S.showCi?"Hide":"Edit"]),
+          ]),
+          !S.showCi
+            ?span({style:{fontSize:"11px",color:T.muted,marginTop:"4px",display:"block"}},[`${S.ci.name||"Your Name"} · ${S.ci.email||"yourname@email.com"} · ${S.ci.phone||"(xxx) xxx-xxxx"}`])
+            :div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginTop:"8px"}},
+              ciFields.map(([f,lb,ph])=>div({},[
+                mkLabel(lb),
+                (()=>{const i=mkInput(S.ci[f]||"",v=>{S.ci={...S.ci,[f]:v};lsSet("resume-ci",JSON.stringify(S.ci));rerender();},{placeholder:ph});return i;})()
+              ]))
+            ),
+        ]);
+
+        // Refine box wired to S.tailored
+        const refineInp=h("input",{style:{...inp_s,flex:"1"},placeholder:'e.g. "Change all locations to Vancouver, BC" or "Tighten the summary"'});
+        refineInp.value=S.refineText||"";
+        refineInp.addEventListener("input",e=>S.refineText=e.target.value);
+        const doTailoredRefine=async()=>{
+          if(!S.tailored||!S.refineText.trim()||S.load==="refine")return;
+          S.load="refine";rerender();
+          try{
+            const r=await callAI(
+              `You are editing a resume. Apply the instruction precisely and return the COMPLETE updated resume text — same format, ALL CAPS section headers, • bullets. Output ONLY the resume text.`,
+              `INSTRUCTION: ${S.refineText}\n\nRESUME:\n${S.tailored}`
+            );
+            S.tailored=r;lsSet("apply-tailored",r);
+            S.refineText="";
+          }catch{}
+          S.load="";rerender();
+        };
+        refineInp.addEventListener("keydown",async e=>{if(e.key==="Enter"){e.preventDefault();await doTailoredRefine();}});
+        const refineBox=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"12px 16px",marginBottom:"12px"}},[
+          div({style:{fontSize:"12px",fontWeight:"600",color:T.sub,marginBottom:"8px",display:"flex",alignItems:"center",gap:"6px"}},[
+            span({style:{fontSize:"14px"}},["✏️"])," Refine with a quick instruction",
+          ]),
+          div({style:{display:"flex",gap:"8px",alignItems:"center"}},[
+            refineInp,
+            (()=>{
+              const b=mkBtn("teal",S.load==="refine"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Applying…"));return w;})():"Apply",doTailoredRefine,{padding:"9px 16px",fontSize:"13px",flexShrink:"0"});
+              b.disabled=S.load==="refine"||!S.refineText||!S.tailored;
+              return b;
+            })(),
+          ]),
+          div({style:{marginTop:"8px",display:"flex",gap:"6px",flexWrap:"wrap"}},
+            ['Change all locations to Vancouver, BC','Remove buzzwords','Shorten the summary','Add more quantified results'].map(hint=>
+              h("button",{style:{fontSize:"11px",padding:"3px 10px",borderRadius:"12px",border:`1px solid ${T.cardB}`,background:"transparent",color:T.muted,cursor:"pointer"},onClick:()=>{S.refineText=hint;rerender();}},[hint])
+            )
+          ),
+        ]);
+
+        // Export action row
+        const exportRow=div({style:{display:"flex",gap:"8px",marginBottom:"12px",justifyContent:"flex-end",flexWrap:"wrap"}},[
+          mkBtn("ghost",S.copied==="tailoredpdf"?"✓ Copied":"Copy text",()=>{navigator.clipboard.writeText(S.tailored).catch(()=>{});S.copied="tailoredpdf";setTimeout(()=>{S.copied="";rerender();},2000);rerender();},{fontSize:"12px",padding:"6px 12px"}),
+          mkBtn("ghost","⬇ Save .txt",()=>exportTxt(S.tailored,jobSlug+"_tailored.txt"),{fontSize:"12px",padding:"6px 12px"}),
+          mkBtn("ghost","🖨 Print / Save PDF",()=>{
+            const pa=document.getElementById("print-area");
+            pa.style.display="block";
+            pa.innerHTML=buildPDFHTML(S.tailored,S.ci);
+            window.print();
+            pa.style.display="none";
+          },{fontSize:"12px",padding:"6px 12px"}),
+        ]);
+
+        const previewBox=div({style:{border:`1px solid ${T.cardB}`,borderRadius:"10px",overflow:"hidden"}});
+        previewBox.innerHTML=buildPDFHTML(S.tailored,S.ci);
+        body=div({},[ciBox,refineBox,exportRow,previewBox]);
+      }else if(S.applyOut==="cover"&&S.cover){
+        body=div({style:out_s},[S.cover]);
+      }else if(S.applyOut==="compare"){
+        body=div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"14px"}},[
+          div({},[div({style:{fontSize:"11px",color:T.muted,fontWeight:"700",textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:"7px"}},["Original"]),div({style:{...out_s,minHeight:"300px"}},[S.polished||S.raw])]),
+          div({},[div({style:{fontSize:"11px",color:T.cmpL,fontWeight:"700",textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:"7px"}},["Tailored ✦"]),div({style:{...out_s,minHeight:"300px",borderColor:T.cmpB}},[S.tailored])]),
+        ]);
+      }
+      outputSection=div({style:card_s},[tabs,body]);
+    }
+
+    content=div({},[
+      warnBanner,
+      div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"18px"}},[
+        div({style:card_s},[mkLabel(`Base resume${S.polished?" ✓ POLISHED":""}`),mkTextarea(S.polished||S.raw,v=>{if(S.polished)S.polished=v;else S.raw=v;debounceSave(S.polished?"resume-polished":"resume-raw",v);},220,"Paste resume…")]),
+        div({style:card_s},[mkLabel("Job posting"),mkTextarea(S.posting,v=>{S.posting=v;debounceSave("apply-posting",v);},220,"Paste full job posting…")]),
+      ]),
+      div({style:card_s},[genChoices,genBtn]),
+      outputSection,
+    ].filter(Boolean));
+  }
+
+  // ── TAB 5: TRACKER ──
+  else if(S.tab==="tracker"){
+    const counts=STATUSES.reduce((acc,s)=>({...acc,[s.key]:S.apps.filter(a=>a.status===s.key).length}),{});
+    const filtered=S.apps.filter(a=>S.filterSt==="all"||a.status===S.filterSt);
+
+    const statGrid=div({style:{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:"9px",marginBottom:"20px"}},
+      STATUSES.map(s=>{
+        const bg=S.dark?s.bgd:s.bgl;const active=S.filterSt===s.key;
+        const card=div({style:{background:bg,border:`1px solid ${active?s.color:T.cardB}`,borderRadius:"10px",padding:"11px 12px",textAlign:"center",cursor:"pointer",outline:active?`2px solid ${s.color}`:"none"},onClick:()=>{S.filterSt=active?"all":s.key;rerender();}});
+        card.innerHTML=`<div style="font-size:22px;font-weight:700;color:${s.color}">${counts[s.key]||0}</div><div style="font-size:11px;color:${T.muted};margin-top:2px;font-weight:600">${s.label}</div>`;
+        return card;
+      })
+    );
+
+    function buildTrackerAppCard(app){
+      const sm=smeta(app.status);const sbg=S.dark?sm.bgd:sm.bgl;const exp=S.expandedApp===app.id;
+      const card=div({style:{background:T.card,border:`1px solid ${exp?T.active.border:T.cardB}`,borderRadius:"11px",padding:"14px 18px",marginBottom:"9px"}});
+      const statusSel=h("select",{style:{fontSize:"11px",padding:"4px 8px",borderRadius:"7px",border:`1px solid ${T.cardB}`,background:sbg,color:sm.color,cursor:"pointer",fontFamily:"inherit",fontWeight:"600",flexShrink:"0"}});
+      STATUSES.forEach(s=>{const o=h("option",{value:s.key});o.textContent=s.label;if(s.key===app.status)o.selected=true;statusSel.appendChild(o);});
+      statusSel.addEventListener("change",e=>{S.apps=S.apps.map(a=>a.id===app.id?{...a,status:e.target.value}:a);lsSet("tracker-apps-v2",JSON.stringify(S.apps));rerender();});
+      const row=div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"10px"}},[
+        div({style:{flex:"1",cursor:"pointer"},onClick:()=>{S.expandedApp=exp?null:app.id;rerender();}},[
+          div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"3px"}},[
+            span({style:{fontSize:"14px",fontWeight:"700"}},[app.title]),
+            span({style:{fontSize:"11px",fontWeight:"700",padding:"2px 8px",borderRadius:"9px",background:sbg,color:sm.color}},[sm.label]),
+          ]),
+          div({style:{fontSize:"12px",color:T.sub}},[span({style:{fontWeight:"600",color:T.text}},[app.company]),app.location?" · "+app.location:"",app.appliedDate?" · "+app.appliedDate:""]),
+        ]),
+        statusSel,
+      ]);
+      card.appendChild(row);
+      if(exp){
+        const expanded=div({style:{marginTop:"12px",paddingTop:"12px",borderTop:`1px solid ${T.div}`}},[
+          app.notes?h("p",{style:{fontSize:"12px",color:T.sub,lineHeight:"1.7",marginBottom:"10px"}},[app.notes]):null,
+          div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
+            mkBtn("teal","Prep interview →",()=>{S.intJob=app.id;S.tab="interview";rerender();},{fontSize:"12px",padding:"6px 12px"}),
+            mkBtn("ghost","Edit",()=>{S.fd={...app};S.editId=app.id;S.showForm=true;rerender();},{fontSize:"12px",padding:"6px 12px"}),
+            app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",style:{padding:"6px 12px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:T.ghost.text,textDecoration:"none",display:"inline-flex",alignItems:"center"}},["View ↗"]):null,
+            mkBtn("danger","Remove",()=>{if(!confirm("Remove?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();}),
+          ].filter(Boolean)),
+        ].filter(Boolean));
+        card.appendChild(expanded);
+      }
+      return card;
+    }
+
+    function buildTrackerForm(){
+      const f=S.fd;
+      if(!f.id)S.fd.id=Date.now().toString();
+      return div({style:{...card_s,border:`1.5px solid ${T.active.border}`,marginBottom:"16px"}},[
+        div({style:{fontSize:"13px",fontWeight:"700",marginBottom:"12px"}},[S.editId?"Edit application":"Add application"]),
+        div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}},[
+          div({},[mkLabel("Company"),(()=>{const i=mkInput(f.company||"",v=>S.fd.company=v);i.placeholder="Company";return i;})()]),
+          div({},[mkLabel("Job Title"),(()=>{const i=mkInput(f.title||"",v=>S.fd.title=v);i.placeholder="Title";return i;})()]),
+          div({},[mkLabel("Status"),mkSelect(f.status||"saved",STATUSES.map(s=>[s.key,s.label]),v=>S.fd.status=v)]),
+          div({},[mkLabel("Date Applied"),(()=>{const i=h("input",{style:inp_s,type:"date",value:f.appliedDate||""});i.addEventListener("input",e=>S.fd.appliedDate=e.target.value);return i;})()]),
+        ]),
+        div({style:{marginBottom:"10px"}},[mkLabel("Notes"),mkTextarea(f.notes||"",v=>S.fd.notes=v,70,"Notes…")]),
+        div({style:{display:"flex",gap:"8px"}},[
+          (()=>{const b=mkBtn("primary",S.editId?"Save":"Add",()=>{
+            if(!S.fd.company||!S.fd.title)return;
+            if(S.editId)S.apps=S.apps.map(a=>a.id===S.editId?{...S.fd}:a);
+            else S.apps=[{...S.fd},...S.apps];
+            lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+            S.showForm=false;S.editId=null;rerender();
+          },{fontSize:"12px",padding:"7px 14px"});b.disabled=!S.fd.company||!S.fd.title;return b;})(),
+          mkBtn("ghost","Cancel",()=>{S.showForm=false;S.editId=null;rerender();},{fontSize:"12px",padding:"7px 14px"}),
+        ]),
+      ]);
+    }
+
+    content=div({},[
+      statGrid,
+      div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px",flexWrap:"wrap",gap:"8px"}},[
+        div({style:{display:"flex",gap:"7px",alignItems:"center"}},[
+          span({style:{fontSize:"12px",color:T.sub}},[filtered.length+" application"+(filtered.length!==1?"s":"")]),
+          S.filterSt!=="all"?h("button",{style:{fontSize:"11px",color:T.sub,background:"transparent",border:`1px solid ${T.cardB}`,borderRadius:"12px",padding:"3px 10px",cursor:"pointer"},onClick:()=>{S.filterSt="all";rerender();}},"✕ Clear"):null,
+        ].filter(Boolean)),
+        mkBtn("primary","+ Add Application",()=>{S.fd={id:Date.now().toString(),company:"",title:"",location:"",type:"Hybrid",salary:"",url:"",status:"saved",appliedDate:new Date().toISOString().slice(0,10),notes:""};S.editId=null;S.showForm=true;rerender();},{fontSize:"12px",padding:"7px 14px"}),
+      ]),
+      S.showForm?buildTrackerForm():null,
+      !S.storageReady?div({style:{...card_s,textAlign:"center",padding:"40px"}},["Loading…"]):null,
+      S.storageReady&&filtered.length===0?div({style:{...card_s,textAlign:"center",padding:"40px",color:T.sub}},["No applications"+(S.filterSt!=="all"?" with this status yet":"")]):null,
+      ...filtered.map(buildTrackerAppCard),
+    ].filter(Boolean));
+  }
+
+  // ── TAB 6: INTERVIEW PREP ──
+  else if(S.tab==="interview"){
+    const jobSelect=div({},[
+      mkLabel("Preparing for"),
+      (()=>{
+        const s=h("select",{style:inp_s});
+        const opt=h("option",{value:""});opt.textContent="General PM / Ops Manager";s.appendChild(opt);
+        S.apps.forEach(a=>{const o=h("option",{value:a.id});o.textContent=`${a.title} – ${a.company}`;if(a.id===S.intJob)o.selected=true;s.appendChild(o);});
+        s.addEventListener("change",e=>{S.intJob=e.target.value||null;rerender();});
+        return s;
+      })(),
+    ]);
+    const roundPills=div({},[
+      mkLabel("Interview round"),
+      div({style:{display:"flex",gap:"7px",flexWrap:"wrap",paddingTop:"2px"}},[
+        ...([["prescreen","Pre-screen"],["first","First Interview"],["second","Second / Panel"]]).map(([v,l])=>pillBtn(l,S.intRound===v,"#0d9488",()=>{S.intRound=v;rerender();},{padding:"7px 13px",borderRadius:"8px"}))
+      ]),
+    ]);
+    const genQsBtn=(()=>{
+      const b=mkBtn("teal",S.intLoad?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Generating…"));return w;})():"✦ Generate interview questions",async()=>{
+        if(S.intLoad)return;
+        S.intLoad=true;S.intQs=[];S.mockQ="";S.mockA="";S.mockFb="";rerender();
+        const job=S.intJob?S.apps.find(a=>a.id===S.intJob):null;
+        const rl={prescreen:"pre-screen phone call",first:"first interview",second:"second interview or panel"}[S.intRound];
+        try{
+          const r=await callAI(`Interview coach. Return ONLY a JSON array, each item: {category,question,tip}. No markdown, no backticks, no commentary.`,
+            `8 questions for a ${rl}. Job: ${job?`${job.title} at ${job.company}`:"Senior PM / Operations Manager"}. ${job?.notes?"Notes: "+job.notes:""} Candidate: 17+ yrs PM/ops, PMP, TELUS, infrastructure, construction-adjacent, Lean Six Sigma, Agile. Mix: 4 general (category "General PM & Ops"), 4 role-specific (category "Role-Specific").`);
+          try{S.intQs=JSON.parse(r.replace(/```json|```/g,"").trim());S.mockQ="";}
+          catch{S.intQs=[{category:"Error",question:"Could not parse. Try again.",tip:""}];}
+        }catch{S.intQs=[{category:"Error",question:"Error generating.",tip:""}];}
+        S.intLoad=false;rerender();
+      });b.disabled=S.intLoad;return b;
+    })();
+
+    let qSection=null;
+    if(S.intQs.length>0){
+      const job=S.intJob?S.apps.find(a=>a.id===S.intJob):null;
+      const cats=["General PM & Ops","Role-Specific"];
+      qSection=div({style:card_s},[
+        div({style:{fontSize:"14px",fontWeight:"700",marginBottom:"16px"}},[
+          S.intRound==="prescreen"?"Pre-screen questions":S.intRound==="first"?"First interview questions":"Second interview / panel questions",
+          job?span({style:{fontSize:"12px",color:T.sub,fontWeight:"400",marginLeft:"8px"}},[" — "+job.company]):null,
+        ].filter(Boolean)),
+        ...cats.map(cat=>{
+          const qs=S.intQs.filter(q=>q.category===cat);
+          if(!qs.length)return null;
+          return div({style:{marginBottom:"20px"}},[
+            div({style:{fontSize:"11px",fontWeight:"700",textTransform:"uppercase",letterSpacing:"0.07em",color:cat==="Role-Specific"?(S.dark?"#93c5fd":"#1d4ed8"):T.muted,marginBottom:"10px",paddingBottom:"6px",borderBottom:`1px solid ${T.div}`}},[cat]),
+            ...qs.map(q=>div({style:{marginBottom:"10px",padding:"12px 14px",background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"9px"}},[
+              div({style:{fontSize:"13px",fontWeight:"600",color:T.text,marginBottom:"5px",lineHeight:"1.5"}},[q.question]),
+              q.tip?div({style:{fontSize:"12px",color:T.sub,lineHeight:"1.6",borderLeft:`2px solid ${S.dark?"#1e40af":"#93c5fd"}`,paddingLeft:"10px",marginBottom:"6px"}},["💡 "+q.tip]):null,
+              pillBtn("Practice this →",S.mockQ===q.question,"#7c3aed",()=>{S.mockQ=q.question;S.mockA="";S.mockFb="";rerender();},{padding:"4px 11px",borderRadius:"7px",fontSize:"11px"}),
+            ].filter(Boolean))),
+          ]);
+        }).filter(Boolean),
+      ]);
+    }
+
+    let mockSection=null;
+    if(S.mockQ){
+      const submitFb=mkBtn("purple",S.load==="mock"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Analysing…"));return w;})():"Get feedback",async()=>{
+        if(!S.mockA.trim()||S.load==="mock")return;
+        S.load="mock";S.mockFb="";rerender();
+        try{const r=await callAI(`Interview coach. Honest constructive feedback. Format: what worked (1-2 sentences), what to improve (1-2 sentences), better version of the answer (2-3 sentences). Under 200 words.`,`Q: ${S.mockQ}\n\nAnswer: ${S.mockA}`);S.mockFb=r;}
+        catch{S.mockFb="Error. Try again.";}
+        S.load="";rerender();
+      });submitFb.disabled=S.load==="mock"||!S.mockA.trim();
+
+      mockSection=div({style:{...card_s,border:`1.5px solid ${S.dark?"#7c3aed":"#a78bfa"}`}},[
+        div({style:{fontSize:"13px",fontWeight:"700",color:S.dark?"#c4b5fd":"#6d28d9",marginBottom:"6px"}},["Mock interview"]),
+        div({style:{fontSize:"14px",fontWeight:"600",color:T.text,marginBottom:"12px",lineHeight:"1.5",padding:"10px 14px",background:T.inBg,borderRadius:"8px",border:`1px solid ${T.inB}`}},[S.mockQ]),
+        mkLabel("Your answer"),
+        mkTextarea(S.mockA,v=>{S.mockA=v;},110,"Type your answer as if you're in the interview…"),
+        div({style:{marginTop:"10px",display:"flex",gap:"8px"}},[
+          submitFb,
+          mkBtn("ghost","Clear",()=>{S.mockQ="";S.mockA="";S.mockFb="";rerender();},{fontSize:"12px",padding:"7px 14px"}),
+        ]),
+        S.mockFb?div({style:{marginTop:"14px",padding:"14px 16px",background:S.dark?"#052e16":"#f0fdf4",border:`1px solid ${S.dark?"#166534":"#86efac"}`,borderRadius:"9px"}},[
+          div({style:{fontSize:"11px",fontWeight:"700",textTransform:"uppercase",letterSpacing:"0.07em",color:S.dark?"#4ade80":"#15803d",marginBottom:"8px"}},["Coach feedback"]),
+          div({style:{fontSize:"13px",color:T.text,lineHeight:"1.75",whiteSpace:"pre-wrap"}},[S.mockFb]),
+        ]):null,
+      ].filter(Boolean));
+    }
+
+    content=div({},[
+      div({style:card_s},[
+        div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"16px",marginBottom:"16px"}},[jobSelect,roundPills]),
+        genQsBtn,
+      ]),
+      qSection,mockSection,
+    ].filter(Boolean));
+  }
+
+  // ── ASSEMBLE ──
+  const main=div({style:{maxWidth:"1080px",margin:"0 auto",padding:"24px 20px"}},[tabBar,content]);
+
+  const showSetup=!hasKey&&!lsGet("setup-dismissed","");
+  const setupModal=showSetup?div({style:{position:"fixed",inset:"0",background:"rgba(0,0,0,0.75)",zIndex:"200",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}},[
+    div({style:{background:S.dark?"#161c27":"#fff",borderRadius:"16px",padding:"32px",maxWidth:"460px",width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,0.5)"}},[
+      div({style:{fontSize:"26px",marginBottom:"10px"}},["🚀"]),
+      div({style:{fontSize:"18px",fontWeight:"700",color:T.text,marginBottom:"8px"}},["Welcome to ResumeAI"]),
+      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.7",marginBottom:"18px"}},["AI-powered resume polishing, job tailoring, and interview prep — all running locally on your device. To enable the AI you need a free Anthropic API key."]),
+      div({style:{background:S.dark?"#0d1117":"#f4f6fa",border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"18px"}},[
+        div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:"10px"}},["One-time setup"]),
+        ...[["1","Visit console.anthropic.com/settings/keys"],["2","Click Create Key and copy it"],["3","Paste it below and click Save"]].map(([n,txt])=>
+          div({style:{display:"flex",gap:"10px",alignItems:"center",marginBottom:"7px"}},[
+            span({style:{width:"20px",height:"20px",borderRadius:"50%",background:"#2563eb",color:"#fff",fontSize:"10px",fontWeight:"700",display:"inline-flex",alignItems:"center",justifyContent:"center",flexShrink:"0"}},[n]),
+            span({style:{fontSize:"13px",color:T.text}},[txt]),
+          ])
+        ),
+      ]),
+      div({style:{display:"flex",gap:"8px",marginBottom:"10px"}},[
+        (()=>{
+          const inp=h("input",{style:{flex:"1",padding:"10px 12px",borderRadius:"8px",fontSize:"13px",border:`1px solid ${T.inB}`,background:T.inBg,color:T.text},placeholder:"sk-ant-api03-…",type:"password"});
+          inp.value=S.apiKey||"";
+          inp.addEventListener("input",e=>{S.apiKey=e.target.value;});
+          inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&S.apiKey.trim()){lsSet("api-key",S.apiKey.trim());lsSet("setup-dismissed","1");rerender();}});
+          setTimeout(()=>inp.focus(),120);
+          return inp;
+        })(),
+        h("button",{style:{padding:"10px 18px",borderRadius:"8px",background:"#2563eb",color:"#fff",fontSize:"13px",fontWeight:"700",border:"none",cursor:"pointer",flexShrink:"0"},
+          onClick:()=>{if(S.apiKey.trim()){lsSet("api-key",S.apiKey.trim());lsSet("setup-dismissed","1");rerender();}else alert("Please paste your API key first.");}},
+          ["Save & start"]),
+      ]),
+      h("a",{href:"https://console.anthropic.com/settings/keys",target:"_blank",style:{fontSize:"12px",color:"#2563eb",display:"block",marginBottom:"12px"}},["Open Anthropic console →"]),
+      h("button",{style:{fontSize:"12px",color:T.muted,background:"transparent",border:"none",cursor:"pointer",textDecoration:"underline"},
+        onClick:()=>{lsSet("setup-dismissed","1");rerender();}},
+        ["Skip for now — I’ll add it later"]),
+    ]),
+  ]):null;
+
+  const noKeyBanner=(!hasKey&&lsGet("setup-dismissed",""))?div({style:{background:T.warn.bg,borderBottom:`1px solid ${T.warn.border}`,padding:"8px 24px",display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},[
+    span({style:{fontSize:"12px",color:T.warn.text}},["⚠ AI features require an API key — "]),
+    h("button",{style:{fontSize:"12px",color:T.warn.text,background:"transparent",border:"none",cursor:"pointer",textDecoration:"underline",padding:"0"},onClick:()=>{S.showApiKey=true;rerender();}},
+      ["add it here"]),
+    span({style:{fontSize:"12px",color:T.warn.text}},[ " or visit "]),
+    h("a",{href:"https://console.anthropic.com/settings/keys",target:"_blank",style:{fontSize:"12px",color:T.warn.text}},["console.anthropic.com"]),
+  ]):null;
+
+  const root=div({style:{minHeight:"100vh",background:T.appBg,color:T.text,fontFamily:"'Inter',system-ui,sans-serif"}},[header,noKeyBanner,main,setupModal]);
+
+  app.innerHTML="";
+  app.appendChild(root);
+}
+
+// ─────────────────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────────────────
+loadAll();
+_render();
+</script>
+</body>
+</html>
