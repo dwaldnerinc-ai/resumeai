@@ -100,7 +100,7 @@ const S={
   dark:true, tab:"resume",
   raw:"", polished:"", resumeView:"edit", tone:"natural",
   ci:{name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""},
-  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false,
+  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, polishError:"", apiKey:"", apiKeyError:false, showApiKey:false,
   selectedJob:null, posting:"", tailored:"", cover:"", applyOut:"resume", genWhat:"both",
   apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
   searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
@@ -134,6 +134,7 @@ function loadAll(){
   const tone=lsGet("resume-tone"); if(tone)S.tone=tone;
   const dark=lsGet("app-dark"); if(dark!==null)S.dark=(dark==="true");
   const posting=lsGet("apply-posting",""); S.posting=posting;
+  S.apiKey=lsGet("api-key","")||"";
   S.apiKey=lsGet("api-key","")||"";
   const tailored=lsGet("apply-tailored",""); S.tailored=tailored;
   const cover=lsGet("apply-cover",""); S.cover=cover;
@@ -215,14 +216,12 @@ function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").repl
 async function callAI(sys,usr){
   const key=(S.apiKey||lsGet("api-key","")).trim();
   if(!key){S.apiKeyError=true;rerender();throw new Error("No API key — click the key button to add one.");}
+  const hdrs=new Headers();
+  hdrs.append("Content-Type","application/json");
+  hdrs.append("x-api-key",key);
+  hdrs.append("anthropic-version","2023-06-01");
   const r=await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "x-api-key":key,
-      "anthropic-version":"2023-06-01",
-      "anthropic-dangerous-direct-browser-access":"true",
-    },
+    method:"POST",headers:hdrs,
     body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:4000,system:sys,messages:[{role:"user",content:usr}]})
   });
   const d=await r.json();
@@ -327,6 +326,42 @@ function buildPDFHTML(text,ci){
 }
 
 // ─────────────────────────────────────────────────────────
+// EDITABLE PDF HELPER
+// ─────────────────────────────────────────────────────────
+function wireEditable(previewBox, getText, onSave){
+  setTimeout(()=>{
+    const wrap=previewBox.querySelector(".pdf-wrap");
+    if(!wrap)return;
+    wrap.contentEditable="true";
+    wrap.spellcheck=true;
+    wrap.style.outline="none";
+    wrap.style.cursor="text";
+    wrap.style.caretColor="#2563eb";
+    let saveTimer=null;
+    wrap.addEventListener("input",()=>{
+      clearTimeout(saveTimer);
+      saveTimer=setTimeout(()=>{
+        const lines=[];
+        wrap.querySelectorAll(".pdf-sec-title,.pdf-exp-left,.pdf-exp-right,.pdf-bullet-text,.pdf-text-line,.pdf-name,.pdf-tagline").forEach(el=>{
+          const tx=el.innerText.trim();
+          if(!tx)return;
+          if(el.classList.contains("pdf-sec-title"))lines.push("\n"+tx.toUpperCase());
+          else if(el.classList.contains("pdf-bullet-text"))lines.push("\u2022 "+tx);
+          else if(el.classList.contains("pdf-exp-left"))lines.push(tx);
+          else if(el.classList.contains("pdf-exp-right"))lines.push(tx);
+          else lines.push(tx);
+        });
+        const newText=lines.join("\n").trim();
+        if(newText&&newText!==getText())onSave(newText);
+      },600);
+    });
+  },50);
+  const hint=div({style:{position:"absolute",top:"10px",right:"10px",fontSize:"11px",color:"#6b7280",background:"rgba(31,41,55,0.85)",border:"1px solid #374151",borderRadius:"6px",padding:"3px 9px",pointerEvents:"none",backdropFilter:"blur(4px)",zIndex:"5"}},["\u270E Click to edit"]);
+  previewBox.appendChild(hint);
+  previewBox.addEventListener("click",()=>{hint.style.display="none";},{once:true});
+}
+
+// ─────────────────────────────────────────────────────────
 // RENDER ENGINE
 // ─────────────────────────────────────────────────────────
 let renderTimeout=null;
@@ -394,7 +429,6 @@ function _render(){
   // ── HEADER ──
   const TABS=[["resume","1","Resume"],["search","2","Find Jobs"],["board","3","Job Board"],["apply","4","Apply"],["tracker","5","Tracker"],["interview","6","Interview Prep"]];
 
-  const hasKey=!!S.apiKey;
   const header=div({style:{background:T.hBg,borderBottom:`1px solid ${T.hBorder}`,padding:"0 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:"0",zIndex:"10",minHeight:"54px",flexWrap:"wrap",gap:"8px",paddingTop:"8px",paddingBottom:"8px"}},[
     div({style:{display:"flex",alignItems:"center",gap:"10px"}},[
       div({style:{width:"28px",height:"28px",background:"#2563eb",borderRadius:"7px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px",fontWeight:"700",color:"#fff",cursor:"pointer"},title:"Reload",onClick:()=>location.reload()},["R"]),
@@ -617,9 +651,10 @@ function _render(){
           },{padding:"6px 14px",fontSize:"12px"}),
         ]);
 
-        const previewBox=div({style:{border:`1px solid ${T.cardB}`,borderRadius:"10px",overflow:"hidden"}});
+        const previewBox=div({style:{border:`1px solid ${T.cardB}`,borderRadius:"10px",overflow:"hidden",position:"relative"}});
         previewBox.innerHTML=buildPDFHTML(S.polished,S.ci);
-        tabBody=div({},[ciBox,repolishBar,actionRow,previewBox,refineBox]);
+        wireEditable(previewBox,()=>S.polished,v=>{S.polished=v;lsSet("resume-polished",v);});
+        tabBody=div({},[ciBox,repolishBar,actionRow,previewBox]);
       }
     }
 
@@ -777,12 +812,13 @@ function _render(){
       ]);
       card.appendChild(row);
       if(exp){
+        const hasDocs=!!(app.savedResume||app.savedCover);
         const actions=div({style:{marginTop:"12px",paddingTop:"12px",borderTop:`1px solid ${T.div}`}},[
           app.notes?h("p",{style:{fontSize:"12px",color:T.sub,lineHeight:"1.7",marginBottom:"12px"}},[app.notes]):null,
           div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
-            mkBtn("primary","✦ Generate application →",()=>{
+            mkBtn("primary",hasDocs?"↺ Re-generate →":"✦ Generate application →",()=>{
               S.selectedJob=app;
-              S.posting=`${app.title} at ${app.company}\nLocation: ${app.location}\nType: ${app.type}${app.salary?"\nSalary: "+app.salary:""}\n\n${app.notes||""}`;
+              S.posting=app.title+" at "+app.company+"\nLocation: "+app.location+"\nType: "+app.type+(app.salary?"\nSalary: "+app.salary:"")+"\n\n"+(app.notes||"");
               S.tailored="";S.cover="";S.tab="apply";rerender();
             },{fontSize:"12px",padding:"6px 14px"}),
             mkBtn("teal","Prep interview →",()=>{S.intJob=app.id;S.tab="interview";rerender();},{fontSize:"12px",padding:"6px 14px"}),
@@ -964,6 +1000,17 @@ function _render(){
           if(S.genWhat!=="cover"){const r=await callAI(`Resume writer. Tailor this resume to the job posting.\n${TONE_RULES[S.tone]}\n\nRULES — read carefully:\n1. NEVER invent, add, or imply experience the candidate does not have. Do not insert industry names, project types, sector references, or responsibilities that are not already in the resume.\n2. Transferable skills (managing teams, delivering projects, stakeholder communication, budgets, process improvement) apply across all industries — use them as-is without adding an industry label.\n3. Tailor by: reordering bullets to lead with the most relevant, adjusting the summary to speak to this role, and naturally weaving in keywords from the posting where they genuinely match existing experience.\n4. If the job asks for something the candidate clearly has no background in, simply omit that gap — do not fill it with fabricated content.\n5. ALL CAPS section headers, • bullets. Output ONLY the resume text.`,`JOB:\n${S.posting}\n\nRESUME:\n${base}`);S.tailored=r;lsSet("apply-tailored",r);}
           if(S.genWhat!=="resume"){const r=await callAI(`Cover letter writer.\n${TONE_RULES[S.tone]}\nOpen specifically — not "I am writing to apply". Para 1: why this role/company. Para 2: 2-3 concrete matching experiences drawn only from the candidate's actual background — never invent industry experience they don't have; transferable skills are enough. Para 3: confident close. Under 320 words. No hollow phrases. Output ONLY cover letter.`,`JOB:\n${S.posting}\n\nRESUME:\n${base}`);S.cover=r;lsSet("apply-cover",r);}
           S.applyOut=S.genWhat==="cover"?"cover":"resume";
+          // Save docs back to the job board entry
+          if(S.selectedJob){
+            const date=new Date().toLocaleDateString("en-CA");
+            S.apps=S.apps.map(a=>a.id===S.selectedJob.id?{
+              ...a,
+              savedResume:S.tailored||a.savedResume||"",
+              savedCover:S.cover||a.savedCover||"",
+              savedDocsDate:date,
+            }:a);
+            lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+          }
         }catch{S.tailored="Error. Try again.";}
         S.load="";rerender();
       });
@@ -1083,9 +1130,10 @@ function _render(){
           },{fontSize:"12px",padding:"6px 12px"}),
         ]);
 
-        const previewBox=div({style:{border:`1px solid ${T.cardB}`,borderRadius:"10px",overflow:"hidden"}});
+        const previewBox=div({style:{border:`1px solid ${T.cardB}`,borderRadius:"10px",overflow:"hidden",position:"relative"}});
         previewBox.innerHTML=buildPDFHTML(S.tailored,S.ci);
-        body=div({},[ciBox,refineBox,exportRow,previewBox]);
+        wireEditable(previewBox,()=>S.tailored,v=>{S.tailored=v;lsSet("apply-tailored",v);});
+        body=div({},[ciBox,exportRow,previewBox]);
       }else if(S.applyOut==="cover"&&S.cover){
         body=div({style:out_s},[S.cover]);
       }else if(S.applyOut==="compare"){
@@ -1098,12 +1146,9 @@ function _render(){
     }
 
     content=div({},[
-      // Job selector card — pick from board or paste manually
       div({style:card_s},[
         div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"4px"}},["Select a job"]),
         div({style:{fontSize:"13px",color:T.sub,marginBottom:"12px"}},["Pick from your job board to auto-fill, or paste a posting manually below."]),
-
-        // Dropdown of all jobs on the board
         S.apps.length>0?div({style:{marginBottom:"12px"}},[
           mkLabel("Choose from your job board"),
           div({style:{display:"flex",gap:"8px",alignItems:"center"}},[
@@ -1113,7 +1158,7 @@ function _render(){
               S.apps.forEach(app=>{
                 const o=h("option",{value:app.id});
                 const sm=smeta(app.status);
-                o.textContent=`${app.title} — ${app.company} (${sm.label})`;
+                o.textContent=app.title+" — "+app.company+" ("+sm.label+")";
                 if(S.selectedJob&&S.selectedJob.id===app.id)o.selected=true;
                 sel.appendChild(o);
               });
@@ -1121,7 +1166,7 @@ function _render(){
                 const app=S.apps.find(a=>a.id===e.target.value);
                 if(!app)return;
                 S.selectedJob=app;
-                S.posting=`${app.title} at ${app.company}\nLocation: ${app.location}\nType: ${app.type}${app.salary?"\nSalary: "+app.salary:""}\n\n${app.notes||""}`;
+                S.posting=app.title+" at "+app.company+"\nLocation: "+app.location+"\nType: "+app.type+(app.salary?"\nSalary: "+app.salary:"")+"\n\n"+(app.notes||"");
                 S.tailored="";S.cover="";
                 debounceSave("apply-posting",S.posting);
                 rerender();
@@ -1130,21 +1175,14 @@ function _render(){
             })(),
             S.selectedJob?span({style:{fontSize:"11px",fontWeight:"600",color:T.done.text,background:T.done.bg,border:`1px solid ${T.done.border}`,padding:"4px 10px",borderRadius:"8px",flexShrink:"0",whiteSpace:"nowrap"}},["✓ "+S.selectedJob.company]):null,
           ].filter(Boolean)),
-        ]):div({style:{fontSize:"13px",color:T.muted,padding:"10px 0",marginBottom:"4px"}},["No jobs on your board yet — add some in the Job Board tab, or paste a posting below."]),
-
-        // Divider
+        ]):div({style:{fontSize:"13px",color:T.muted,marginBottom:"10px"}},["No jobs on your board yet — add some in the Job Board tab."]),
         div({style:{borderTop:`1px solid ${T.div}`,margin:"12px 0",display:"flex",alignItems:"center",gap:"10px"}},[
           span({style:{fontSize:"11px",color:T.muted,background:T.card,padding:"0 8px",marginLeft:"12px",flexShrink:"0"}},["or paste manually"]),
         ]),
-
-        // Manual paste area
         mkLabel("Job posting text"),
-        mkTextarea(S.posting,v=>{S.posting=v;debounceSave("apply-posting",v);},160,"Paste the full job posting here…"),
+        mkTextarea(S.posting,v=>{S.posting=v;debounceSave("apply-posting",v);},140,"Paste the full job posting here…"),
       ]),
-
-      div({style:{display:"grid",gridTemplateColumns:"1fr",gap:"18px"}},[
-        div({style:card_s},[mkLabel(`Base resume${S.polished?" ✓ POLISHED":""}`),mkTextarea(S.polished||S.raw,v=>{if(S.polished)S.polished=v;else S.raw=v;debounceSave(S.polished?"resume-polished":"resume-raw",v);},160,"Paste resume…")]),
-      ]),
+      div({style:card_s},[mkLabel(`Base resume${S.polished?" ✓ POLISHED":""}`),mkTextarea(S.polished||S.raw,v=>{if(S.polished)S.polished=v;else S.raw=v;debounceSave(S.polished?"resume-polished":"resume-raw",v);},140,"Paste resume…")]),
       div({style:card_s},[genChoices,genBtn]),
       outputSection,
     ].filter(Boolean));
@@ -1182,8 +1220,45 @@ function _render(){
       ]);
       card.appendChild(row);
       if(exp){
+        const hasDocs=!!(app.savedResume||app.savedCover);
+        const docSection=hasDocs?div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"12px 14px",marginBottom:"12px"}},[
+          div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px"}},[
+            div({style:{display:"flex",alignItems:"center",gap:"7px"}},[
+              span({style:{fontSize:"12px",fontWeight:"700",color:T.text}},["📄 Saved documents"]),
+              app.savedDocsDate?span({style:{fontSize:"11px",color:T.muted}},[" — "+app.savedDocsDate]):null,
+            ].filter(Boolean)),
+            mkBtn("ghost","Load into Apply →",()=>{
+              S.selectedJob=app;
+              S.posting=app.title+" at "+app.company+"\nLocation: "+app.location+"\nType: "+app.type+(app.salary?"\nSalary: "+app.salary:"")+"\n\n"+(app.notes||"");
+              if(app.savedResume){S.tailored=app.savedResume;lsSet("apply-tailored",app.savedResume);}
+              if(app.savedCover){S.cover=app.savedCover;lsSet("apply-cover",app.savedCover);}
+              S.applyOut=app.savedResume?"resumepdf":"cover";
+              S.tab="apply";rerender();
+            },{fontSize:"11px",padding:"5px 12px"}),
+          ]),
+          div({style:{display:"flex",gap:"8px",flexWrap:"wrap"}},[
+            app.savedResume?div({style:{flex:"1",minWidth:"180px",background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"10px 12px"}},[
+              div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"6px"}},["Tailored Resume"]),
+              div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",maxHeight:"48px",overflow:"hidden"}},[app.savedResume.substring(0,150)+"…"]),
+              div({style:{display:"flex",gap:"5px",marginTop:"8px",flexWrap:"wrap"}},[
+                mkBtn("ghost","View PDF",()=>{const pa=document.getElementById("print-area");pa.style.display="block";pa.innerHTML=buildPDFHTML(app.savedResume,S.ci);window.print();pa.style.display="none";},{fontSize:"11px",padding:"3px 9px"}),
+                mkBtn("ghost","Copy",()=>{navigator.clipboard.writeText(app.savedResume).catch(()=>{});},{fontSize:"11px",padding:"3px 9px"}),
+                mkBtn("ghost","⬇ .txt",()=>{const a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(app.savedResume);a.download=app.company.replace(/\s+/g,"_")+"_resume.txt";a.click();},{fontSize:"11px",padding:"3px 9px"}),
+              ]),
+            ]):null,
+            app.savedCover?div({style:{flex:"1",minWidth:"180px",background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"10px 12px"}},[
+              div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"6px"}},["Cover Letter"]),
+              div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",maxHeight:"48px",overflow:"hidden"}},[app.savedCover.substring(0,150)+"…"]),
+              div({style:{display:"flex",gap:"5px",marginTop:"8px",flexWrap:"wrap"}},[
+                mkBtn("ghost","Copy",()=>{navigator.clipboard.writeText(app.savedCover).catch(()=>{});},{fontSize:"11px",padding:"3px 9px"}),
+                mkBtn("ghost","⬇ .txt",()=>{const a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(app.savedCover);a.download=app.company.replace(/\s+/g,"_")+"_cover_letter.txt";a.click();},{fontSize:"11px",padding:"3px 9px"}),
+              ]),
+            ]):null,
+          ].filter(Boolean)),
+        ]):null;
         const expanded=div({style:{marginTop:"12px",paddingTop:"12px",borderTop:`1px solid ${T.div}`}},[
           app.notes?h("p",{style:{fontSize:"12px",color:T.sub,lineHeight:"1.7",marginBottom:"10px"}},[app.notes]):null,
+          docSection,
           div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
             mkBtn("teal","Prep interview →",()=>{S.intJob=app.id;S.tab="interview";rerender();},{fontSize:"12px",padding:"6px 12px"}),
             mkBtn("ghost","Edit",()=>{S.fd={...app};S.editId=app.id;S.showForm=true;rerender();},{fontSize:"12px",padding:"6px 12px"}),
@@ -1333,15 +1408,16 @@ function _render(){
   // ── ASSEMBLE ──
   const main=div({style:{maxWidth:"1080px",margin:"0 auto",padding:"24px 20px"}},[tabBar,content]);
 
+  const hasKey=!!S.apiKey;
   const showSetup=!hasKey&&!lsGet("setup-dismissed","");
   const setupModal=showSetup?div({style:{position:"fixed",inset:"0",background:"rgba(0,0,0,0.75)",zIndex:"200",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}},[
     div({style:{background:S.dark?"#161c27":"#fff",borderRadius:"16px",padding:"32px",maxWidth:"460px",width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,0.5)"}},[
-      div({style:{fontSize:"26px",marginBottom:"10px"}},["🚀"]),
+      div({style:{fontSize:"26px",marginBottom:"10px"}},["\u{1F680}"]),
       div({style:{fontSize:"18px",fontWeight:"700",color:T.text,marginBottom:"8px"}},["Welcome to ResumeAI"]),
-      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.7",marginBottom:"18px"}},["AI-powered resume polishing, job tailoring, and interview prep — all running locally on your device. To enable the AI you need a free Anthropic API key."]),
+      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.7",marginBottom:"18px"}},["AI-powered resume polishing, job tailoring, and interview prep \u2014 all running locally on your device. To enable the AI you need a free Anthropic API key."]),
       div({style:{background:S.dark?"#0d1117":"#f4f6fa",border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"18px"}},[
         div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:"10px"}},["One-time setup"]),
-        ...[["1","Visit console.anthropic.com/settings/keys"],["2","Click Create Key and copy it"],["3","Paste it below and click Save"]].map(([n,txt])=>
+        ...[ ["1","Visit console.anthropic.com/settings/keys"],["2","Click Create Key and copy it"],["3","Paste it below and click Save"] ].map(([n,txt])=>
           div({style:{display:"flex",gap:"10px",alignItems:"center",marginBottom:"7px"}},[
             span({style:{width:"20px",height:"20px",borderRadius:"50%",background:"#2563eb",color:"#fff",fontSize:"10px",fontWeight:"700",display:"inline-flex",alignItems:"center",justifyContent:"center",flexShrink:"0"}},[n]),
             span({style:{fontSize:"13px",color:T.text}},[txt]),
@@ -1350,7 +1426,7 @@ function _render(){
       ]),
       div({style:{display:"flex",gap:"8px",marginBottom:"10px"}},[
         (()=>{
-          const inp=h("input",{style:{flex:"1",padding:"10px 12px",borderRadius:"8px",fontSize:"13px",border:`1px solid ${T.inB}`,background:T.inBg,color:T.text},placeholder:"sk-ant-api03-…",type:"password"});
+          const inp=h("input",{style:{flex:"1",padding:"10px 12px",borderRadius:"8px",fontSize:"13px",border:`1px solid ${T.inB}`,background:T.inBg,color:T.text},placeholder:"sk-ant-api03-\u2026",type:"password"});
           inp.value=S.apiKey||"";
           inp.addEventListener("input",e=>{S.apiKey=e.target.value;});
           inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&S.apiKey.trim()){lsSet("api-key",S.apiKey.trim());lsSet("setup-dismissed","1");rerender();}});
@@ -1358,21 +1434,18 @@ function _render(){
           return inp;
         })(),
         h("button",{style:{padding:"10px 18px",borderRadius:"8px",background:"#2563eb",color:"#fff",fontSize:"13px",fontWeight:"700",border:"none",cursor:"pointer",flexShrink:"0"},
-          onClick:()=>{if(S.apiKey.trim()){lsSet("api-key",S.apiKey.trim());lsSet("setup-dismissed","1");rerender();}else alert("Please paste your API key first.");}},
-          ["Save & start"]),
+          onClick:()=>{if(S.apiKey.trim()){lsSet("api-key",S.apiKey.trim());lsSet("setup-dismissed","1");rerender();}else alert("Please paste your API key first.");}},["Save & start"]),
       ]),
-      h("a",{href:"https://console.anthropic.com/settings/keys",target:"_blank",style:{fontSize:"12px",color:"#2563eb",display:"block",marginBottom:"12px"}},["Open Anthropic console →"]),
+      h("a",{href:"https://console.anthropic.com/settings/keys",target:"_blank",style:{fontSize:"12px",color:"#2563eb",display:"block",marginBottom:"12px"}},["Open Anthropic console \u2192"]),
       h("button",{style:{fontSize:"12px",color:T.muted,background:"transparent",border:"none",cursor:"pointer",textDecoration:"underline"},
-        onClick:()=>{lsSet("setup-dismissed","1");rerender();}},
-        ["Skip for now — I’ll add it later"]),
+        onClick:()=>{lsSet("setup-dismissed","1");rerender();}},["Skip for now \u2014 I\u2019ll add it later"]),
     ]),
   ]):null;
 
   const noKeyBanner=(!hasKey&&lsGet("setup-dismissed",""))?div({style:{background:T.warn.bg,borderBottom:`1px solid ${T.warn.border}`,padding:"8px 24px",display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},[
     span({style:{fontSize:"12px",color:T.warn.text}},["⚠ AI features require an API key — "]),
-    h("button",{style:{fontSize:"12px",color:T.warn.text,background:"transparent",border:"none",cursor:"pointer",textDecoration:"underline",padding:"0"},onClick:()=>{S.showApiKey=true;rerender();}},
-      ["add it here"]),
-    span({style:{fontSize:"12px",color:T.warn.text}},[ " or visit "]),
+    h("button",{style:{fontSize:"12px",color:T.warn.text,background:"transparent",border:"none",cursor:"pointer",textDecoration:"underline",padding:"0"},onClick:()=>{S.showApiKey=true;rerender();}},["add it here"]),
+    span({style:{fontSize:"12px",color:T.warn.text}},["  — visit "]),
     h("a",{href:"https://console.anthropic.com/settings/keys",target:"_blank",style:{fontSize:"12px",color:T.warn.text}},["console.anthropic.com"]),
   ]):null;
 
