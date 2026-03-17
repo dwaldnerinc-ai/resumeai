@@ -1098,10 +1098,52 @@ function _render(){
     }
 
     content=div({},[
-      warnBanner,
-      div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"18px"}},[
-        div({style:card_s},[mkLabel(`Base resume${S.polished?" ✓ POLISHED":""}`),mkTextarea(S.polished||S.raw,v=>{if(S.polished)S.polished=v;else S.raw=v;debounceSave(S.polished?"resume-polished":"resume-raw",v);},220,"Paste resume…")]),
-        div({style:card_s},[mkLabel("Job posting"),mkTextarea(S.posting,v=>{S.posting=v;debounceSave("apply-posting",v);},220,"Paste full job posting…")]),
+      // Job selector card — pick from board or paste manually
+      div({style:card_s},[
+        div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"4px"}},["Select a job"]),
+        div({style:{fontSize:"13px",color:T.sub,marginBottom:"12px"}},["Pick from your job board to auto-fill, or paste a posting manually below."]),
+
+        // Dropdown of all jobs on the board
+        S.apps.length>0?div({style:{marginBottom:"12px"}},[
+          mkLabel("Choose from your job board"),
+          div({style:{display:"flex",gap:"8px",alignItems:"center"}},[
+            (()=>{
+              const sel=h("select",{style:{...inp_s,flex:"1",fontFamily:"inherit"}});
+              const blank=h("option",{value:""}); blank.textContent="— Select a job —"; sel.appendChild(blank);
+              S.apps.forEach(app=>{
+                const o=h("option",{value:app.id});
+                const sm=smeta(app.status);
+                o.textContent=`${app.title} — ${app.company} (${sm.label})`;
+                if(S.selectedJob&&S.selectedJob.id===app.id)o.selected=true;
+                sel.appendChild(o);
+              });
+              sel.addEventListener("change",e=>{
+                const app=S.apps.find(a=>a.id===e.target.value);
+                if(!app)return;
+                S.selectedJob=app;
+                S.posting=`${app.title} at ${app.company}\nLocation: ${app.location}\nType: ${app.type}${app.salary?"\nSalary: "+app.salary:""}\n\n${app.notes||""}`;
+                S.tailored="";S.cover="";
+                debounceSave("apply-posting",S.posting);
+                rerender();
+              });
+              return sel;
+            })(),
+            S.selectedJob?span({style:{fontSize:"11px",fontWeight:"600",color:T.done.text,background:T.done.bg,border:`1px solid ${T.done.border}`,padding:"4px 10px",borderRadius:"8px",flexShrink:"0",whiteSpace:"nowrap"}},["✓ "+S.selectedJob.company]):null,
+          ].filter(Boolean)),
+        ]):div({style:{fontSize:"13px",color:T.muted,padding:"10px 0",marginBottom:"4px"}},["No jobs on your board yet — add some in the Job Board tab, or paste a posting below."]),
+
+        // Divider
+        div({style:{borderTop:`1px solid ${T.div}`,margin:"12px 0",display:"flex",alignItems:"center",gap:"10px"}},[
+          span({style:{fontSize:"11px",color:T.muted,background:T.card,padding:"0 8px",marginLeft:"12px",flexShrink:"0"}},["or paste manually"]),
+        ]),
+
+        // Manual paste area
+        mkLabel("Job posting text"),
+        mkTextarea(S.posting,v=>{S.posting=v;debounceSave("apply-posting",v);},160,"Paste the full job posting here…"),
+      ]),
+
+      div({style:{display:"grid",gridTemplateColumns:"1fr",gap:"18px"}},[
+        div({style:card_s},[mkLabel(`Base resume${S.polished?" ✓ POLISHED":""}`),mkTextarea(S.polished||S.raw,v=>{if(S.polished)S.polished=v;else S.raw=v;debounceSave(S.polished?"resume-polished":"resume-raw",v);},160,"Paste resume…")]),
       ]),
       div({style:card_s},[genChoices,genBtn]),
       outputSection,
