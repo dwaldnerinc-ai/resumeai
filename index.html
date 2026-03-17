@@ -679,9 +679,11 @@ function _render(){
 
   // ── TAB 2: FIND JOBS ──
   else if(S.tab==="search"){
+    const kwInput=(()=>{const i=h("input",{style:inp_s,placeholder:"e.g. Project Manager, Construction…"});i.value=S.searchKw;i.addEventListener("input",e=>{S.searchKw=e.target.value;});i.addEventListener("keydown",e=>{if(e.key==="Enter")searchBtn.click();});return i;})();
+    const locInput=(()=>{const i=h("input",{style:inp_s,placeholder:"e.g. Vancouver, BC"});i.value=S.searchLoc;i.addEventListener("input",e=>{S.searchLoc=e.target.value;});return i;})();
     const filters=div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"12px"}},[
-      div({},[mkLabel("Keywords"),mkInput(S.searchKw,v=>S.searchKw=v,{placeholder:"e.g. Project Manager, Construction…"})]),
-      div({},[mkLabel("Location"),mkInput(S.searchLoc,v=>S.searchLoc=v,{placeholder:"e.g. Vancouver, BC"})]),
+      div({},[mkLabel("Keywords"),kwInput]),
+      div({},[mkLabel("Location"),locInput]),
     ]);
     const typeFilters=div({style:{marginBottom:"16px"}},[
       mkLabel("Work type"),
@@ -699,7 +701,7 @@ function _render(){
         S.load="search";S.searchDone=false;rerender();
         await new Promise(r=>setTimeout(r,700));
         let res=[...SEARCH_POOL];
-        const q=(S.searchKw||"").toLowerCase();
+        const q=(kwInput.value||S.searchKw||"").toLowerCase().trim();
         if(q)res=res.filter(j=>j.title.toLowerCase().includes(q)||j.tags.some(tg=>tg.toLowerCase().includes(q))||j.company.toLowerCase().includes(q));
         if(S.searchType.length)res=res.filter(j=>S.searchType.includes(j.type));
         res.sort((a,b)=>b.match-a.match);
