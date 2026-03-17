@@ -215,13 +215,14 @@ function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").repl
 async function callAI(sys,usr){
   const key=(S.apiKey||lsGet("api-key","")).trim();
   if(!key){S.apiKeyError=true;rerender();throw new Error("No API key — click the key button to add one.");}
-  const hdrs=new Headers();
-  hdrs.append("Content-Type","application/json");
-  hdrs.append("x-api-key",key);
-  hdrs.append("anthropic-version","2023-06-01");
-  hdrs.append("anthropic-dangerous-direct-browser-access","true");
   const r=await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",headers:hdrs,
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "x-api-key":key,
+      "anthropic-version":"2023-06-01",
+      "anthropic-dangerous-direct-browser-access":"true",
+    },
     body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:4000,system:sys,messages:[{role:"user",content:usr}]})
   });
   const d=await r.json();
