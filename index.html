@@ -303,30 +303,125 @@ function buildPDFHTML(text,ci){
 // EDITABLE PDF HELPER
 // ─────────────────────────────────────────────────────────
 function wireEditable(previewBox,getText,onSave){
-  setTimeout(()=>{
+  let editing=false;
+  let undoStack=[];  // snapshots of text before each edit session
+  const T=t();
+
+  function extractText(){
+    const lines=[];
+    previewBox.querySelectorAll(".pdf-sec-title,.pdf-exp-left,.pdf-exp-right,.pdf-bullet-text,.pdf-text-line,.pdf-name,.pdf-tagline").forEach(el=>{
+      const tx=el.innerText.trim();if(!tx)return;
+      if(el.classList.contains("pdf-sec-title"))lines.push("\n"+tx.toUpperCase());
+      else if(el.classList.contains("pdf-bullet-text"))lines.push("\u2022 "+tx);
+      else lines.push(tx);
+    });
+    return lines.join("\n").trim();
+  }
+
+  // ── Toolbar: Edit / Save / Revert / Undo ──
+  const toolbar=div({style:{
+    position:"absolute",top:"10px",right:"10px",display:"flex",gap:"6px",
+    alignItems:"center",zIndex:"10",
+  }});
+
+  const editBtn=h("button",{style:{
+    fontSize:"11px",padding:"4px 11px",borderRadius:"6px",cursor:"pointer",
+    border:"1px solid #374151",background:"rgba(17,24,39,0.88)",color:"#e5e7eb",
+    fontFamily:"inherit",fontWeight:"600",display:"flex",alignItems:"center",gap:"5px",
+  }}); editBtn.textContent="\u270E Edit";
+
+  const saveBtn=h("button",{style:{
+    fontSize:"11px",padding:"4px 11px",borderRadius:"6px",cursor:"pointer",
+    border:"1px solid #166534",background:"#052e16",color:"#4ade80",
+    fontFamily:"inherit",fontWeight:"600",display:"none",
+  }}); saveBtn.textContent="\u2713 Save";
+
+  const revertBtn=h("button",{style:{
+    fontSize:"11px",padding:"4px 11px",borderRadius:"6px",cursor:"pointer",
+    border:"1px solid #374151",background:"rgba(17,24,39,0.88)",color:"#fca5a5",
+    fontFamily:"inherit",fontWeight:"600",display:"none",
+  }}); revertBtn.textContent="\u21BA Revert";
+
+  const undoBtn=h("button",{style:{
+    fontSize:"11px",padding:"4px 11px",borderRadius:"6px",cursor:"pointer",
+    border:"1px solid #374151",background:"rgba(17,24,39,0.88)",color:"#93c5fd",
+    fontFamily:"inherit",fontWeight:"600",display:"none",
+  }}); undoBtn.textContent="\u21B6 Undo";
+
+  function startEdit(){
     const wrap=previewBox.querySelector(".pdf-wrap");
     if(!wrap)return;
-    wrap.contentEditable="true";wrap.spellcheck=true;
-    wrap.style.outline="none";wrap.style.cursor="text";wrap.style.caretColor="#2563eb";
-    let t=null;
-    wrap.addEventListener("input",()=>{
-      clearTimeout(t);
-      t=setTimeout(()=>{
-        const lines=[];
-        wrap.querySelectorAll(".pdf-sec-title,.pdf-exp-left,.pdf-exp-right,.pdf-bullet-text,.pdf-text-line,.pdf-name,.pdf-tagline").forEach(el=>{
-          const tx=el.innerText.trim();if(!tx)return;
-          if(el.classList.contains("pdf-sec-title"))lines.push("\n"+tx.toUpperCase());
-          else if(el.classList.contains("pdf-bullet-text"))lines.push("\u2022 "+tx);
-          else lines.push(tx);
-        });
-        const newText=lines.join("\n").trim();
-        if(newText&&newText!==getText())onSave(newText);
-      },600);
-    });
-  },50);
-  const hint=div({style:{position:"absolute",top:"10px",right:"10px",fontSize:"11px",color:"#9ca3af",background:"rgba(17,24,39,0.85)",border:"1px solid #374151",borderRadius:"6px",padding:"3px 9px",pointerEvents:"none",zIndex:"5"}},["\u270E Click to edit"]);
-  previewBox.appendChild(hint);
-  previewBox.addEventListener("click",()=>hint.style.display="none",{once:true});
+    undoStack.push(getText()); // snapshot before editing
+    undoBtn.style.display=undoStack.length>0?"":"none";
+    editing=true;
+    wrap.contentEditable="true";
+    wrap.spellcheck=true;
+    wrap.style.outline="2px solid #2563eb44";
+    wrap.style.borderRadius="4px";
+    wrap.style.cursor="text";
+    wrap.style.caretColor="#2563eb";
+    editBtn.style.display="none";
+    saveBtn.style.display="";
+    revertBtn.style.display="";
+    undoBtn.style.display=undoStack.length>1?"":"none";
+    setTimeout(()=>wrap.focus(),50);
+  }
+
+  function stopEdit(){
+    const wrap=previewBox.querySelector(".pdf-wrap");
+    if(!wrap)return;
+    editing=false;
+    wrap.contentEditable="false";
+    wrap.style.outline="none";
+    wrap.style.cursor="default";
+    editBtn.style.display="";
+    saveBtn.style.display="none";
+    revertBtn.style.display="none";
+    undoBtn.style.display="none";
+  }
+
+  editBtn.addEventListener("click",()=>startEdit());
+
+  saveBtn.addEventListener("click",()=>{
+    const newText=extractText();
+    if(newText&&newText!==getText())onSave(newText);
+    stopEdit();
+  });
+
+  revertBtn.addEventListener("click",()=>{
+    if(!confirm("Revert to the last saved version? Your current edits will be lost."))return;
+    // Restore from the snapshot taken when editing started
+    const prev=undoStack[undoStack.length-1];
+    if(prev){
+      onSave(prev);
+      // Rebuild the preview with the reverted text
+      const wrap=previewBox.querySelector(".pdf-wrap");
+      if(wrap){wrap.contentEditable="false";}
+      stopEdit();
+      rerender(); // re-render to show reverted version
+    }
+  });
+
+  undoBtn.addEventListener("click",()=>{
+    if(undoStack.length===0)return;
+    const prev=undoStack.pop();
+    onSave(prev);
+    stopEdit();
+    rerender();
+  });
+
+  toolbar.appendChild(undoBtn);
+  toolbar.appendChild(revertBtn);
+  toolbar.appendChild(saveBtn);
+  toolbar.appendChild(editBtn);
+  previewBox.appendChild(toolbar);
+
+  // Ctrl+S to save, Escape to revert while editing
+  previewBox.addEventListener("keydown",e=>{
+    if(!editing)return;
+    if((e.ctrlKey||e.metaKey)&&e.key==="s"){e.preventDefault();saveBtn.click();}
+    if(e.key==="Escape"){revertBtn.click();}
+  });
 }
 
 // ─────────────────────────────────────────────────────────
