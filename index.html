@@ -220,17 +220,55 @@ function matchBg(m){const d=S.dark;return m>=90?(d?"#052e16":"#f0fdf4"):m>=80?(d
 // PDF RESUME RENDERER
 // ─────────────────────────────────────────────────────────
 function buildPDFHTML(text,ci){
-  const name=ci.name||"Your Name";
-  const tagline=ci.tagline||"Senior Program Manager | Operations Manager | Project Manager";
-  const phone=ci.phone||"(xxx) xxx-xxxx";
-  const email=ci.email||"yourname@email.com";
-  const location=ci.location||"Vancouver, BC";
-  const linkedin=ci.linkedin||"linkedin.com/in/yourprofile";
+  // Auto-detect header info from resume text if S.ci fields are empty
+  const lines=text.split("\n").map(l=>l.trim()).filter(Boolean);
+  let detectedName="", detectedTagline="", detectedEmail="", detectedPhone="", detectedLocation="", detectedLinkedin="";
+  let bodyStartIdx=0;
 
-  // Parse sections
+  // Scan the first ~8 lines for header-like content before the first ALL CAPS section
+  for(let i=0;i<Math.min(8,lines.length);i++){
+    const l=lines[i];
+    const isSection=/^[A-Z][A-Z\s&\/]{4,}$/.test(l)&&l.length<60;
+    if(isSection){bodyStartIdx=i;break;}
+    bodyStartIdx=i+1;
+    // Detect name: mixed case, no special chars, 2+ words, short line
+    if(!detectedName&&/^[A-Z][a-z]/.test(l)&&l.split(" ").length>=2&&l.length<50&&!l.includes("@")&&!l.includes("|")){
+      detectedName=l;
+    }
+    // Detect tagline: contains | separators or known PM/role keywords
+    else if(!detectedTagline&&(l.includes("|")||l.includes("Manager")||l.includes("Director")||l.includes("Engineer"))&&l.length>20){
+      detectedTagline=l;
+    }
+    // Detect contact items
+    if(l.includes("@"))detectedEmail=l.replace(/.*?([^\s|]+@[^\s|]+).*/,"$1");
+    if(l.match(/\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/))detectedPhone=l.match(/\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/)[0];
+    if(l.toLowerCase().includes("linkedin"))detectedLinkedin=l.replace(/.*?(linkedin\.com[^\s|]+).*/i,"$1");
+    if(l.match(/[A-Z][a-z]+,\s*[A-Z]{2}/)&&l.length<40)detectedLocation=l.replace(/.*?([A-Z][a-z]+,\s*[A-Z]{2}).*/,"$1");
+  }
+
+  // Use S.ci values if set, otherwise fall back to detected values, otherwise placeholder
+  const name=ci.name||detectedName||"Your Name";
+  const tagline=ci.tagline||detectedTagline||"Senior Program Manager | Operations Manager | Project Manager";
+  const phone=ci.phone||detectedPhone||"(xxx) xxx-xxxx";
+  const email=ci.email||detectedEmail||"yourname@email.com";
+  const location=ci.location||detectedLocation||"Vancouver, BC";
+  const linkedin=ci.linkedin||detectedLinkedin||"linkedin.com/in/yourprofile";
+
+  // Auto-save detected values back to S.ci if fields were empty (so header stays consistent)
+  if(!ci.name&&detectedName){S.ci={...S.ci,name:detectedName};lsSet("resume-ci",JSON.stringify(S.ci));}
+  if(!ci.tagline&&detectedTagline){S.ci={...S.ci,tagline:detectedTagline};lsSet("resume-ci",JSON.stringify(S.ci));}
+  if(!ci.email&&detectedEmail){S.ci={...S.ci,email:detectedEmail};lsSet("resume-ci",JSON.stringify(S.ci));}
+  if(!ci.phone&&detectedPhone){S.ci={...S.ci,phone:detectedPhone};lsSet("resume-ci",JSON.stringify(S.ci));}
+  if(!ci.location&&detectedLocation){S.ci={...S.ci,location:detectedLocation};lsSet("resume-ci",JSON.stringify(S.ci));}
+  if(!ci.linkedin&&detectedLinkedin){S.ci={...S.ci,linkedin:detectedLinkedin};lsSet("resume-ci",JSON.stringify(S.ci));}
+
+  // Use only body text (skip detected header lines) for section parsing
+  const bodyText=lines.slice(bodyStartIdx).join("\n");
+
+  // Parse sections from body only
   const sections=[];
   let cur=null;
-  text.split("\n").forEach(line=>{
+  bodyText.split("\n").forEach(line=>{
     const tr=line.trim();
     if(!tr)return;
     const isH=/^[A-Z][A-Z\s&\/]{4,}$/.test(tr)&&tr.length<60;
