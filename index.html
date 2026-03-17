@@ -721,11 +721,10 @@ function _render(){
             ]),
           ]);
           el.addEventListener("click",e=>{
-            e.preventDefault();
             const liveKw=(kwInp.value||"").trim();
             const liveLoc=(locInp.value||"Vancouver, BC").trim();
-            if(!liveKw){kwInp.focus();return;}
-            window.open(board.url(liveKw,liveLoc),"_blank","noreferrer");
+            if(!liveKw){e.preventDefault();kwInp.focus();return;}
+            el.href=board.url(liveKw,liveLoc);
           });
           return el;
         }),
