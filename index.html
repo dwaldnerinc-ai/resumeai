@@ -874,7 +874,7 @@ function _render(){
                 span({style:{fontWeight:"600",color:T.text}},[job.company])," \u00b7 ",job.location,
                 job.salaryRange?span({style:{color:T.text}},[" \u00b7 "+job.salaryRange]):null,
               ].filter(Boolean)),
-              job.whyGoodFit?div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",marginBottom:"4px"}},["\uD83D\uDCA1 "+job.whyGoodFit]):null,
+              job.whyGoodFit?div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",marginBottom:"4px"}},["💡 "+job.whyGoodFit]):null,
               // Keyword chips from scoring
               job.matchKeywords&&job.matchKeywords.length>0?div({style:{display:"flex",gap:"4px",flexWrap:"wrap"}},[
                 ...job.matchKeywords.map(k=>span({style:{fontSize:"10px",padding:"2px 7px",borderRadius:"6px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[k]))
