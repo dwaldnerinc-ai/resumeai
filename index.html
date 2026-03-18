@@ -1114,6 +1114,40 @@ function _render(){
       const statusSel=h("select",{style:{fontSize:"11px",padding:"4px 8px",borderRadius:"7px",border:`1px solid ${T.cardB}`,background:sbg,color:sm.color,cursor:"pointer",fontFamily:"inherit",fontWeight:"600",flexShrink:"0"}});
       STATUSES.forEach(s=>{const o=h("option",{value:s.key});o.textContent=s.label;if(s.key===app.status)o.selected=true;statusSel.appendChild(o);});
       statusSel.addEventListener("change",async e=>{S.apps=S.apps.map(a=>a.id===app.id?{...a,status:e.target.value}:a);lsSet("tracker-apps-v2",JSON.stringify(S.apps));rerender();});
+
+      // Score badge — show if scored, show "Score" button if not
+      const hasScore=app.matchScore!=null;
+      const scoreBadge=hasScore
+        ?div({style:{display:"flex",flexDirection:"column",alignItems:"center",gap:"2px",flexShrink:"0"}},[
+            span({style:{
+              fontSize:"12px",fontWeight:"800",padding:"3px 8px",borderRadius:"8px",
+              background:app.matchScore>=85?"#052e16":app.matchScore>=70?"#1a2e05":"#1c1917",
+              color:app.matchScore>=85?"#4ade80":app.matchScore>=70?"#a3e635":"#d6d3d1",
+              border:"1px solid "+(app.matchScore>=85?"#166534":app.matchScore>=70?"#3f6212":"#44403c"),
+            }},[app.matchScore+"%"]),
+            span({style:{fontSize:"9px",color:T.muted,textTransform:"uppercase",letterSpacing:"0.05em"}},["match"]),
+          ])
+        :S.polished?(()=>{
+            const b=h("button",{style:{fontSize:"10px",padding:"3px 8px",borderRadius:"7px",border:"1px solid "+T.inB,background:"transparent",color:T.muted,cursor:"pointer",flexShrink:"0",whiteSpace:"nowrap"}});
+            b.textContent="Score";
+            b.addEventListener("click",async e=>{
+              e.stopPropagation();
+              b.textContent="…";b.disabled=true;
+              try{
+                const r=await callAI(
+                  "Resume-job match scorer. Return ONLY valid JSON: {score: integer 0-100, keywords: array of 3 short matching skill strings}. No markdown.",
+                  "RESUME:\n"+S.polished.substring(0,500)+"\n\nJOB: "+app.title+" at "+app.company+"\n"+(app.notes||"").substring(0,200)
+                );
+                const sc=JSON.parse(r.replace(/```json|```/g,"").trim());
+                S.apps=S.apps.map(a=>a.id===app.id?{...a,matchScore:sc.score,matchKeywords:sc.keywords||[]}:a);
+                lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+                rerender();
+              }catch{b.textContent="Score";b.disabled=false;}
+            });
+            return b;
+          })()
+        :null;
+
       const row=div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"10px"}},[
         div({style:{flex:"1",cursor:"pointer"},onClick:()=>{S.expandedApp=exp?null:app.id;rerender();}},[
           div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"3px"}},[
@@ -1122,10 +1156,15 @@ function _render(){
             span({style:{fontSize:"11px",padding:"2px 8px",borderRadius:"9px",background:T.tag.bg,color:T.tag.text,border:`1px solid ${T.tag.border}`}},[app.type]),
           ]),
           div({style:{fontSize:"12px",color:T.sub}},[span({style:{fontWeight:"600",color:T.text}},[app.company]),app.location?" · "+app.location:"",app.salary?" · ":"",(app.salary?span({style:{color:T.text,fontWeight:"500"}},[app.salary]):null)].filter(Boolean)),
-        ]),
+          // Keyword chips under title if scored
+          app.matchKeywords&&app.matchKeywords.length>0?div({style:{display:"flex",gap:"4px",flexWrap:"wrap",marginTop:"4px"}},[
+            ...app.matchKeywords.map(k=>span({style:{fontSize:"10px",padding:"2px 6px",borderRadius:"6px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[k]))
+          ]):null,
+        ].filter(Boolean)),
+        scoreBadge,
         statusSel,
         (()=>{const b=h("button",{style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0"},title:"Remove"});b.textContent="🗑";b.addEventListener("click",e=>{e.stopPropagation();if(!confirm("Remove "+app.title+"?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();});return b;})(),
-      ]);
+      ].filter(Boolean));
       card.appendChild(row);
       if(exp){
         const hasDocs=!!(app.savedResume||app.savedCover);
@@ -1137,7 +1176,6 @@ function _render(){
               S.posting=app.title+" at "+app.company+"\nLocation: "+app.location+"\nType: "+app.type+(app.salary?"\nSalary: "+app.salary:"")+"\n\n"+(app.notes||"");
               S.tailored="";S.cover="";S.tab="apply";rerender();
             },{fontSize:"12px",padding:"6px 14px"}),
-            mkBtn("ghost","Edit",()=>{S.fd={...app};S.editId=app.id;S.showForm=true;rerender();},{fontSize:"12px",padding:"6px 14px"}),
             app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",style:{padding:"6px 14px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:T.ghost.text,textDecoration:"none",display:"inline-flex",alignItems:"center"}},["View posting ↗"]):null,
             mkBtn("danger","Remove",async()=>{if(!confirm("Remove?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();}),
           ].filter(Boolean)),
