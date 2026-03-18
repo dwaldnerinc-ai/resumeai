@@ -71,7 +71,8 @@ const SEED_APPS=[];
 const TONE_RULES={
   natural:`VOICE (critical): Write like a confident human — not a corporate AI. Plain direct language. AVOID: spearheaded, leveraged, utilized, orchestrated, championed, fostered, robust, seamless, synergy, dynamic, innovative, results-driven, passionate, proven track record, end-to-end, holistic, transformative. Use simple verbs: Led, Built, Managed, Reduced, Saved, Improved, Delivered, Cut, Launched.`,
   bold:`VOICE: Confident, direct, punchy. Short powerful bullets. No filler. No buzzwords. No passive voice.`,
-  polished:`VOICE: Professional and structured. Avoid extreme buzzwords. Strong action verbs, quantify where possible.`
+  polished:`VOICE: Professional and structured. Avoid extreme buzzwords. Strong action verbs, quantify where possible.`,
+  format:null
 };
 
 // ─────────────────────────────────────────────────────────
@@ -81,7 +82,7 @@ const S={
   dark:true, tab:"resume",
   raw:"", polished:"", resumeView:"edit", tone:"natural",
   ci:{name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""},
-  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false,
+  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, tipsOpen:false,
   selectedJob:null, posting:"", tailored:"", cover:"", applyOut:"resume", genWhat:"both",
   apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
   searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
@@ -583,10 +584,56 @@ function _render(){
     // Shared polish action (used in both edit and preview views)
     async function doPolish(){
       if(!S.raw.trim()||S.load==="polish")return;
+      // Format Only — skip AI entirely, use raw text as-is
+      if(S.tone==="format"){
+        S.polished=S.raw.trim();
+        lsSet("resume-polished",S.polished);
+        S.resumeView="preview";S.polishError="";rerender();
+        return;
+      }
       S.load="polish";S.polishError="";rerender();
       try{
         const r=await callAI(
-          `Professional resume writer. Rewrite into clean ATS-friendly plain text.\n${TONE_RULES[S.tone]}\nALL CAPS headers, • bullets. Sections: PROFESSIONAL SUMMARY, AREAS OF EXPERTISE, TECHNICAL SKILLS, PROFESSIONAL EXPERIENCE, CERTIFICATIONS. No tables/columns. Output ONLY resume text.\n\nFor PROFESSIONAL EXPERIENCE, format each role as two consecutive lines followed by bullets:\nLine 1: Job Title — Company Name, Location\nLine 2: Month Year – Month Year (or Present)\n• Achievement bullet\n\nRepeat this exact pattern for every role, including multiple roles at the same employer. Never group or nest roles.`,
+          `You are an expert resume editor specializing in senior-level, human-sounding language. Rewrite the resume following these EXACT RULES.
+
+MANDATORY STYLE GUIDELINES:
+1. CONCISION: 8-12 words max per bullet. Cut every non-essential word.
+2. HUMAN TONE: Warm, professional, conversational. Never robotic/corporate.
+3. OUTCOMES OVER TACTICS: Focus on results ($$, %, milestones). Never list table-stakes skills.
+4. NO BUZZWORDS: Replace "stakeholder coordination" with "clear communication" or "relationship building". Replace "cross-functional alignment" with "team collaboration". Replace "hands-on leadership" with specifics. Replace "strong background in X" with "Skilled in X" or show via results.
+5. NO HALLUCINATIONS: Only use information provided. Never add skills or experience not in the original.
+
+SECTION RULES:
+PROFESSIONAL SUMMARY (60-75 words, 3 sentences max):
+- Sentence 1: Years of experience + what you deliver + on-time/budget track record
+- Sentence 2: Scale and complexity (multi-project, cross-team, locations)  
+- Sentence 3: Key strengths + subtle emotional intelligence ("trust-building communication")
+
+AREAS OF EXPERTISE (6 lines max, 2-4 words each):
+- Examples: "Project Planning & Delivery", "Cost Management", "Team Collaboration"
+- Include "Relationship Building" to show emotional intelligence
+
+TECHNICAL SKILLS (4-6 lines):
+- Tools on left, soft skills on right
+- "Quick to learn new systems" instead of listing every tool
+
+PROFESSIONAL EXPERIENCE (3-4 bullets per role MAX):
+- Bold metrics ($1.5M, 80%, 35%)
+- Start with strongest result bullet
+- Action verbs: Delivered, Led, Built, Directed, Achieved
+
+CERTIFICATIONS: Bold cert names. Issuing org only, no dates unless recent.
+
+${TONE_RULES[S.tone]?TONE_RULES[S.tone]:""}
+
+FORMAT: ALL CAPS section headers, • bullets. Output ONLY the resume text. No explanations.
+
+For PROFESSIONAL EXPERIENCE, each role:
+Line 1: Job Title — Company Name, Location
+Line 2: Month Year – Month Year (or Present)
+• Achievement bullet (3-4 bullets max)
+
+Never group roles. Never add experience not in the original.`,
           `Rewrite:\n\n${S.raw}`
         );
         if(r&&r.trim().length>50){S.polished=r;lsSet("resume-polished",r);S.resumeView="preview";S.polishError="";}
@@ -599,7 +646,7 @@ function _render(){
     function mkToneRow(){
       return div({style:{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap"}},[
         span({style:{fontSize:"11px",color:T.muted,fontWeight:"600",textTransform:"uppercase",letterSpacing:"0.06em",marginRight:"2px"}},["Tone:"]),
-        ...[["natural","Human","#0d9488"],["bold","Bold","#7c3aed"],["polished","Formal","#2563eb"]].map(([v,l,c])=>
+        ...[["natural","Human","#0d9488"],["bold","Bold","#7c3aed"],["polished","Formal","#2563eb"],["format","Format Only","#64748b"]].map(([v,l,c])=>
           pillBtn(l,S.tone===v,c,()=>{S.tone=v;lsSet("resume-tone",v);rerender();},{padding:"5px 12px",borderRadius:"16px"})
         )
       ]);
@@ -676,7 +723,7 @@ function _render(){
       const polishRow=div({style:{marginTop:"12px",display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap"}},[
         mkToneRow(),
         (()=>{
-          const b=mkBtn("primary",S.load==="polish"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Polishing…"));return w;})():"✦ Polish resume",doPolish);
+          const b=mkBtn("primary",S.load==="polish"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Formatting…"));return w;})():S.tone==="format"?"⬡ Format as PDF":"✦ Polish resume",doPolish);
           b.disabled=S.load==="polish"||!S.raw.trim();
           polishBtn=b;
           return b;
@@ -685,8 +732,134 @@ function _render(){
       ].filter(Boolean));
 
       const ta=mkTextarea(S.raw,v=>{S.raw=v;debounceSave("resume-raw",v);if(polishBtn)polishBtn.disabled=!v.trim();},200,"Paste your resume text here…");
+      const formatHint=S.tone==="format"?div({style:{marginTop:"6px",fontSize:"12px",color:T.muted,lineHeight:"1.5"}},["Format Only skips the AI entirely — your resume text is used exactly as written, converted to a clean PDF with your header. Perfect when your content is already polished."]):null;
       const errBanner=S.polishError?div({style:{marginTop:"10px",padding:"10px 14px",background:T.danger.bg,border:`1px solid ${T.danger.border}`,borderRadius:"8px",fontSize:"13px",color:T.danger.text}},["⚠ "+S.polishError]):null;
-      tabBody=div({},[ciCard,uploadWrap,ta,polishRow,errBanner].filter(Boolean));
+
+      // ── Resume Tips card ──
+      const TIPS_PROMPT=`You are an expert resume editor specializing in senior-level, human-sounding language. Rewrite the provided resume following these EXACT RULES:
+
+MANDATORY STYLE GUIDELINES:
+1. CONCISION: 8-12 words max per bullet. Cut every non-essential word.
+2. HUMAN TONE: Warm, professional, conversational. Never robotic/corporate.
+3. OUTCOMES > TACTICS: Focus on results ($$, %, milestones hit). Never list table-stakes skills.
+4. NO BUZZWORDS: Replace "stakeholder coordination" → "clear communication" or "relationship building"
+5. NO HALLUCINATIONS: Only use information provided. Never add skills/experience.
+
+SECTION-SPECIFIC RULES:
+
+PROFESSIONAL SUMMARY (60-75 words max, 3 sentences):
+- Sentence 1: Years + what you deliver + on-time/budget
+- Sentence 2: Scale/complexity (multi-project, cross-team, locations)
+- Sentence 3: Key strengths + subtle EI ("trust-building communication")
+
+AREAS OF EXPERTISE (6 lines max, 2-4 words each):
+- Examples: "Project Planning & Delivery", "Cost Management", "Team Collaboration"
+- Include "Relationship Building" to show emotional intelligence
+
+TECHNICAL SKILLS (4-6 lines):
+- Tools on left, soft skills on right
+- "Quick to learn new systems" instead of listing every tool
+
+PROFESSIONAL EXPERIENCE (3-4 bullets per role MAX):
+- Bold metrics ($1.5M, 80%, 35%)
+- Start with strongest result bullet
+- Action verbs: Delivered, Led, Built, Directed, Achieved
+
+CERTIFICATIONS:
+- Bold cert names (PMP, Agile, Six Sigma)
+- Issuing org only, no dates unless recent
+
+CRITICAL AVOID LIST:
+❌ "Stakeholder coordination" → "clear communication" or "relationship building"
+❌ "Scheduling" → imply through "on-time delivery"
+❌ "Cross-functional alignment" → "team collaboration"
+❌ "Hands-on leadership" → "directed programs across X locations"
+❌ "Strong background in X" → "Skilled in X" or show via results
+
+CHECKLIST BEFORE OUTPUT:
+- Every bullet under 12 words
+- No buzzwords from avoid list
+- Metrics bolded ($X, XX%)
+- Human, not robotic tone
+- Only uses provided information
+- Scannable in 15 seconds
+
+FORMAT: ALL CAPS section headers, bullet points. Output ONLY the rewritten resume. No explanations.
+
+REWRITE THIS RESUME:
+[PASTE YOUR RESUME HERE]`;
+
+      const tipsOpen=S.tipsOpen||false;
+      const tipsCard=div({style:{...card_s,marginTop:"16px"}},[
+        // Header row — always visible
+        h("button",{style:{width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",background:"transparent",border:"none",cursor:"pointer",padding:"0",textAlign:"left"},
+          onClick:()=>{S.tipsOpen=!S.tipsOpen;rerender();}},[
+          div({style:{display:"flex",alignItems:"center",gap:"8px"}},[
+            span({style:{fontSize:"16px"}},["💡"]),
+            div({},[
+              div({style:{fontSize:"14px",fontWeight:"700",color:T.text}},["Resume writing tips"]),
+              div({style:{fontSize:"12px",color:T.muted,marginTop:"1px"}},["Guidelines + a prompt you can copy to use with any AI"]),
+            ]),
+          ]),
+          span({style:{fontSize:"14px",color:T.muted,transition:"transform 0.2s",transform:tipsOpen?"rotate(180deg)":"rotate(0deg)"}},["\u25BE"]),
+        ]),
+
+        // Expandable content
+        tipsOpen?div({style:{marginTop:"14px",borderTop:`1px solid ${T.div}`,paddingTop:"14px"}},[
+
+          // Quick tips grid
+          div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginBottom:"14px"}},[
+            ...[
+              ["✂","8-12 words per bullet","Cut every non-essential word"],
+              ["🎯","Outcomes over tactics","Results ($, %, milestones) not responsibilities"],
+              ["🚫","No buzzwords","Stakeholder coordination → clear communication"],
+              ["✅","No hallucinations","Only use what's in your actual experience"],
+              ["💪","Strong action verbs","Delivered, Led, Built, Directed, Achieved"],
+              ["📊","Bold your metrics","$1.5M, 80%, 35 locations — make them pop"],
+            ].map(([icon,title,desc])=>div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"8px",padding:"10px 12px"}},[
+              div({style:{display:"flex",alignItems:"center",gap:"6px",marginBottom:"3px"}},[
+                span({style:{fontSize:"14px"}},[icon]),
+                span({style:{fontSize:"12px",fontWeight:"700",color:T.text}},[title]),
+              ]),
+              div({style:{fontSize:"11px",color:T.muted,lineHeight:"1.4"}},[desc]),
+            ])),
+          ]),
+
+          // Avoid list
+          div({style:{background:T.danger.bg,border:`1px solid ${T.danger.border}`,borderRadius:"8px",padding:"10px 14px",marginBottom:"14px"}},[
+            div({style:{fontSize:"12px",fontWeight:"700",color:T.danger.text,marginBottom:"6px"}},["❌ Phrases to avoid:"]),
+            ...[
+              ['"Stakeholder coordination"','"clear communication" or "relationship building"'],
+              ['"Cross-functional alignment"','"team collaboration"'],
+              ['"Hands-on leadership"','"directed programs across X locations"'],
+              ['"Strong background in X"','"Skilled in X" — or show it via results'],
+              ['"Scheduling"',"imply it through on-time delivery"],
+            ].map(([bad,good])=>div({style:{fontSize:"11px",color:T.danger.text,marginBottom:"3px",display:"flex",gap:"6px"}},[
+              span({style:{flexShrink:"0"}},[bad]),
+              span({style:{color:T.muted}},["\u2192"]),
+              span({style:{color:T.text}},[good]),
+            ])),
+          ]),
+
+          // Copyable prompt
+          div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"8px",padding:"12px 14px"}},[
+            div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},[
+              div({style:{fontSize:"12px",fontWeight:"700",color:T.sub}},["📋 Prompt to use with any AI (ChatGPT, Gemini, etc.)"]),
+              (()=>{
+                const b=mkBtn("ghost",S.copied==="tips"?"✓ Copied!":"Copy prompt",()=>{
+                  navigator.clipboard.writeText(TIPS_PROMPT).catch(()=>{});
+                  S.copied="tips";setTimeout(()=>{S.copied="";rerender();},2500);rerender();
+                },{fontSize:"11px",padding:"4px 10px"});
+                return b;
+              })(),
+            ]),
+            div({style:{fontSize:"11px",color:T.muted,lineHeight:"1.6",whiteSpace:"pre-wrap",maxHeight:"120px",overflow:"hidden",maskImage:"linear-gradient(to bottom, black 60%, transparent 100%)"}},[TIPS_PROMPT.substring(0,300)+"…"]),
+          ]),
+
+        ]):null,
+      ].filter(Boolean));
+
+      tabBody=div({},[ciCard,uploadWrap,ta,polishRow,formatHint,errBanner,tipsCard].filter(Boolean));
 
     }else{
       // PDF Preview
@@ -1344,7 +1517,7 @@ function _render(){
         ...[ ["both","Resume + Cover Letter"],["resume","Resume only"],["cover","Cover Letter only"] ].map(([v,l])=>pillBtn(l,S.genWhat===v,"#2563eb",()=>{S.genWhat=v;rerender();},{padding:"6px 13px",borderRadius:"8px"}))
       ])]),
       div({},[mkLabel("Tone"),div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
-        ...[["natural","Human & natural","#0d9488"],["bold","Bold & direct","#7c3aed"],["polished","Formal","#2563eb"]].map(([v,l,c])=>pillBtn(l,S.tone===v,c,()=>{S.tone=v;lsSet("resume-tone",v);rerender();},{padding:"6px 13px",borderRadius:"8px"}))
+        ...[["natural","Human & natural","#0d9488"],["bold","Bold & direct","#7c3aed"],["polished","Formal","#2563eb"],["format","Format Only","#64748b"]].map(([v,l,c])=>pillBtn(l,S.tone===v,c,()=>{S.tone=v;lsSet("resume-tone",v);rerender();},{padding:"6px 13px",borderRadius:"8px"}))
       ]),span({style:{fontSize:"11px",color:T.muted,marginTop:"6px",display:"block"}},[S.tone==="natural"?"Sounds human — plain language, no buzzwords.":S.tone==="bold"?"Short, punchy, zero filler.":"Professional and structured."])]),
     ]);
 
