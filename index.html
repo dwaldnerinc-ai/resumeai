@@ -221,7 +221,23 @@ function matchBg(m){const d=S.dark;return m>=90?(d?"#052e16":"#f0fdf4"):m>=80?(d
 // PDF RESUME RENDERER
 // ─────────────────────────────────────────────────────────
 function buildPDFHTML(text,ci){
-  // Parse all lines — first section before an ALL CAPS heading goes to header pool
+  // Header comes purely from S.ci — set on the Resume edit tab
+  const name=ci.name||"";
+  const tagline=ci.tagline||"";
+  const phone=ci.phone||"";
+  const email=ci.email||"";
+  const location=ci.location||"";
+  const linkedin=ci.linkedin||"";
+
+  const contactParts=[
+    location?`<span class="pdf-contact-item pdf-ci-location">\uD83D\uDCCD ${esc(location)}</span>`:"",
+    phone?`<span class="pdf-contact-item pdf-ci-phone">\uD83D\uDCDE ${esc(phone)}</span>`:"",
+    email?`<span class="pdf-contact-item pdf-ci-email">\u2709 ${esc(email)}</span>`:"",
+    linkedin?`<span class="pdf-contact-item pdf-ci-linkedin">\uD83D\uDD17 ${esc(linkedin)}</span>`:"",
+  ].filter(Boolean).join('<span style="color:#ccc"> | </span>');
+
+  // Parse resume body — skip any lines that look like header info
+  // (name/contact at top before the first ALL CAPS section)
   const allLines=text.split("\n").map(l=>l.trim()).filter(Boolean);
   const sections=[];
   let cur=null;
@@ -234,45 +250,7 @@ function buildPDFHTML(text,ci){
     }else{if(!cur)cur={title:"__hdr__",items:[]};cur.items.push({type:"text",text:line});}
   });
   if(cur)sections.push(cur);
-
-  // Extract header info from the __hdr__ section (lines before first section heading)
-  const hdrItems=(sections.find(s=>s.title==="__hdr__")||{items:[]}).items.map(i=>i.text);
-  const rest=sections.filter(s=>s.title!=="__hdr__");
-
-  // Parse name, tagline, contact from header lines
-  let name="",tagline="",contactItems=[];
-  hdrItems.forEach((line,i)=>{
-    if(!name&&/^[A-Z][a-z]/.test(line)&&line.split(" ").length>=2&&line.length<60&&!line.includes("|")&&!line.includes("@")&&!line.match(/\d{3}/)){
-      name=line;
-    } else if(!tagline&&(line.includes("|")||/Manager|Director|Engineer|Specialist|Analyst|Coordinator|Officer/i.test(line))){
-      tagline=line;
-    } else if(line.includes("@")||line.match(/\(?\d{3}\)?[\s.-]\d{3}/)||line.toLowerCase().includes("linkedin")||line.match(/[A-Z][a-z]+,\s*[A-Z]{2}/)||line.includes("\uD83D")||line.includes("\uD83C")||line.includes("\u260D")||line.includes("\u260F")||line.includes("\u2709")||line.includes("\uD83D\uDCCD")){
-      contactItems.push(line);
-    } else if(name&&!tagline&&line.length>20){
-      tagline=line;
-    }
-  });
-
-  // Fall back to S.ci values if not found in text, then placeholders
-  if(!name)name=ci.name||"Your Name";
-  if(!tagline)tagline=ci.tagline||"";
-
-  // Build contact line from detected items or S.ci
-  const phone=ci.phone||(contactItems.find(l=>l.match(/\(?\d{3}\)?[\s.-]\d{3}/)))||"";
-  const email=ci.email||(contactItems.find(l=>l.includes("@")))||"";
-  const location=ci.location||(contactItems.find(l=>l.match(/[A-Z][a-z]+,\s*[A-Z]{2}/)))||"";
-  const linkedin=ci.linkedin||(contactItems.find(l=>l.toLowerCase().includes("linkedin")))||"";
-
-  const contactParts=[
-    location?`<span class="pdf-contact-item pdf-ci-location">\uD83D\uDCCD ${esc(location)}</span>`:"",
-    phone?`<span class="pdf-contact-item pdf-ci-phone">\uD83D\uDCDE ${esc(phone)}</span>`:"",
-    email?`<span class="pdf-contact-item pdf-ci-email">\u2709 ${esc(email)}</span>`:"",
-    linkedin?`<span class="pdf-contact-item pdf-ci-linkedin">\uD83D\uDD17 ${esc(linkedin)}</span>`:"",
-  ].filter(Boolean).join('<span style="color:#ccc"> | </span>');
-
-
-
-  function renderExp(items){
+  const rest=sections.filter(s=>s.title!=="__hdr__");  function renderExp(items){
     const blocks=[];let block=null;
     const isSubLine=(tx)=>/\d{4}/.test(tx)||tx.includes(" – ")||tx.includes(" - ")||tx.includes("Present")||tx.includes("present")||(tx.length<70&&block&&block.bullets.length===0&&block.left);
     items.forEach(it=>{
@@ -317,10 +295,10 @@ function buildPDFHTML(text,ci){
   }).join("");
 
   return`<div class="pdf-wrap">
-    <div class="pdf-name">${esc(name)}</div>
+    ${name?`<div class="pdf-name">${esc(name)}</div>`:""}
     ${tagline?`<div class="pdf-tagline">${esc(tagline)}</div>`:""}
     ${contactParts?`<div class="pdf-contact">${contactParts}</div>`:""}
-    <hr class="pdf-divider"/>
+    ${(name||contactParts)?`<hr class="pdf-divider"/>`:""}
     ${sectionsHTML}
   </div>`;
 }
@@ -673,7 +651,28 @@ function _render(){
       uploadWrap.appendChild(uploadBtn);
       uploadWrap.appendChild(span({style:{fontSize:"12px",color:T.muted}},["— or paste text below"]));
 
-      let polishBtn;
+      // ── Contact info card ──
+      const ciCard=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"14px"}},[
+        div({style:{fontSize:"12px",fontWeight:"700",color:T.sub,marginBottom:"10px",textTransform:"uppercase",letterSpacing:"0.07em"}},["\uD83D\uDC64 Your contact info — shown on all PDFs"]),
+        div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}},[
+          ...[
+            ["name","Full Name","e.g. David Waldner"],
+            ["tagline","Title / Tagline","e.g. Senior Program Manager | PMP"],
+            ["phone","Phone","e.g. (604) 555-1234"],
+            ["email","Email","e.g. david@email.com"],
+            ["location","Location","e.g. Vancouver, BC"],
+            ["linkedin","LinkedIn","linkedin.com/in/yourprofile (optional)"],
+          ].map(([f,lb,ph])=>div({},[
+            mkLabel(lb),
+            (()=>{
+              const i=mkInput(S.ci[f]||"",v=>{S.ci={...S.ci,[f]:v};lsSet("resume-ci",JSON.stringify(S.ci));},{placeholder:ph});
+              return i;
+            })(),
+          ])),
+        ]),
+      ]);
+
+
       const polishRow=div({style:{marginTop:"12px",display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap"}},[
         mkToneRow(),
         (()=>{
@@ -687,7 +686,7 @@ function _render(){
 
       const ta=mkTextarea(S.raw,v=>{S.raw=v;debounceSave("resume-raw",v);if(polishBtn)polishBtn.disabled=!v.trim();},200,"Paste your resume text here…");
       const errBanner=S.polishError?div({style:{marginTop:"10px",padding:"10px 14px",background:T.danger.bg,border:`1px solid ${T.danger.border}`,borderRadius:"8px",fontSize:"13px",color:T.danger.text}},["⚠ "+S.polishError]):null;
-      tabBody=div({},[uploadWrap,ta,polishRow,errBanner].filter(Boolean));
+      tabBody=div({},[ciCard,uploadWrap,ta,polishRow,errBanner].filter(Boolean));
 
     }else{
       // PDF Preview
