@@ -329,10 +329,10 @@ function buildPDFHTML(text,ci){
     <div class="pdf-name">${esc(name)}</div>
     <div class="pdf-tagline">${esc(tagline)}</div>
     <div class="pdf-contact">
-      <span>📍 ${esc(location)}</span><span style="color:#ccc">|</span>
-      <span>📞 ${esc(phone)}</span><span style="color:#ccc">|</span>
-      <span>✉ ${esc(email)}</span><span style="color:#ccc">|</span>
-      <span>🔗 ${esc(linkedin)}</span>
+      <span class="pdf-contact-item pdf-ci-location">📍 ${esc(location)}</span><span style="color:#ccc">|</span>
+      <span class="pdf-contact-item pdf-ci-phone">📞 ${esc(phone)}</span><span style="color:#ccc">|</span>
+      <span class="pdf-contact-item pdf-ci-email">✉ ${esc(email)}</span>
+      ${linkedin?`<span style="color:#ccc">|</span><span class="pdf-contact-item pdf-ci-linkedin">🔗 ${esc(linkedin)}</span>`:""}
     </div>
     <hr class="pdf-divider"/>
     ${sectionsHTML}
@@ -359,24 +359,30 @@ function wireEditable(previewBox,getText,onSave){
   }
 
   function syncCiFromHeader(){
-    // When user edits header directly in the PDF, sync back to S.ci
+    // Sync edited header fields back to S.ci using specific element classes
     const nameEl=previewBox.querySelector(".pdf-name");
     const tagEl=previewBox.querySelector(".pdf-tagline");
-    if(nameEl&&nameEl.innerText.trim()&&nameEl.innerText.trim()!=="Your Name"){
-      S.ci={...S.ci,name:nameEl.innerText.trim()};
+    const locationEl=previewBox.querySelector(".pdf-ci-location");
+    const phoneEl=previewBox.querySelector(".pdf-ci-phone");
+    const emailEl=previewBox.querySelector(".pdf-ci-email");
+    const linkedinEl=previewBox.querySelector(".pdf-ci-linkedin");
+
+    function clean(el,prefix){
+      if(!el)return null;
+      // Remove the emoji prefix (📍 📞 ✉ 🔗) to get just the value
+      return el.innerText.replace(prefix,"").trim();
     }
-    if(tagEl&&tagEl.innerText.trim()){
-      S.ci={...S.ci,tagline:tagEl.innerText.trim()};
-    }
-    // Sync contact line items
-    previewBox.querySelectorAll(".pdf-contact-item").forEach(el=>{
-      const tx=el.innerText.trim();
-      if(!tx)return;
-      if(tx.includes("@"))S.ci={...S.ci,email:tx};
-      else if(tx.match(/^\(?\d/))S.ci={...S.ci,phone:tx};
-      else if(tx.includes("linkedin"))S.ci={...S.ci,linkedin:tx};
-      else if(tx.includes(",")&&tx.length<40)S.ci={...S.ci,location:tx};
-    });
+
+    const updates={};
+    if(nameEl)updates.name=nameEl.innerText.trim();
+    if(tagEl)updates.tagline=tagEl.innerText.trim();
+    if(locationEl)updates.location=clean(locationEl,"📍");
+    if(phoneEl)updates.phone=clean(phoneEl,"📞");
+    if(emailEl)updates.email=clean(emailEl,"✉");
+    // If linkedin element is gone (user deleted it) or empty, clear it
+    updates.linkedin=linkedinEl?clean(linkedinEl,"🔗"):"";
+
+    S.ci={...S.ci,...updates};
     lsSet("resume-ci",JSON.stringify(S.ci));
   }
 
