@@ -220,66 +220,56 @@ function matchBg(m){const d=S.dark;return m>=90?(d?"#052e16":"#f0fdf4"):m>=80?(d
 // PDF RESUME RENDERER
 // ─────────────────────────────────────────────────────────
 function buildPDFHTML(text,ci){
-  // Auto-detect header info from resume text if S.ci fields are empty
-  const lines=text.split("\n").map(l=>l.trim()).filter(Boolean);
-  let detectedName="", detectedTagline="", detectedEmail="", detectedPhone="", detectedLocation="", detectedLinkedin="";
-  let bodyStartIdx=0;
-
-  // Scan the first ~8 lines for header-like content before the first ALL CAPS section
-  for(let i=0;i<Math.min(8,lines.length);i++){
-    const l=lines[i];
-    const isSection=/^[A-Z][A-Z\s&\/]{4,}$/.test(l)&&l.length<60;
-    if(isSection){bodyStartIdx=i;break;}
-    bodyStartIdx=i+1;
-    // Detect name: mixed case, no special chars, 2+ words, short line
-    if(!detectedName&&/^[A-Z][a-z]/.test(l)&&l.split(" ").length>=2&&l.length<50&&!l.includes("@")&&!l.includes("|")){
-      detectedName=l;
-    }
-    // Detect tagline: contains | separators or known PM/role keywords
-    else if(!detectedTagline&&(l.includes("|")||l.includes("Manager")||l.includes("Director")||l.includes("Engineer"))&&l.length>20){
-      detectedTagline=l;
-    }
-    // Detect contact items
-    if(l.includes("@"))detectedEmail=l.replace(/.*?([^\s|]+@[^\s|]+).*/,"$1");
-    if(l.match(/\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/))detectedPhone=l.match(/\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/)[0];
-    if(l.toLowerCase().includes("linkedin"))detectedLinkedin=l.replace(/.*?(linkedin\.com[^\s|]+).*/i,"$1");
-    if(l.match(/[A-Z][a-z]+,\s*[A-Z]{2}/)&&l.length<40)detectedLocation=l.replace(/.*?([A-Z][a-z]+,\s*[A-Z]{2}).*/,"$1");
-  }
-
-  // Use S.ci values if set, otherwise fall back to detected values, otherwise placeholder
-  const name=ci.name||detectedName||"Your Name";
-  const tagline=ci.tagline||detectedTagline||"Senior Program Manager | Operations Manager | Project Manager";
-  const phone=ci.phone||detectedPhone||"(xxx) xxx-xxxx";
-  const email=ci.email||detectedEmail||"yourname@email.com";
-  const location=ci.location||detectedLocation||"Vancouver, BC";
-  const linkedin=ci.linkedin||detectedLinkedin||"linkedin.com/in/yourprofile";
-
-  // Auto-save detected values back to S.ci if fields were empty (so header stays consistent)
-  if(!ci.name&&detectedName){S.ci={...S.ci,name:detectedName};lsSet("resume-ci",JSON.stringify(S.ci));}
-  if(!ci.tagline&&detectedTagline){S.ci={...S.ci,tagline:detectedTagline};lsSet("resume-ci",JSON.stringify(S.ci));}
-  if(!ci.email&&detectedEmail){S.ci={...S.ci,email:detectedEmail};lsSet("resume-ci",JSON.stringify(S.ci));}
-  if(!ci.phone&&detectedPhone){S.ci={...S.ci,phone:detectedPhone};lsSet("resume-ci",JSON.stringify(S.ci));}
-  if(!ci.location&&detectedLocation){S.ci={...S.ci,location:detectedLocation};lsSet("resume-ci",JSON.stringify(S.ci));}
-  if(!ci.linkedin&&detectedLinkedin){S.ci={...S.ci,linkedin:detectedLinkedin};lsSet("resume-ci",JSON.stringify(S.ci));}
-
-  // Use only body text (skip detected header lines) for section parsing
-  const bodyText=lines.slice(bodyStartIdx).join("\n");
-
-  // Parse sections from body only
+  // Parse all lines — first section before an ALL CAPS heading goes to header pool
+  const allLines=text.split("\n").map(l=>l.trim()).filter(Boolean);
   const sections=[];
   let cur=null;
-  bodyText.split("\n").forEach(line=>{
-    const tr=line.trim();
-    if(!tr)return;
-    const isH=/^[A-Z][A-Z\s&\/]{4,}$/.test(tr)&&tr.length<60;
-    if(isH){if(cur)sections.push(cur);cur={title:tr,items:[]};}
+  allLines.forEach(line=>{
+    const isH=/^[A-Z][A-Z\s&\/,\-:.']{3,}$/.test(line)&&line===line.toUpperCase()&&line.length<60;
+    if(isH){if(cur)sections.push(cur);cur={title:line,items:[]};}
     else if(cur){
-      if(tr.startsWith("•")||tr.startsWith("–")||tr.startsWith("-"))cur.items.push({type:"bullet",text:tr.replace(/^[•–\-]\s*/,"")});
-      else cur.items.push({type:"text",text:tr});
-    }else{if(!cur)cur={title:"__hdr__",items:[]};cur.items.push({type:"text",text:tr});}
+      if(line.startsWith("\u2022")||line.startsWith("\u2013")||line.startsWith("-"))cur.items.push({type:"bullet",text:line.replace(/^[\u2022\u2013\-]\s*/,"")});
+      else cur.items.push({type:"text",text:line});
+    }else{if(!cur)cur={title:"__hdr__",items:[]};cur.items.push({type:"text",text:line});}
   });
   if(cur)sections.push(cur);
+
+  // Extract header info from the __hdr__ section (lines before first section heading)
+  const hdrItems=(sections.find(s=>s.title==="__hdr__")||{items:[]}).items.map(i=>i.text);
   const rest=sections.filter(s=>s.title!=="__hdr__");
+
+  // Parse name, tagline, contact from header lines
+  let name="",tagline="",contactItems=[];
+  hdrItems.forEach((line,i)=>{
+    if(!name&&/^[A-Z][a-z]/.test(line)&&line.split(" ").length>=2&&line.length<60&&!line.includes("|")&&!line.includes("@")&&!line.match(/\d{3}/)){
+      name=line;
+    } else if(!tagline&&(line.includes("|")||/Manager|Director|Engineer|Specialist|Analyst|Coordinator|Officer/i.test(line))){
+      tagline=line;
+    } else if(line.includes("@")||line.match(/\(?\d{3}\)?[\s.-]\d{3}/)||line.toLowerCase().includes("linkedin")||line.match(/[A-Z][a-z]+,\s*[A-Z]{2}/)||line.includes("\uD83D")||line.includes("\uD83C")||line.includes("\u260D")||line.includes("\u260F")||line.includes("\u2709")||line.includes("\uD83D\uDCCD")){
+      contactItems.push(line);
+    } else if(name&&!tagline&&line.length>20){
+      tagline=line;
+    }
+  });
+
+  // Fall back to S.ci values if not found in text, then placeholders
+  if(!name)name=ci.name||"Your Name";
+  if(!tagline)tagline=ci.tagline||"";
+
+  // Build contact line from detected items or S.ci
+  const phone=ci.phone||(contactItems.find(l=>l.match(/\(?\d{3}\)?[\s.-]\d{3}/)))||"";
+  const email=ci.email||(contactItems.find(l=>l.includes("@")))||"";
+  const location=ci.location||(contactItems.find(l=>l.match(/[A-Z][a-z]+,\s*[A-Z]{2}/)))||"";
+  const linkedin=ci.linkedin||(contactItems.find(l=>l.toLowerCase().includes("linkedin")))||"";
+
+  const contactParts=[
+    location?`<span class="pdf-contact-item pdf-ci-location">\uD83D\uDCCD ${esc(location)}</span>`:"",
+    phone?`<span class="pdf-contact-item pdf-ci-phone">\uD83D\uDCDE ${esc(phone)}</span>`:"",
+    email?`<span class="pdf-contact-item pdf-ci-email">\u2709 ${esc(email)}</span>`:"",
+    linkedin?`<span class="pdf-contact-item pdf-ci-linkedin">\uD83D\uDD17 ${esc(linkedin)}</span>`:"",
+  ].filter(Boolean).join('<span style="color:#ccc"> | </span>');
+
+
 
   function renderExp(items){
     const blocks=[];let block=null;
@@ -327,13 +317,8 @@ function buildPDFHTML(text,ci){
 
   return`<div class="pdf-wrap">
     <div class="pdf-name">${esc(name)}</div>
-    <div class="pdf-tagline">${esc(tagline)}</div>
-    <div class="pdf-contact">
-      <span class="pdf-contact-item pdf-ci-location">📍 ${esc(location)}</span><span style="color:#ccc">|</span>
-      <span class="pdf-contact-item pdf-ci-phone">📞 ${esc(phone)}</span><span style="color:#ccc">|</span>
-      <span class="pdf-contact-item pdf-ci-email">✉ ${esc(email)}</span>
-      ${linkedin?`<span style="color:#ccc">|</span><span class="pdf-contact-item pdf-ci-linkedin">🔗 ${esc(linkedin)}</span>`:""}
-    </div>
+    ${tagline?`<div class="pdf-tagline">${esc(tagline)}</div>`:""}
+    ${contactParts?`<div class="pdf-contact">${contactParts}</div>`:""}
     <hr class="pdf-divider"/>
     ${sectionsHTML}
   </div>`;
@@ -1151,7 +1136,6 @@ function _render(){
               S.posting=app.title+" at "+app.company+"\nLocation: "+app.location+"\nType: "+app.type+(app.salary?"\nSalary: "+app.salary:"")+"\n\n"+(app.notes||"");
               S.tailored="";S.cover="";S.tab="apply";rerender();
             },{fontSize:"12px",padding:"6px 14px"}),
-            mkBtn("teal","Prep interview →",()=>{S.intJob=app.id;S.tab="interview";rerender();},{fontSize:"12px",padding:"6px 14px"}),
             mkBtn("ghost","Edit",()=>{S.fd={...app};S.editId=app.id;S.showForm=true;rerender();},{fontSize:"12px",padding:"6px 14px"}),
             app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",style:{padding:"6px 14px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:T.ghost.text,textDecoration:"none",display:"inline-flex",alignItems:"center"}},["View posting ↗"]):null,
             mkBtn("danger","Remove",async()=>{if(!confirm("Remove?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();}),
