@@ -545,7 +545,7 @@ function _render(){
   }
 
   // ── HEADER ──
-  const TABS=[["resume","1","Resume"],["search","2","Find Jobs"],["board","3","Job Board"],["apply","4","Generate Docs"],["tracker","5","Apply & Track"],["interview","6","Interview Prep"]];
+  const TABS=[["resume","1","Resume"],["search","2","Find Jobs"],["board","3","Job Board"],["apply","4","Craft"],["tracker","5","Apply & Track"],["interview","6","Interview Prep"]];
 
   const hasKey=!!S.apiKey;
   const header=div({style:{background:T.hBg,borderBottom:`1px solid ${T.hBorder}`,padding:"0 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:"0",zIndex:"10",minHeight:"54px",flexWrap:"wrap",gap:"8px",paddingTop:"8px",paddingBottom:"8px"}},[
@@ -1503,7 +1503,7 @@ function _render(){
 
     content=div({},[
       div({style:card_s},[
-        div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"4px"}},["Generate tailored documents"]),
+        div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"4px"}},["Craft your application"]),
         div({style:{fontSize:"13px",color:T.sub,marginBottom:"12px"}},["Select a job from your board to generate a tailored resume and cover letter. Then head to Apply & Track to submit and track your application."]),
         S.apps.length>0?div({style:{marginBottom:"12px"}},[
           mkLabel("Choose from your job board"),
