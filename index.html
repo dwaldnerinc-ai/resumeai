@@ -82,7 +82,7 @@ const S={
   dark:true, tab:"resume",
   raw:"", polished:"", resumeView:"edit", tone:"natural",
   ci:{name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""},
-  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, tipsOpen:false,
+  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, tipsOpen:false,tmplOpen:false,tmpl:null,
   selectedJob:null, posting:"", tailored:"", cover:"", applyOut:"resume", genWhat:"both",
   apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
   searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
@@ -887,7 +887,84 @@ REWRITE THIS RESUME:
       const formatHint=S.tone==="format"?div({style:{marginTop:"6px",fontSize:"12px",color:T.muted,lineHeight:"1.5"}},["Format Only skips the AI entirely — your resume text is used exactly as written, converted to a clean PDF with your header. Perfect when your content is already polished."]):null;
       const errBanner=S.polishError?div({style:{marginTop:"10px",padding:"10px 14px",background:T.danger.bg,border:`1px solid ${T.danger.border}`,borderRadius:"8px",fontSize:"13px",color:T.danger.text}},["⚠ "+S.polishError]):null;
 
-      tabBody=div({},[ciCard,uploadWrap,ta,polishRow,formatHint,errBanner].filter(Boolean));
+
+      // ── Resume Template card ──
+      if(!S.tmpl)S.tmpl={summary:"",expertise:"",skills:"",certs:"",additional:"",jobs:[{title:"",company:"",location:"",dates:"",bullets:""}]};
+
+      function buildFromTemplate(){
+        const T2=S.tmpl;
+        const lines=[];
+        if(T2.summary.trim()){lines.push("PROFESSIONAL SUMMARY");lines.push(T2.summary.trim());lines.push("");}
+        if(T2.expertise.trim()){lines.push("AREAS OF EXPERTISE");T2.expertise.split("\n").map(l=>l.trim()).filter(Boolean).forEach(l=>lines.push("\u2022 "+l));lines.push("");}
+        if(T2.skills.trim()){lines.push("TECHNICAL SKILLS");T2.skills.split("\n").map(l=>l.trim()).filter(Boolean).forEach(l=>lines.push("\u2022 "+l));lines.push("");}
+        const jobs=(T2.jobs||[]).filter(j=>j.title||j.company);
+        if(jobs.length){
+          lines.push("PROFESSIONAL EXPERIENCE");
+          jobs.forEach(j=>{
+            lines.push((j.title||"Role")+" \u2014 "+(j.company||"Company")+(j.location?", "+j.location:""));
+            if(j.dates)lines.push(j.dates);
+            (j.bullets||"").split("\n").map(l=>l.trim()).filter(Boolean).forEach(l=>lines.push("\u2022 "+l));
+            lines.push("");
+          });
+        }
+        if(T2.certs.trim()){lines.push("CERTIFICATIONS");T2.certs.split("\n").map(l=>l.trim()).filter(Boolean).forEach(l=>lines.push("\u2022 "+l));lines.push("");}
+        if(T2.additional.trim()){lines.push("ADDITIONAL QUALIFICATIONS");T2.additional.split("\n").map(l=>l.trim()).filter(Boolean).forEach(l=>lines.push("\u2022 "+l));lines.push("");}
+        S.raw=lines.join("\n").trim();lsSet("resume-raw",S.raw);S.tmplOpen=false;rerender();
+      }
+
+      const tmplCard=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"14px"}},[
+        h("button",{style:{width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",background:"transparent",border:"none",cursor:"pointer",padding:"0"},
+          onClick:()=>{S.tmplOpen=!S.tmplOpen;rerender();}},[
+          div({style:{display:"flex",alignItems:"center",gap:"8px"}},[
+            span({style:{fontSize:"16px"}},["\uD83D\uDCCB"]),
+            div({},[
+              div({style:{fontSize:"13px",fontWeight:"700",color:T.text}},["Resume template"]),
+              div({style:{fontSize:"11px",color:T.muted}},["Having trouble with formatting? Fill in the fields and we\u2019ll build it for you"]),
+            ]),
+          ]),
+          span({style:{fontSize:"12px",color:T.muted}},[S.tmplOpen?"\u25B2":"\u25BE"]),
+        ]),
+        S.tmplOpen?div({style:{marginTop:"14px",borderTop:`1px solid ${T.div}`,paddingTop:"14px"}},[
+          div({style:{marginBottom:"12px"}},[
+            mkLabel("Professional Summary (2-3 sentences)"),
+            mkTextarea(S.tmpl.summary,v=>{S.tmpl.summary=v;},60,"e.g. 17+ years delivering complex infrastructure projects on time and budget..."),
+          ]),
+          div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"12px"}},[
+            div({},[mkLabel("Areas of Expertise \u2014 one per line"),mkTextarea(S.tmpl.expertise,v=>{S.tmpl.expertise=v;},90,"Project Planning & Delivery\nBudgeting & Cost Management\nRisk Management")]),
+            div({},[mkLabel("Technical Skills \u2014 one per line"),mkTextarea(S.tmpl.skills,v=>{S.tmpl.skills=v;},90,"Microsoft Project\nExcel\nTeams\nQuick to learn new systems")]),
+          ]),
+          div({style:{marginBottom:"12px"}},[
+            div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},[
+              mkLabel("Professional Experience"),
+              mkBtn("ghost","+ Add role",()=>{S.tmpl.jobs=[...(S.tmpl.jobs||[]),{title:"",company:"",location:"",dates:"",bullets:""}];rerender();},{fontSize:"11px",padding:"3px 10px"}),
+            ]),
+            ...((S.tmpl.jobs||[]).map((job,i)=>div({style:{background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"12px",marginBottom:"8px"}},[
+              div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},[
+                span({style:{fontSize:"11px",fontWeight:"700",color:T.muted}},["Role "+(i+1)]),
+                i>0?mkBtn("ghost","\u2715",()=>{S.tmpl.jobs=S.tmpl.jobs.filter((_,j)=>j!==i);rerender();},{fontSize:"11px",padding:"2px 8px"}):null,
+              ].filter(Boolean)),
+              div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginBottom:"8px"}},[
+                div({},[mkLabel("Job Title"),(()=>{const inp=mkInput(job.title,v=>{S.tmpl.jobs[i].title=v;},{placeholder:"e.g. Senior Project Manager"});return inp;})()]),
+                div({},[mkLabel("Company"),(()=>{const inp=mkInput(job.company,v=>{S.tmpl.jobs[i].company=v;},{placeholder:"e.g. TELUS"});return inp;})()]),
+                div({},[mkLabel("Location"),(()=>{const inp=mkInput(job.location,v=>{S.tmpl.jobs[i].location=v;},{placeholder:"e.g. Vancouver, BC"});return inp;})()]),
+                div({},[mkLabel("Dates"),(()=>{const inp=mkInput(job.dates,v=>{S.tmpl.jobs[i].dates=v;},{placeholder:"e.g. Jan 2018 \u2013 Mar 2023"});return inp;})()]),
+              ]),
+              mkLabel("Key achievements \u2014 one bullet per line"),
+              mkTextarea(job.bullets,v=>{S.tmpl.jobs[i].bullets=v;},70,"Delivered $4.2M project on time\nReduced vendor costs by 18%"),
+            ]))),
+          ]),
+          div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"16px"}},[
+            div({},[mkLabel("Certifications \u2014 one per line"),mkTextarea(S.tmpl.certs,v=>{S.tmpl.certs=v;},80,"PMP \u2013 Project Management Institute\nAgile/Scrum \u2013 TELUS")]),
+            div({},[mkLabel("Additional Qualifications \u2014 one per line"),mkTextarea(S.tmpl.additional,v=>{S.tmpl.additional=v;},80,"Valid Driver\u2019s License\nBilingual (English/French)")]),
+          ]),
+          div({style:{display:"flex",gap:"8px",alignItems:"center"}},[
+            mkBtn("primary","\u29C6 Build resume from template",buildFromTemplate),
+            span({style:{fontSize:"11px",color:T.muted}},["Fills the text area above \u2014 then choose a tone and polish"]),
+          ]),
+        ]):null,
+      ].filter(Boolean));
+
+      tabBody=div({},[ciCard,uploadWrap,ta,polishRow,formatHint,errBanner,tmplCard].filter(Boolean));
 
     }else{
       // PDF Preview
