@@ -24,7 +24,6 @@ button:active{transform:scale(0.97)}
 .pdf-tagline{font-size:11pt;color:#2e6da4;font-weight:600;text-align:center;margin-bottom:8px}
 .pdf-contact{font-size:9.5pt;color:#555;display:flex;justify-content:center;flex-wrap:wrap;gap:4px 12px;margin-bottom:0}
 .pdf-divider{border:none;border-top:3px solid #1e3a6e;margin:14px 0 16px}
-.pdf-sec-title{font-size:9.5pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.09em;border-bottom:1.5px solid #d0d8e4;padding-bottom:4px;margin-bottom:7px;text-align:center}
 .pdf-exp-block{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #eef0f4}
 .pdf-exp-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
 .pdf-exp-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 12px;margin-bottom:4px}
@@ -39,6 +38,10 @@ button:active{transform:scale(0.97)}
 .pdf-grid-item{display:flex;gap:0;align-items:center;justify-content:center;color:#222}
 .pdf-grid-item span{color:#222}
 .pdf-grid-item .pdf-bullet-dot{display:none}
+.app-stale{border:1.5px solid #854d0e!important;background:rgba(133,77,14,0.1)!important;position:relative}
+.app-stale::after{content:"⚠ Follow up?";position:absolute;top:-10px;right:10px;background:#854d0e;color:white;font-size:10px;padding:2px 6px;border-radius:4px;font-family:inherit}
+.pdf-bullet-text strong,.pdf-text-line strong{font-weight:700;color:#1e40af;background:rgba(30,64,175,0.03);padding:0 1px;border-radius:2px}
+.pdf-sec-title{font-size:9.5pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.09em;border-bottom:2px solid #1e40af;padding-bottom:4px;margin-bottom:7px;text-align:center}
 
 @media print{
   body>*:not(#print-area){display:none!important}
@@ -69,7 +72,7 @@ const SEED_APPS=[];
 
 
 const TONE_RULES={
-  natural:`VOICE (critical): Write like a confident human — not a corporate AI. Plain direct language. AVOID: spearheaded, leveraged, utilized, orchestrated, championed, fostered, robust, seamless, synergy, dynamic, innovative, results-driven, passionate, proven track record, end-to-end, holistic, transformative. Use simple verbs: Led, Built, Managed, Reduced, Saved, Improved, Delivered, Cut, Launched.`,
+  natural:`VOICE (critical): Write like a confident human — not a corporate AI. Plain direct language. AVOID: spearheaded, leveraged, utilized, orchestrated, championed, fostered, robust, seamless, synergy, dynamic, innovative, results-driven, passionate, proven track record, end-to-end, holistic, transformative. Use simple verbs: Led, Built, Managed, Reduced, Saved, Improved, Delivered, Cut, Launched. TONE REGISTER: Peer-to-peer. This is a Senior Leader speaking to another Senior Leader. No 'Dear Sir/Madam,' no over-explaining, no begging. Confident and direct.`,
   bold:`VOICE: Confident, direct, punchy. Short powerful bullets. No filler. No buzzwords. No passive voice.`,
   polished:`VOICE: Professional and structured. Avoid extreme buzzwords. Strong action verbs, quantify where possible.`,
   format:null
@@ -82,7 +85,7 @@ const S={
   dark:true, tab:"resume",
   raw:"", polished:"", resumeView:"edit", tone:"natural",
   ci:{name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""},
-  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, tipsOpen:false,tmplOpen:false,tmpl:null,
+  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, tipsOpen:false,tmplOpen:false,tmpl:null,followUpText:"",followUpJob:null,
   selectedJob:null, posting:"", tailored:"", cover:"", applyOut:"resume", genWhat:"both",
   apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
   searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
@@ -215,6 +218,42 @@ function isDone(s){
   return {resume:!!S.polished,search:S.searchDone,board:S.apps.length>0,apply:!!(S.tailored||S.cover),tracker:S.apps.some(a=>a.status!=="saved"),interview:S.intQs.length>0}[s]||false;
 }
 
+function calculateImpactScore(text){
+  if(!text)return 0;
+  const metricRegex=/(\$?\d+(?:\.\d+)?[MKk%+]?)/g;
+  const matches=text.match(metricRegex)||[];
+  const uniqueMetrics=new Set(matches).size;
+  const verbs=["led","managed","reduced","saved","built","delivered","optimized","spearheaded","directed","achieved","launched","mentored","captured"];
+  const verbCount=verbs.filter(v=>text.toLowerCase().includes(v)).length;
+  return Math.min((uniqueMetrics*8)+(verbCount*5),100);
+}
+
+function calculateJobMatch(resumeText,jobPosting){
+  if(!resumeText||!jobPosting)return 0;
+  const keywords=["pmp","agile","scrum","budget","telecom","infrastructure","procurement","stakeholder","risk","compliance","lean","six sigma","fiber","copper","project management","program management","change management","vendor","contract","schedule","scope","quality","safety","reporting","forecasting","itil","resource","waterfall"];
+  const postingLower=jobPosting.toLowerCase();
+  const resumeLower=resumeText.toLowerCase();
+  let matchCount=0,totalFound=0;
+  keywords.forEach(word=>{
+    if(postingLower.includes(word)){
+      totalFound++;
+      if(resumeLower.includes(word))matchCount++;
+    }
+  });
+  if(totalFound===0)return 70;
+  return Math.round((matchCount/totalFound)*100);
+}
+
+function generateFollowUp(jobTitle,company){
+  const templates=[
+    `Hi [Hiring Manager Name],\n\nI'm following up on my application for the ${jobTitle} role at ${company}. Given my 17+ years in infrastructure and program delivery — including $1.5M in captured savings at TELUS — I'm confident I can bring that same operational discipline to your team.\n\nI'm still very interested and would welcome a conversation about next steps.\n\nBest,\n[Your Name]`,
+    `Hi [Hiring Manager Name],\n\nI wanted to keep my application for the ${jobTitle} position at ${company} top of mind. Since applying, I've been thinking about how my experience in high-pressure decision-making and contract compliance could support your current roadmap.\n\nDo you have an update on the interview timeline?\n\nRegards,\n[Your Name]`,
+  ];
+  return templates[Math.floor(Math.random()*templates.length)];
+}
+
+
+
 function matchColor(m){return m>=90?"#16a34a":m>=80?"#2563eb":m>=70?"#d97706":"#6b7280";}
 function matchBg(m){const d=S.dark;return m>=90?(d?"#052e16":"#f0fdf4"):m>=80?(d?"#0c1e3e":"#eff6ff"):m>=70?(d?"#1c1200":"#fffbeb"):(d?"#1f2937":"#f3f4f6");}
 
@@ -253,9 +292,10 @@ function buildPDFHTML(text,ci){
   if(cur)sections.push(cur);
   const rest=sections.filter(s=>s.title!=="__hdr__");  function renderExp(items){
     const blocks=[];let block=null;
+    const highlightMetrics=(text)=>text.replace(/(\$?\d+(?:\.\d+)?[MKk%+]?)/g,'<strong>$1</strong>');
     const isSubLine=(tx)=>/\d{4}/.test(tx)||tx.includes(" – ")||tx.includes(" - ")||tx.includes("Present")||tx.includes("present")||(tx.length<70&&block&&block.bullets.length===0&&block.left);
     items.forEach(it=>{
-      if(it.type==="bullet"){if(!block)block={left:"",right:"",bullets:[]};block.bullets.push(it.text);}
+      if(it.type==="bullet"){if(!block)block={left:"",right:"",bullets:[]};block.bullets.push(highlightMetrics(esc(it.text)));}
       else{const tr=it.text.trim();if(!block){block={left:tr,right:"",bullets:[]};}
       else if(block.bullets.length===0&&block.left&&!block.right&&isSubLine(tr)){block.right=tr;}
       else{if(block.left||block.bullets.length>0)blocks.push(block);block={left:tr,right:"",bullets:[]};}}
@@ -263,12 +303,17 @@ function buildPDFHTML(text,ci){
     if(block&&(block.left||block.bullets.length>0))blocks.push(block);
     return blocks.map((b,i)=>{
       const isLast=i===blocks.length-1;
+      let left=b.left,right=b.right;
+      if(!right&&left){
+        const dateMatch=left.match(/[\|\-\–]\s*(\d{4}[\–\-–]\d{4}|\d{4}[\–\-–]Present|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}[\s\–\-–]+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}[\s\–\-–]+Present|\d{4})\s*$/i);
+        if(dateMatch){right=dateMatch[1].trim();left=left.slice(0,dateMatch.index).replace(/[\|\–\-]\s*$/,"").trim();}
+      }
       return `<div class="pdf-exp-block"${isLast?' style="border-bottom:none;margin-bottom:0;padding-bottom:0"':''}>
-        ${(b.left||b.right)?`<div class="pdf-exp-header">
-          <span class="pdf-exp-left">${esc(b.left)}</span>
-          ${b.right?`<span class="pdf-exp-right">${esc(b.right)}</span>`:""}
+        ${(left||right)?`<div class="pdf-exp-header">
+          <span class="pdf-exp-left">${esc(left)}</span>
+          ${right?`<span class="pdf-exp-right">${esc(right)}</span>`:""}
         </div>`:""}
-        ${b.bullets.map(bl=>`<div class="pdf-bullet"><span class="pdf-bullet-dot">▪</span><span class="pdf-bullet-text">${esc(bl)}</span></div>`).join("")}
+        ${b.bullets.map(bl=>`<div class="pdf-bullet"><span class="pdf-bullet-dot">▪</span><span class="pdf-bullet-text">${bl}</span></div>`).join("")}
       </div>`;
     }).join("");
   }
@@ -313,6 +358,49 @@ function buildPDFHTML(text,ci){
     return`<div style="margin-bottom:10px"><div class="pdf-sec-title">${esc(sec.title)}</div>${bodyHTML}</div>`;
   }).join("");
 
+  // ── Semantic HTML for print-area (machine-readable for job boards) ──
+  function buildSemanticHTML(){
+    const semSections=rest.map(sec=>{
+      const isExp=sec.title.includes("EXPERIENCE");
+      const isGrid=GRID_KEYS.some(k=>sec.title.toUpperCase().includes(k));
+      let body="";
+      if(isExp){
+        // Re-use the same block parsing logic
+        const blocks=[];let block=null;
+        const isSubLine=(tx)=>/\d{4}/.test(tx)||tx.includes(" – ")||tx.includes(" - ")||tx.includes("Present");
+        sec.items.forEach(it=>{
+          if(it.type==="bullet"){if(!block)block={left:"",right:"",bullets:[]};block.bullets.push(it.text);}
+          else{const tr=it.text.trim();if(!block){block={left:tr,right:"",bullets:[]};}
+          else if(block.bullets.length===0&&block.left&&!block.right&&isSubLine(tr)){block.right=tr;}
+          else{if(block.left||block.bullets.length>0)blocks.push(block);block={left:tr,right:"",bullets:[]};}}
+        });
+        if(block&&(block.left||block.bullets.length>0))blocks.push(block);
+        body=blocks.map(b=>{
+          let left=b.left,right=b.right;
+          if(!right&&left){
+            const dm=left.match(/[\|\-\–]\s*(\d{4}[\–\-–]\d{4}|\d{4}[\–\-–]Present|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}[\s\–\-–]+(?:Present|\d{4}))\s*$/i);
+            if(dm){right=dm[1].trim();left=left.slice(0,dm.index).replace(/[\|\–\-]\s*$/,"").trim();}
+          }
+          return`<article><h3>${esc(left)}${right?" | "+esc(right):""}</h3><ul>${b.bullets.map(bl=>`<li>${esc(bl)}</li>`).join("")}</ul></article>`;
+        }).join("");
+      }else if(isGrid){
+        const entries=sec.items.map(it=>it.text.replace(/^[•\u2022\u2013\-]\s*/,"").trim()).filter(Boolean);
+        body=`<ul>${entries.map(e=>`<li>${esc(e)}</li>`).join("")}</ul>`;
+      }else{
+        body=sec.items.map(it=>it.type==="bullet"?`<li>${esc(it.text)}</li>`:`<p>${esc(it.text)}</p>`).join("");
+        if(sec.items.some(it=>it.type==="bullet"))body=`<ul>${body}</ul>`;
+      }
+      return`<section><h2>${esc(sec.title)}</h2>${body}</section>`;
+    }).join("");
+    return`<div class="pdf-wrap">
+      ${name?`<h1 class="pdf-name">${esc(name)}</h1>`:""}
+      ${tagline?`<p class="pdf-tagline">${esc(tagline)}</p>`:""}
+      ${contactParts?`<p class="pdf-contact">${contactParts}</p>`:""}
+      ${(name||contactParts)?`<hr class="pdf-divider"/>`:""}
+      ${semSections}
+    </div>`;
+  }
+
   return`<div class="pdf-wrap">
     ${name?`<div class="pdf-name">${esc(name)}</div>`:""}
     ${tagline?`<div class="pdf-tagline">${esc(tagline)}</div>`:""}
@@ -321,6 +409,10 @@ function buildPDFHTML(text,ci){
     ${sectionsHTML}
   </div>`;
 }
+
+// Export semantic version for print area
+function buildSemanticPDFHTML(text,ci){return buildPDFHTML(text,ci,true);}
+
 
 // ─────────────────────────────────────────────────────────
 // EDITABLE PDF HELPER
@@ -612,46 +704,50 @@ function _render(){
       S.load="polish";S.polishError="";rerender();
       try{
         const r=await callAI(
-          `You are an expert resume editor specializing in senior-level, human-sounding language. Rewrite the resume following these EXACT RULES.
+          `ROLE: You are an expert Executive Resume Writer specializing in Senior Project/Program Management roles (Director, Senior PM, Program Manager).
+
+STRICT ANTI-HALLUCINATION RULES (highest priority):
+1. DATA INTEGRITY: Use ONLY the facts, numbers, achievements, and dates provided. Never invent or assume.
+2. NO FABRICATION: Do not create fake budgets, team sizes, project names, or certifications.
+3. MISSING METRICS: If a metric is missing but would be impactful, use [X] as a placeholder (e.g. "Led a team of [X]"). Never invent a number.
+4. NO ADDED EXPERIENCE: Do not insert industry names, project types, or responsibilities not in the original.
 
 MANDATORY STYLE GUIDELINES:
-1. CONCISION: 8-12 words max per bullet. Cut every non-essential word.
-2. HUMAN TONE: Warm, professional, conversational. Never robotic/corporate.
-3. OUTCOMES OVER TACTICS: Focus on results ($$, %, milestones). Never list table-stakes skills.
-4. NO BUZZWORDS: Replace "stakeholder coordination" with "clear communication" or "relationship building". Replace "cross-functional alignment" with "team collaboration". Replace "hands-on leadership" with specifics. Replace "strong background in X" with "Skilled in X" or show via results.
-5. NO HALLUCINATIONS: Only use information provided. Never add skills or experience not in the original.
+1. CONCISION: Bullets under 2 lines, 8-12 words ideal. Cut every non-essential word.
+2. OUTCOMES OVER TACTICS: Lead with results ($$, %, milestones). Never list table-stakes responsibilities.
+3. STRONG VERBS: Directed, Delivered, Built, Optimized, Mentored, Captured, Led, Reduced, Achieved.
+4. HUMAN TONE: Professional and authoritative. Never robotic or corporate-sounding.
 
 SECTION RULES:
 PROFESSIONAL SUMMARY (60-75 words, 3 sentences max):
 - Sentence 1: Years of experience + what you deliver + on-time/budget track record
-- Sentence 2: Scale and complexity (multi-project, cross-team, locations)  
+- Sentence 2: Scale and complexity (multi-project, cross-team, locations)
 - Sentence 3: Key strengths + subtle emotional intelligence ("trust-building communication")
 
 AREAS OF EXPERTISE (6 lines max, 2-4 words each):
 - Examples: "Project Planning & Delivery", "Cost Management", "Team Collaboration"
-- Include "Relationship Building" to show emotional intelligence
+- Include "Relationship Building" to reflect emotional intelligence
 
 TECHNICAL SKILLS (4-6 lines):
-- Tools on left, soft skills on right
-- "Quick to learn new systems" instead of listing every tool
+- List tools and platforms only if mentioned in the original
+- Add "Quick to learn new systems" if appropriate
 
 PROFESSIONAL EXPERIENCE (3-4 bullets per role MAX):
-- Bold metrics ($1.5M, 80%, 35%)
-- Start with strongest result bullet
-- Action verbs: Delivered, Led, Built, Directed, Achieved
+- Start with the strongest result bullet
+- Use [X] for any missing metrics rather than inventing numbers
+- Action verbs: Directed, Delivered, Built, Led, Optimized, Reduced, Achieved
 
-CERTIFICATIONS: Bold cert names. Issuing org only, no dates unless recent.
+CERTIFICATIONS: List only certifications explicitly mentioned. Issuing org only, no dates unless provided.
 
 ${TONE_RULES[S.tone]?TONE_RULES[S.tone]:""}
 
-FORMAT: ALL CAPS section headers, • bullets. Output ONLY plain text — no markdown, no asterisks, no bold formatting, no headers with #. No explanations.
+OUTPUT FORMAT: ALL CAPS section headers, • bullets, plain text only. No markdown, no asterisks, no # headers.
 
-For PROFESSIONAL EXPERIENCE, each role:
-Line 1: Job Title — Company Name, Location
+For PROFESSIONAL EXPERIENCE, each role must follow this exact pattern:
+Line 1: Job Title | Company Name | Location
 Line 2: Month Year – Month Year (or Present)
-• Achievement bullet (3-4 bullets max)
-
-Never group roles. Never add experience not in the original.`,
+• Achievement bullet
+(3-4 bullets max per role. Never group or nest roles.)`,
           `Rewrite:\n\n${S.raw}`
         );
         if(r&&r.trim().length>50){
@@ -679,55 +775,52 @@ Never group roles. Never add experience not in the original.`,
     }
 
       // ── Resume Tips card ──
-      const TIPS_PROMPT=`You are an expert resume editor specializing in senior-level, human-sounding language. Rewrite the provided resume following these EXACT RULES:
+      const TIPS_PROMPT=`ROLE: You are an expert Executive Resume Writer specializing in Senior Project/Program Management roles (Director, Senior PM, Program Manager).
+
+STRICT ANTI-HALLUCINATION RULES (highest priority):
+1. DATA INTEGRITY: Use ONLY facts, numbers, and achievements provided. Never invent or assume.
+2. NO FABRICATION: Do not create fake budgets, team sizes, project names, or certifications.
+3. MISSING METRICS: Use [X] as a placeholder for missing metrics (e.g. "Led a team of [X]"). Never invent a number.
+4. NO ADDED EXPERIENCE: Do not insert industry names, project types, or responsibilities not in the original.
 
 MANDATORY STYLE GUIDELINES:
-1. CONCISION: 8-12 words max per bullet. Cut every non-essential word.
-2. HUMAN TONE: Warm, professional, conversational. Never robotic/corporate.
-3. OUTCOMES > TACTICS: Focus on results ($$, %, milestones hit). Never list table-stakes skills.
-4. NO BUZZWORDS: Replace "stakeholder coordination" → "clear communication" or "relationship building"
-5. NO HALLUCINATIONS: Only use information provided. Never add skills/experience.
+1. CONCISION: Bullets under 2 lines, 8-12 words ideal.
+2. OUTCOMES OVER TACTICS: Lead with results ($$, %, milestones). Never list table-stakes responsibilities.
+3. STRONG VERBS: Directed, Delivered, Built, Optimized, Mentored, Captured, Led, Reduced, Achieved.
+4. NO BUZZWORDS — replace these exactly:
+   "Stakeholder coordination" → "clear communication" or "relationship building"
+   "Cross-functional alignment" → "team collaboration"
+   "Hands-on leadership" → describe specifically what was directed
+   "Strong background in X" → "Skilled in X" or show via results
+   "Synergy", "Holistic", "Deep dive", "Passion for excellence" → delete entirely
+5. HUMAN TONE: Professional and authoritative. Never robotic or corporate-sounding.
 
-SECTION-SPECIFIC RULES:
-
-PROFESSIONAL SUMMARY (60-75 words max, 3 sentences):
-- Sentence 1: Years + what you deliver + on-time/budget
-- Sentence 2: Scale/complexity (multi-project, cross-team, locations)
-- Sentence 3: Key strengths + subtle EI ("trust-building communication")
+SECTION RULES:
+PROFESSIONAL SUMMARY (60-75 words, 3 sentences max):
+- Sentence 1: Years of experience + what you deliver + on-time/budget track record
+- Sentence 2: Scale and complexity (multi-project, cross-team, locations)
+- Sentence 3: Key strengths + subtle emotional intelligence ("trust-building communication")
 
 AREAS OF EXPERTISE (6 lines max, 2-4 words each):
 - Examples: "Project Planning & Delivery", "Cost Management", "Team Collaboration"
-- Include "Relationship Building" to show emotional intelligence
 
 TECHNICAL SKILLS (4-6 lines):
-- Tools on left, soft skills on right
-- "Quick to learn new systems" instead of listing every tool
+- List only tools mentioned in the original resume
+- Add "Quick to learn new systems" if appropriate
 
 PROFESSIONAL EXPERIENCE (3-4 bullets per role MAX):
-- Bold metrics ($1.5M, 80%, 35%)
-- Start with strongest result bullet
-- Action verbs: Delivered, Led, Built, Directed, Achieved
+- Start with the strongest result bullet
+- Use [X] for missing metrics — never invent numbers
+- Action verbs: Directed, Delivered, Built, Led, Optimized, Reduced, Achieved
 
-CERTIFICATIONS:
-- Bold cert names (PMP, Agile, Six Sigma)
-- Issuing org only, no dates unless recent
+CERTIFICATIONS: List only certifications explicitly mentioned. Issuing org only.
 
-CRITICAL AVOID LIST:
-❌ "Stakeholder coordination" → "clear communication" or "relationship building"
-❌ "Scheduling" → imply through "on-time delivery"
-❌ "Cross-functional alignment" → "team collaboration"
-❌ "Hands-on leadership" → "directed programs across X locations"
-❌ "Strong background in X" → "Skilled in X" or show via results
+OUTPUT FORMAT: ALL CAPS section headers, • bullets, plain text only. No markdown.
 
-CHECKLIST BEFORE OUTPUT:
-- Every bullet under 12 words
-- No buzzwords from avoid list
-- Metrics bolded ($X, XX%)
-- Human, not robotic tone
-- Only uses provided information
-- Scannable in 15 seconds
-
-FORMAT: ALL CAPS section headers, bullet points. Output ONLY the rewritten resume. No explanations.
+For PROFESSIONAL EXPERIENCE, each role:
+Line 1: Job Title | Company Name | Location
+Line 2: Month Year – Month Year (or Present)
+• Achievement bullet (3-4 max)
 
 REWRITE THIS RESUME:
 [PASTE YOUR RESUME HERE]`;
@@ -991,7 +1084,7 @@ REWRITE THIS RESUME:
           mkBtn("ghost","Print / Save PDF",()=>{
             const pa=document.getElementById("print-area");
             pa.style.display="block";
-            pa.innerHTML=buildPDFHTML(S.polished,S.ci);
+            pa.innerHTML=buildSemanticPDFHTML(S.polished,S.ci);
             window.print();
             pa.style.display="none";
           },{padding:"6px 14px",fontSize:"12px"}),
@@ -1000,7 +1093,24 @@ REWRITE THIS RESUME:
         const previewBox=div({style:{border:`1px solid ${T.cardB}`,borderRadius:"10px",overflow:"hidden",position:"relative"}});
         previewBox.innerHTML=buildPDFHTML(S.polished,S.ci);
         wireEditable(previewBox,()=>S.polished,v=>{S.polished=v;lsSet("resume-polished",v);});
-        tabBody=div({},[repolishBar,actionRow,previewBox]);
+
+        // Impact score badge
+        const score=calculateImpactScore(S.polished);
+        const scoreColor=score>=75?"#4ade80":score>=50?"#fbbf24":"#f87171";
+        const scoreBorder=score>=75?"#166534":score>=50?"#854d0e":"#7f1d1d";
+        const scoreBg=score>=75?(S.dark?"#052e16":"#f0fdf4"):score>=50?(S.dark?"#1c1200":"#fffbeb"):(S.dark?"#3b1212":"#fee2e2");
+        const scoreMsg=score>=75?"Great — your resume has strong metrics and action verbs.":score>=50?"Good start — add more specific numbers and results to stand out.":"Add measurable results ($, %, team size) to improve your score.";
+        const impactBadge=div({style:{marginBottom:"14px",padding:"12px",background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"10px",display:"flex",alignItems:"center",gap:"15px"}},[
+          div({style:{flexShrink:"0",width:"45px",height:"45px",borderRadius:"50%",border:`3px solid ${scoreBorder}`,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:"700",color:scoreColor,fontSize:"15px"}},[
+            String(score),
+          ]),
+          div({},[
+            div({style:{fontSize:"13px",fontWeight:"600",color:T.text}},["Resume Impact Score"]),
+            div({style:{fontSize:"11px",color:T.muted,marginTop:"2px"}},[scoreMsg]),
+          ]),
+        ]);
+
+        tabBody=div({},[repolishBar,impactBadge,actionRow,previewBox]);
       }
     }
 
@@ -1649,8 +1759,8 @@ REWRITE THIS RESUME:
         if(!base.trim()||!S.posting.trim()||S.load==="gen")return;
         S.load="gen";S.tailored="";S.cover="";rerender();
         try{
-          if(S.genWhat!=="cover"){const r=await callAI(`Resume writer. Tailor this resume to the job posting.\n${TONE_RULES[S.tone]}\n\nRULES — read carefully:\n1. NEVER invent, add, or imply experience the candidate does not have. Do not insert industry names, project types, sector references, or responsibilities that are not already in the resume.\n2. Transferable skills (managing teams, delivering projects, stakeholder communication, budgets, process improvement) apply across all industries — use them as-is without adding an industry label.\n3. Tailor by: reordering bullets to lead with the most relevant, adjusting the summary to speak to this role, and naturally weaving in keywords from the posting where they genuinely match existing experience.\n4. If the job asks for something the candidate clearly has no background in, simply omit that gap — do not fill it with fabricated content.\n5. ALL CAPS section headers, • bullets. Output ONLY the resume text.`,`JOB:\n${S.posting}\n\nRESUME:\n${cleanBase}`);const cleanR=r.replace(/\*\*([^*]+)\*\*/g,"$1").replace(/\*([^*]+)\*/g,"$1").replace(/^#{1,3}\s+/gm,"").trim();S.tailored=cleanR;lsSet("apply-tailored",cleanR);}
-          if(S.genWhat!=="resume"){const r=await callAI(`Cover letter writer.\n${TONE_RULES[S.tone]}\nOpen specifically — not "I am writing to apply". Para 1: why this role/company. Para 2: 2-3 concrete matching experiences drawn only from the candidate's actual background — never invent industry experience they don't have; transferable skills are enough. Para 3: confident close. Under 320 words. No hollow phrases. Output ONLY cover letter.`,`JOB:\n${S.posting}\n\nRESUME:\n${cleanBase}`);S.cover=r;lsSet("apply-cover",r);}
+          if(S.genWhat!=="cover"){const r=await callAI(`ROLE: Senior Executive Resume Tailor.\n${TONE_RULES[S.tone]?TONE_RULES[S.tone]+"\n\n":""}STRATEGY:\n1. Compare the resume to the job posting. Identify the top 3 skills or keywords the posting emphasizes.\n2. If the candidate has these skills, bring them forward — reorder bullets, strengthen the summary, weave in keywords naturally.\n3. If a skill is missing but the candidate has TRANSFERABLE experience, reframe existing experience to highlight the overlap (e.g., 'Telecom Operations' → 'Complex Infrastructure Oversight' if the job is construction).\n4. If the candidate has NO relevant background for a requirement, omit that gap entirely. Do NOT invent it.\n5. NEVER fabricate budgets, team sizes, project names, metrics, or certifications not in the original resume.\n6. ALL CAPS section headers, • bullets. Output ONLY the resume text — no explanations.`,`JOB:\n${S.posting}\n\nRESUME:\n${cleanBase}`);const cleanR=r.replace(/\*\*([^*]+)\*\*/g,"$1").replace(/\*([^*]+)\*/g,"$1").replace(/^#{1,3}\s+/gm,"").trim();S.tailored=cleanR;lsSet("apply-tailored",cleanR);}
+          if(S.genWhat!=="resume"){const r=await callAI(`ROLE: High-level Executive Consultant writing on behalf of a Senior Leader.\nTONE: Peer-to-peer, confident, solution-oriented. No "I am writing to apply." No "Dear Sir/Madam." No over-explaining. No begging.\n${TONE_RULES[S.tone]?TONE_RULES[S.tone]+"\n\n":""}STRUCTURE:\n1. THE HOOK: Open with a business challenge the company faces (infer from the posting). One sentence.\n2. THE PROOF: Connect one specific metric from the resume ($, %, milestone) directly to a requirement in the posting. Be precise.\n3. THE FIT: Briefly state why this industry/company is a natural extension of the candidate's 17+ years — no fluff, just logic.\n4. THE CLOSE: A confident peer-level ask — "When is a good time to discuss..." Not "I look forward to hearing from you."\nRULES: Under 320 words. Only use facts from the resume — no invented experience. Output ONLY the cover letter text.`,`JOB:\n${S.posting}\n\nRESUME:\n${cleanBase}`);S.cover=r;lsSet("apply-cover",r);}
           S.applyOut=S.genWhat==="cover"?"cover":"resume";
           if(S.selectedJob){
             const _date=new Date().toLocaleDateString("en-CA");
@@ -1758,7 +1868,7 @@ REWRITE THIS RESUME:
           mkBtn("ghost","🖨 Print / Save PDF",()=>{
             const pa=document.getElementById("print-area");
             pa.style.display="block";
-            pa.innerHTML=buildPDFHTML(S.tailored,S.ci);
+            pa.innerHTML=buildSemanticPDFHTML(S.tailored,S.ci);
             window.print();
             pa.style.display="none";
           },{fontSize:"12px",padding:"6px 12px"}),
@@ -1813,7 +1923,22 @@ REWRITE THIS RESUME:
         mkTextarea(S.posting,v=>{S.posting=v;debounceSave("apply-posting",v);},140,"Paste the full job posting here…"),
       ]),
       div({style:card_s},[mkLabel(`Base resume${S.polished?" ✓ POLISHED":""}`),mkTextarea(S.polished||S.raw,v=>{if(S.polished)S.polished=v;else S.raw=v;debounceSave(S.polished?"resume-polished":"resume-raw",v);},140,"Paste resume…")]),
-      div({style:card_s},[genChoices,genBtn]),
+      div({style:card_s},[genChoices,genBtn,
+        // Job match bar — shown when both posting and resume are loaded
+        S.posting.trim()&&(S.polished||S.raw)?(()=>{
+          const matchScore=calculateJobMatch(S.polished||S.raw,S.posting);
+          const barColor=matchScore>=80?"#16a34a":matchScore>=60?"#d97706":"#dc2626";
+          const barText=matchScore>=80?"Strong match":matchScore>=60?"Partial match":"Low match — consider tailoring";
+          return div({style:{marginTop:"14px",paddingTop:"14px",borderTop:`1px solid ${T.div}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",flexWrap:"wrap"}},[
+            div({style:{fontSize:"12px",color:T.muted,flexShrink:"0"}},["\uD83C\uDFAF Resume match:"]),
+            div({style:{flex:"1",minWidth:"80px",height:"8px",background:S.dark?"#1f2937":"#e5e7eb",borderRadius:"4px",overflow:"hidden"}},[
+              div({style:{width:matchScore+"%",height:"100%",background:barColor,borderRadius:"4px",transition:"width 0.5s ease"}}),
+            ]),
+            span({style:{fontSize:"12px",fontWeight:"700",color:barColor,flexShrink:"0"}},[matchScore+"%"]),
+            span({style:{fontSize:"11px",color:T.muted,flexShrink:"0"}},[barText]),
+          ]);
+        })():null,
+      ].filter(Boolean)),
       outputSection,
     ].filter(Boolean));
   }
@@ -1834,7 +1959,14 @@ REWRITE THIS RESUME:
 
     function buildTrackerAppCard(app){
       const sm=smeta(app.status);const sbg=S.dark?sm.bgd:sm.bgl;const exp=S.expandedApp===app.id;
+      // Stale detection — applied for 7+ days with no movement
+      const isStale=(()=>{
+        if(app.status!=="applied"||!app.appliedDate)return false;
+        const days=Math.floor((Date.now()-new Date(app.appliedDate).getTime())/(1000*60*60*24));
+        return days>=7;
+      })();
       const card=div({style:{background:T.card,border:`1px solid ${exp?T.active.border:T.cardB}`,borderRadius:"11px",padding:"14px 18px",marginBottom:"9px"}});
+      if(isStale)card.className="app-stale";
       const statusSel=h("select",{style:{fontSize:"11px",padding:"4px 8px",borderRadius:"7px",border:`1px solid ${T.cardB}`,background:sbg,color:sm.color,cursor:"pointer",fontFamily:"inherit",fontWeight:"600",flexShrink:"0"}});
       STATUSES.forEach(s=>{const o=h("option",{value:s.key});o.textContent=s.label;if(s.key===app.status)o.selected=true;statusSel.appendChild(o);});
       statusSel.addEventListener("change",e=>{S.apps=S.apps.map(a=>a.id===app.id?{...a,status:e.target.value}:a);lsSet("tracker-apps-v2",JSON.stringify(S.apps));rerender();});
@@ -1871,7 +2003,7 @@ REWRITE THIS RESUME:
               div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"5px"}},["Tailored Resume"]),
               div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",maxHeight:"44px",overflow:"hidden"}},[app.savedResume.substring(0,130)+"…"]),
               div({style:{display:"flex",gap:"5px",marginTop:"7px",flexWrap:"wrap"}},[
-                mkBtn("ghost","View PDF",()=>{const pa=document.getElementById("print-area");pa.style.display="block";pa.innerHTML=buildPDFHTML(app.savedResume,S.ci);window.print();pa.style.display="none";},{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","View PDF",()=>{const pa=document.getElementById("print-area");pa.style.display="block";pa.innerHTML=buildSemanticPDFHTML(app.savedResume,S.ci);window.print();pa.style.display="none";},{fontSize:"11px",padding:"3px 8px"}),
                 mkBtn("ghost","Copy",()=>navigator.clipboard.writeText(app.savedResume).catch(()=>{}),{fontSize:"11px",padding:"3px 8px"}),
                 mkBtn("ghost","⬇ .txt",()=>{const a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(app.savedResume);a.download=app.company.replace(/[\s]+/g,"_")+"_resume.txt";a.click();},{fontSize:"11px",padding:"3px 8px"}),
               ]),
@@ -1891,10 +2023,26 @@ REWRITE THIS RESUME:
           docSection,
           div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
             mkBtn("teal","Prep interview →",()=>{S.intJob=app.id;S.tab="interview";rerender();},{fontSize:"12px",padding:"6px 12px"}),
+            isStale?mkBtn("ghost","📧 Follow-up email",()=>{
+              const template=generateFollowUp(app.title,app.company);
+              S.followUpText=template;S.followUpJob=app.id;rerender();
+            },{fontSize:"12px",padding:"6px 12px",borderColor:"#854d0e",color:"#fbbf24"}):null,
             mkBtn("ghost","Edit",()=>{S.fd={...app};S.editId=app.id;S.showForm=true;rerender();},{fontSize:"12px",padding:"6px 12px"}),
             app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",style:{padding:"6px 12px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:T.ghost.text,textDecoration:"none",display:"inline-flex",alignItems:"center"}},["View ↗"]):null,
             mkBtn("danger","Remove",()=>{if(!confirm("Remove?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();}),
           ].filter(Boolean)),
+          // Follow-up email display
+          S.followUpJob===app.id&&S.followUpText?div({style:{marginTop:"12px",background:T.inBg,border:`1px solid #854d0e`,borderRadius:"8px",padding:"12px 14px"}},[
+            div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},[
+              div({style:{fontSize:"12px",fontWeight:"700",color:"#fbbf24"}},["📧 Follow-up email template"]),
+              div({style:{display:"flex",gap:"6px"}},[
+                mkBtn("ghost",S.copied==="followup"?"✓ Copied":"Copy",()=>{navigator.clipboard.writeText(S.followUpText).catch(()=>{});S.copied="followup";setTimeout(()=>{S.copied="";rerender();},2000);rerender();},{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","↺ Regenerate",()=>{S.followUpText=generateFollowUp(app.title,app.company);rerender();},{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","✕",()=>{S.followUpText="";S.followUpJob=null;rerender();},{fontSize:"11px",padding:"3px 8px"}),
+              ]),
+            ]),
+            h("pre",{style:{fontSize:"11px",color:T.text,lineHeight:"1.7",whiteSpace:"pre-wrap",fontFamily:"inherit",margin:"0"}},[S.followUpText]),
+          ]):null,
         ].filter(Boolean));
         card.appendChild(expanded);
       }
