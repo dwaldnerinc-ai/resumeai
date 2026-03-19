@@ -273,21 +273,36 @@ function buildPDFHTML(text,ci){
     }).join("");
   }
 
-  function renderGrid(items){
-    // Accept both bullet items and plain text lines as grid entries
-    // Also split comma-separated items (common in raw/pasted resumes)
-    const entries=items.flatMap(it=>{
+  function renderGrid(items, title){
+    const isCert=title&&(title.includes("CERTIF")||title.includes("LICENCE")||title.includes("LICENSE"));
+    const cols=isCert?2:3;
+
+    // Each item = one original line from the resume
+    // Items on the same line (comma/pipe separated) stay in the same row
+    // Each item gets its own row — we do NOT merge lines together
+    const rows=items.map(it=>{
       const cleaned=it.text.replace(/^[•\u2022\u2013\-]\s*/,"").trim();
-      // If line contains commas and no sub-bullets, split into individual items
-      if(cleaned.includes(",")&&!cleaned.startsWith("•")){
-        return cleaned.split(",").map(s=>s.trim()).filter(Boolean);
+      if(!cleaned)return null;
+      // Split by | or , only for non-cert sections where items are short keywords
+      if(!isCert&&(cleaned.includes("|")||cleaned.includes(","))&&cleaned.length<80){
+        const parts=cleaned.split(/[|,]/).map(s=>s.trim()).filter(Boolean);
+        if(parts.length>1)return parts;
       }
-      return cleaned?[cleaned]:[];
+      return [cleaned];
+    }).filter(Boolean);
+
+    // Pad each row to the column count
+    const paddedRows=rows.map(row=>{
+      while(row.length<cols)row.push("");
+      return row.slice(0,cols);
     });
-    while(entries.length%3!==0)entries.push("");
-    const rows=[];
-    for(let i=0;i<entries.length;i+=3)rows.push(entries.slice(i,i+3));
-    return`<table class="pdf-grid-table"><tbody>${rows.map(row=>`<tr>${row.map(cell=>`<td class="pdf-grid-cell">${cell?`<div class="pdf-grid-item"><span class="pdf-bullet-dot">▪</span><span>${esc(cell)}</span></div>`:""}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+
+    const colWidth=Math.floor(100/cols)+"%";
+    return`<table class="pdf-grid-table"><tbody>${paddedRows.map(row=>
+      `<tr>${row.map(cell=>
+        `<td class="pdf-grid-cell" style="width:${colWidth}">${cell?`<div class="pdf-grid-item"><span class="pdf-bullet-dot">▪</span><span>${esc(cell)}</span></div>`:""}</td>`
+      ).join("")}</tr>`
+    ).join("")}</tbody></table>`;
   }
 
   const GRID_KEYS=["EXPERTISE","SKILLS","CERTIF","AWARD","DEVELOPMENT","EDUCATION","LICENCE","LICENSE","VOLUNTEER","ADDITIONAL","QUALIFICATION","TRAINING","LANGUAGE"];
@@ -296,7 +311,7 @@ function buildPDFHTML(text,ci){
     const isExp=sec.title.includes("EXPERIENCE");
     let bodyHTML="";
     if(isExp)bodyHTML=renderExp(sec.items);
-    else if(isGrid)bodyHTML=renderGrid(sec.items);
+    else if(isGrid)bodyHTML=renderGrid(sec.items,sec.title);
     else bodyHTML=sec.items.map(it=>it.type==="bullet"
       ?`<div class="pdf-bullet"><span class="pdf-bullet-dot">▪</span><span class="pdf-bullet-text">${esc(it.text)}</span></div>`
       :`<div class="pdf-text-line">${esc(it.text)}</div>`
