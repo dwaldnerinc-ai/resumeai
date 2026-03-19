@@ -274,14 +274,23 @@ function buildPDFHTML(text,ci){
   }
 
   function renderGrid(items){
-    const entries=items.map(it=>it.text).filter(Boolean);
+    // Accept both bullet items and plain text lines as grid entries
+    // Also split comma-separated items (common in raw/pasted resumes)
+    const entries=items.flatMap(it=>{
+      const cleaned=it.text.replace(/^[•\u2022\u2013\-]\s*/,"").trim();
+      // If line contains commas and no sub-bullets, split into individual items
+      if(cleaned.includes(",")&&!cleaned.startsWith("•")){
+        return cleaned.split(",").map(s=>s.trim()).filter(Boolean);
+      }
+      return cleaned?[cleaned]:[];
+    });
     while(entries.length%3!==0)entries.push("");
     const rows=[];
     for(let i=0;i<entries.length;i+=3)rows.push(entries.slice(i,i+3));
     return`<table class="pdf-grid-table"><tbody>${rows.map(row=>`<tr>${row.map(cell=>`<td class="pdf-grid-cell">${cell?`<div class="pdf-grid-item"><span class="pdf-bullet-dot">▪</span><span>${esc(cell)}</span></div>`:""}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
   }
 
-  const GRID_KEYS=["EXPERTISE","SKILLS","CERTIF"];
+  const GRID_KEYS=["EXPERTISE","SKILLS","CERTIF","AWARD","DEVELOPMENT","EDUCATION","LICENCE","LICENSE","VOLUNTEER"];
   const sectionsHTML=rest.map(sec=>{
     const isGrid=GRID_KEYS.some(k=>sec.title.toUpperCase().includes(k));
     const isExp=sec.title.includes("EXPERIENCE");
@@ -626,7 +635,7 @@ CERTIFICATIONS: Bold cert names. Issuing org only, no dates unless recent.
 
 ${TONE_RULES[S.tone]?TONE_RULES[S.tone]:""}
 
-FORMAT: ALL CAPS section headers, • bullets. Output ONLY the resume text. No explanations.
+FORMAT: ALL CAPS section headers, • bullets. Output ONLY plain text — no markdown, no asterisks, no bold formatting, no headers with #. No explanations.
 
 For PROFESSIONAL EXPERIENCE, each role:
 Line 1: Job Title — Company Name, Location
@@ -636,7 +645,15 @@ Line 2: Month Year – Month Year (or Present)
 Never group roles. Never add experience not in the original.`,
           `Rewrite:\n\n${S.raw}`
         );
-        if(r&&r.trim().length>50){S.polished=r;lsSet("resume-polished",r);S.resumeView="preview";S.polishError="";}
+        if(r&&r.trim().length>50){
+          // Strip any markdown the AI snuck in
+          const clean=r
+            .replace(/\*\*([^*]+)\*\*/g,"$1")  // **bold** -> plain
+            .replace(/\*([^*]+)\*/g,"$1")        // *italic* -> plain
+            .replace(/^#{1,3}\s+/gm,"")           // ## headers -> plain
+            .replace(/^---+$/gm,"")                // horizontal rules
+            .trim();
+          S.polished=clean;lsSet("resume-polished",clean);S.resumeView="preview";S.polishError="";}
         else{S.polishError="Empty response — check your API key has credits.";}
       }catch(e){S.polishError=e.message||"API error. Check your key and try again.";console.error("Polish error:",e);}
       S.load="";rerender();
@@ -1543,7 +1560,7 @@ REWRITE THIS RESUME:
         if(!base.trim()||!S.posting.trim()||S.load==="gen")return;
         S.load="gen";S.tailored="";S.cover="";rerender();
         try{
-          if(S.genWhat!=="cover"){const r=await callAI(`Resume writer. Tailor this resume to the job posting.\n${TONE_RULES[S.tone]}\n\nRULES — read carefully:\n1. NEVER invent, add, or imply experience the candidate does not have. Do not insert industry names, project types, sector references, or responsibilities that are not already in the resume.\n2. Transferable skills (managing teams, delivering projects, stakeholder communication, budgets, process improvement) apply across all industries — use them as-is without adding an industry label.\n3. Tailor by: reordering bullets to lead with the most relevant, adjusting the summary to speak to this role, and naturally weaving in keywords from the posting where they genuinely match existing experience.\n4. If the job asks for something the candidate clearly has no background in, simply omit that gap — do not fill it with fabricated content.\n5. ALL CAPS section headers, • bullets. Output ONLY the resume text.`,`JOB:\n${S.posting}\n\nRESUME:\n${cleanBase}`);S.tailored=r;lsSet("apply-tailored",r);}
+          if(S.genWhat!=="cover"){const r=await callAI(`Resume writer. Tailor this resume to the job posting.\n${TONE_RULES[S.tone]}\n\nRULES — read carefully:\n1. NEVER invent, add, or imply experience the candidate does not have. Do not insert industry names, project types, sector references, or responsibilities that are not already in the resume.\n2. Transferable skills (managing teams, delivering projects, stakeholder communication, budgets, process improvement) apply across all industries — use them as-is without adding an industry label.\n3. Tailor by: reordering bullets to lead with the most relevant, adjusting the summary to speak to this role, and naturally weaving in keywords from the posting where they genuinely match existing experience.\n4. If the job asks for something the candidate clearly has no background in, simply omit that gap — do not fill it with fabricated content.\n5. ALL CAPS section headers, • bullets. Output ONLY the resume text.`,`JOB:\n${S.posting}\n\nRESUME:\n${cleanBase}`);const cleanR=r.replace(/\*\*([^*]+)\*\*/g,"$1").replace(/\*([^*]+)\*/g,"$1").replace(/^#{1,3}\s+/gm,"").trim();S.tailored=cleanR;lsSet("apply-tailored",cleanR);}
           if(S.genWhat!=="resume"){const r=await callAI(`Cover letter writer.\n${TONE_RULES[S.tone]}\nOpen specifically — not "I am writing to apply". Para 1: why this role/company. Para 2: 2-3 concrete matching experiences drawn only from the candidate's actual background — never invent industry experience they don't have; transferable skills are enough. Para 3: confident close. Under 320 words. No hollow phrases. Output ONLY cover letter.`,`JOB:\n${S.posting}\n\nRESUME:\n${cleanBase}`);S.cover=r;lsSet("apply-cover",r);}
           S.applyOut=S.genWhat==="cover"?"cover":"resume";
           if(S.selectedJob){
