@@ -274,34 +274,28 @@ function buildPDFHTML(text,ci){
   }
 
   function renderGrid(items, title){
-    const isCert=title&&(title.includes("CERTIF")||title.includes("LICENCE")||title.includes("LICENSE"));
-    const cols=isCert?2:3;
+    // Each original line = one entry. Clean bullet prefixes.
+    const entries=items.map(it=>it.text.replace(/^[•\u2022\u2013\-]\s*/,"").trim()).filter(Boolean);
+    if(!entries.length)return"";
 
-    // Each item = one original line from the resume
-    // Items on the same line (comma/pipe separated) stay in the same row
-    // Each item gets its own row — we do NOT merge lines together
-    const rows=items.map(it=>{
-      const cleaned=it.text.replace(/^[•\u2022\u2013\-]\s*/,"").trim();
-      if(!cleaned)return null;
-      // Split by | or , only for non-cert sections where items are short keywords
-      if(!isCert&&(cleaned.includes("|")||cleaned.includes(","))&&cleaned.length<80){
-        const parts=cleaned.split(/[|,]/).map(s=>s.trim()).filter(Boolean);
-        if(parts.length>1)return parts;
-      }
-      return [cleaned];
-    }).filter(Boolean);
+    // Group into chunks of 3 — left cell gets 3, right cell gets next 3, repeat
+    const chunks=[];
+    for(let i=0;i<entries.length;i+=3)chunks.push(entries.slice(i,i+3));
 
-    // Pad each row to the column count
-    const paddedRows=rows.map(row=>{
-      while(row.length<cols)row.push("");
-      return row.slice(0,cols);
-    });
+    // Pair chunks into rows: [left, right]
+    const rows=[];
+    for(let i=0;i<chunks.length;i+=2)rows.push([chunks[i],chunks[i+1]||[]]);
 
-    const colWidth=Math.floor(100/cols)+"%";
-    return`<table class="pdf-grid-table"><tbody>${paddedRows.map(row=>
-      `<tr>${row.map(cell=>
-        `<td class="pdf-grid-cell" style="width:${colWidth}">${cell?`<div class="pdf-grid-item"><span class="pdf-bullet-dot">▪</span><span>${esc(cell)}</span></div>`:""}</td>`
-      ).join("")}</tr>`
+    function renderCell(items){
+      if(!items.length)return"";
+      return items.map(item=>`<div class="pdf-grid-item" style="margin-bottom:2px"><span>${esc(item)}</span></div>`).join("");
+    }
+
+    return`<table class="pdf-grid-table"><tbody>${rows.map(([left,right])=>
+      `<tr>
+        <td class="pdf-grid-cell" style="width:50%;vertical-align:top">${renderCell(left)}</td>
+        <td class="pdf-grid-cell" style="width:50%;vertical-align:top">${renderCell(right)}</td>
+      </tr>`
     ).join("")}</tbody></table>`;
   }
 
