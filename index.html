@@ -36,7 +36,7 @@ button:active{transform:scale(0.97)}
 .pdf-text-line{font-size:10pt;margin-bottom:3px;color:#222;line-height:1.55}
 .pdf-grid-table{width:100%;border-collapse:collapse;font-size:9.5pt;color:#222}
 .pdf-grid-cell{padding:3px 6px 3px 0;width:33%;vertical-align:middle;color:#222;text-align:center}
-.pdf-grid-item{display:flex;gap:0;align-items:center;color:#222}
+.pdf-grid-item{display:flex;gap:0;align-items:center;justify-content:center;color:#222}
 .pdf-grid-item span{color:#222}
 .pdf-grid-item .pdf-bullet-dot{display:none}
 
@@ -2070,6 +2070,15 @@ REWRITE THIS RESUME:
       h("button",{style:{fontSize:"12px",color:T.muted,background:"transparent",border:"none",cursor:"pointer",textDecoration:"underline"},
         onClick:()=>{lsSet("setup-dismissed","1");rerender();}},
         ["Skip for now — I’ll add it later"]),
+      div({style:{marginTop:"14px",padding:"12px 14px",background:"#0c1e3e",border:"1px solid #1e40af",borderRadius:"8px"}},[
+        div({style:{fontSize:"11px",fontWeight:"700",color:"#93c5fd",marginBottom:"4px"}},["\uD83E\uDDEA Just testing?"]),
+        div({style:{fontSize:"11px",color:"#64748b",marginBottom:"8px",lineHeight:"1.5"}},["Use the shared demo key below. Limited credits, rate-limited — for testing only."]),
+        h("button",{style:{fontSize:"12px",padding:"6px 14px",borderRadius:"7px",border:"1px solid #1e40af",background:"#1e3a8a",color:"#93c5fd",cursor:"pointer",fontWeight:"600",width:"100%"},
+          onClick:()=>{
+            const demoKey="PASTE_DEMO_KEY_HERE";
+            S.apiKey=demoKey;lsSet("api-key",demoKey);lsSet("setup-dismissed","1");rerender();
+          }},["Use demo key \u2014 start testing \u2192"]),
+      ]),
     ]),
   ]):null;
 
