@@ -290,7 +290,7 @@ function buildPDFHTML(text,ci){
     return`<table class="pdf-grid-table"><tbody>${rows.map(row=>`<tr>${row.map(cell=>`<td class="pdf-grid-cell">${cell?`<div class="pdf-grid-item"><span class="pdf-bullet-dot">▪</span><span>${esc(cell)}</span></div>`:""}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
   }
 
-  const GRID_KEYS=["EXPERTISE","SKILLS","CERTIF","AWARD","DEVELOPMENT","EDUCATION","LICENCE","LICENSE","VOLUNTEER"];
+  const GRID_KEYS=["EXPERTISE","SKILLS","CERTIF","AWARD","DEVELOPMENT","EDUCATION","LICENCE","LICENSE","VOLUNTEER","ADDITIONAL","QUALIFICATION","TRAINING","LANGUAGE"];
   const sectionsHTML=rest.map(sec=>{
     const isGrid=GRID_KEYS.some(k=>sec.title.toUpperCase().includes(k));
     const isExp=sec.title.includes("EXPERIENCE");
@@ -663,7 +663,7 @@ Never group roles. Never add experience not in the original.`,
     function mkToneRow(){
       return div({style:{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap"}},[
         span({style:{fontSize:"11px",color:T.muted,fontWeight:"600",textTransform:"uppercase",letterSpacing:"0.06em",marginRight:"2px"}},["Tone:"]),
-        ...[["natural","Human","#0d9488"],["bold","Bold","#7c3aed"],["polished","Formal","#2563eb"],["format","Format Only","#64748b"]].map(([v,l,c])=>
+        ...[["natural","Human","#0d9488"],["bold","Bold","#7c3aed"],["polished","Formal","#2563eb"],["format","Format Only","#b45309"]].map(([v,l,c])=>
           pillBtn(l,S.tone===v,c,()=>{S.tone=v;lsSet("resume-tone",v);rerender();},{padding:"5px 12px",borderRadius:"16px"})
         )
       ]);
@@ -737,6 +737,7 @@ Never group roles. Never add experience not in the original.`,
       ]);
 
 
+      let polishBtn;
       const polishRow=div({style:{marginTop:"12px",display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap"}},[
         mkToneRow(),
         (()=>{
@@ -1534,7 +1535,7 @@ REWRITE THIS RESUME:
         ...[ ["both","Resume + Cover Letter"],["resume","Resume only"],["cover","Cover Letter only"] ].map(([v,l])=>pillBtn(l,S.genWhat===v,"#2563eb",()=>{S.genWhat=v;rerender();},{padding:"6px 13px",borderRadius:"8px"}))
       ])]),
       div({},[mkLabel("Tone"),div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
-        ...[["natural","Human & natural","#0d9488"],["bold","Bold & direct","#7c3aed"],["polished","Formal","#2563eb"],["format","Format Only","#64748b"]].map(([v,l,c])=>pillBtn(l,S.tone===v,c,()=>{S.tone=v;lsSet("resume-tone",v);rerender();},{padding:"6px 13px",borderRadius:"8px"}))
+        ...[["natural","Human & natural","#0d9488"],["bold","Bold & direct","#7c3aed"],["polished","Formal","#2563eb"],["format","Format Only","#b45309"]].map(([v,l,c])=>pillBtn(l,S.tone===v,c,()=>{S.tone=v;lsSet("resume-tone",v);rerender();},{padding:"6px 13px",borderRadius:"8px"}))
       ]),span({style:{fontSize:"11px",color:T.muted,marginTop:"6px",display:"block"}},[S.tone==="natural"?"Sounds human — plain language, no buzzwords.":S.tone==="bold"?"Short, punchy, zero filler.":"Professional and structured."])]),
     ]);
 
