@@ -19,26 +19,28 @@ button:active{transform:scale(0.97)}
 
 /* ── PDF RESUME STYLES (DM Sans) ── */
 .pdf-wrap{background:#fff;color:#1a1a1a;font-family:'DM Sans',sans-serif;font-size:10.5pt;font-weight:400;padding:36px 44px;max-width:800px;margin:0 auto;line-height:1.6}
-.pdf-wrap *{color:inherit;font-weight:inherit}
+.pdf-wrap *{color:inherit}
 .pdf-name{font-size:22pt;font-weight:700;color:#0d2b4e;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:4px}
 .pdf-tagline{font-size:11pt;color:#2e6da4;font-weight:600;text-align:center;margin-bottom:8px}
-.pdf-contact{font-size:9.5pt;color:#555;display:flex;justify-content:center;flex-wrap:wrap;gap:4px 12px;margin-bottom:0}
+.pdf-contact{font-size:9.5pt;color:#555;font-weight:400;display:flex;justify-content:center;flex-wrap:wrap;gap:4px 12px;margin-bottom:0}
 .pdf-divider{border:none;border-top:3px solid #1e3a6e;margin:14px 0 16px}
-.pdf-exp-block{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #eef0f4}
+.pdf-exp-block{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #eef0f4;font-weight:400}
 .pdf-exp-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
 .pdf-exp-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 12px;margin-bottom:4px}
 .pdf-exp-left{font-size:10.5pt;font-weight:700;color:#0d2b4e;flex:1 1 auto}
 .pdf-exp-right{font-size:9.5pt;color:#2e6da4;font-weight:600;flex-shrink:0;white-space:nowrap}
 .pdf-bullet{display:flex;gap:7px;margin-bottom:2px;font-size:10pt}
-.pdf-bullet-dot{color:#2e6da4;flex-shrink:0;margin-top:1px}
-.pdf-bullet-text{color:#222;line-height:1.55}
-.pdf-text-line{font-size:10pt;margin-bottom:3px;color:#222;line-height:1.55}
+.pdf-bullet-dot{color:#2e6da4;flex-shrink:0;margin-top:1px;font-weight:400}
+.pdf-bullet-text{color:#222;line-height:1.55;font-weight:400}
+.pdf-text-line{font-size:10pt;margin-bottom:3px;color:#222;line-height:1.55;font-weight:400}
 /* Flexbox grid — replaces table layout */
-.pdf-grid-flex{display:flex;flex-wrap:wrap;gap:4px 0;width:100%}
-.pdf-grid-flex-item{flex:0 0 50%;box-sizing:border-box;padding:3px 8px 3px 0;font-size:9.5pt;color:#222;text-align:center}
-.pdf-grid-item{display:flex;gap:0;align-items:center;justify-content:center;color:#222}
+.pdf-grid-flex{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 0;width:100%;margin-top:4px}
+.pdf-grid-flex-item{flex:0 0 33.33%;text-align:center;font-size:9.5pt;color:#222;font-weight:400}
+.pdf-grid-item{display:flex;gap:0;align-items:center;justify-content:center;color:#222;font-weight:400}
 .pdf-grid-item span{color:#222}
 .pdf-grid-item .pdf-bullet-dot{display:none}
+.score-card{background:#1e2937;border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid #374151}
+.buzzword-tag{background:#450a0a;color:#f87171;padding:2px 8px;border-radius:4px;font-size:11px;margin-right:4px;display:inline-block;margin-bottom:4px}
 .app-stale{border:1.5px solid #854d0e!important;background:rgba(133,77,14,0.1)!important;position:relative}
 .app-stale::after{content:"⚠ Follow up?";position:absolute;top:-10px;right:10px;background:#854d0e;color:white;font-size:10px;padding:2px 6px;border-radius:4px;font-family:inherit}
 .pdf-bullet-text strong,.pdf-text-line strong{font-weight:700;color:#1e40af;background:rgba(30,64,175,0.03);padding:0 1px;border-radius:2px}
@@ -73,9 +75,15 @@ const SEED_APPS=[];
 
 
 const TONE_RULES={
-  natural:`VOICE (critical): Write like a confident human — not a corporate AI. Plain direct language. AVOID: spearheaded, leveraged, utilized, orchestrated, championed, fostered, robust, seamless, synergy, dynamic, innovative, results-driven, passionate, proven track record, end-to-end, holistic, transformative. Use simple verbs: Led, Built, Managed, Reduced, Saved, Improved, Delivered, Cut, Launched. TONE REGISTER: Peer-to-peer. This is a Senior Leader speaking to another Senior Leader. No 'Dear Sir/Madam,' no over-explaining, no begging. Confident and direct.`,
-  bold:`VOICE: Confident, direct, punchy. Short powerful bullets. No filler. No buzzwords. No passive voice.`,
-  polished:`VOICE: Professional and structured. Avoid extreme buzzwords. Strong action verbs, quantify where possible.`,
+  natural:`VOICE: Senior Leader talking to a peer. Honest, direct, and zero-fluff.
+SENTENCE STRUCTURE: Use "I" or start with strong simple verbs. No passive voice.
+CRITICAL BAN LIST (do not use any of these): spearheaded, leveraged, utilized, orchestrated, championed, fostered, robust, seamless, synergy, dynamic, innovative, results-driven, passionate, proven track record, end-to-end, holistic, transformative, pragmatic, strategic, mission-critical.
+THE RULE OF THREE:
+1. If a word has 4 syllables, find a 2-syllable version.
+2. If a sentence sounds like a corporate brochure, delete it.
+3. Focus on "What I fixed" and "How much I saved" — not "What I was responsible for."`,
+  bold:`VOICE: Short, punchy, aggressive. Results only. No filler. No adjectives.`,
+  polished:`VOICE: Professional and structured. Strong action verbs, quantified results.`,
   format:null
 };
 
@@ -86,7 +94,7 @@ const S={
   dark:true, tab:"resume",
   raw:"", polished:"", resumeView:"edit", tone:"natural",
   ci:{name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""},
-  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, tipsOpen:false,tmplOpen:false,tmpl:null,followUpText:"",followUpJob:null,toneCheck:null,
+  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, tipsOpen:false,tmplOpen:false,tmpl:null,followUpText:"",followUpJob:null,toneCheck:null,metricAlert:false,
   selectedJob:null, posting:"", tailored:"", cover:"", applyOut:"resume", genWhat:"both",
   apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
   searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
@@ -221,12 +229,14 @@ function isDone(s){
 
 function calculateImpactScore(text){
   if(!text)return 0;
-  const metricRegex=/(\$\d+(?:\.\d+)?[MKkBb+]?|\d+(?:\.\d+)?[MKkBb%+]|\d+\+\s*(?:years?|yrs?))/gi;
-  const matches=text.match(metricRegex)||[];
-  const uniqueMetrics=new Set(matches).size;
-  const verbs=["led","managed","reduced","saved","built","delivered","optimized","spearheaded","directed","achieved","launched","mentored","captured"];
-  const verbCount=verbs.filter(v=>text.toLowerCase().includes(v)).length;
-  return Math.min((uniqueMetrics*8)+(verbCount*5),100);
+  const metrics=text.match(/(\$\d+(?:\.\d+)?[MKkBb]?|\d+(?:\.\d+)?%|\d+\+\s*(?:years?|yrs?))/gi)||[];
+  const metricScore=Math.min(metrics.length*10,50);
+  const strongVerbs=["built","saved","reduced","delivered","captured","managed","cut","led","directed","achieved","launched","mentored","optimized"];
+  const weakVerbs=["assisted","helped","responsible","spearheaded","leveraged","utilized"];
+  let verbScore=0;
+  strongVerbs.forEach(v=>{if(text.toLowerCase().includes(v))verbScore+=7;});
+  weakVerbs.forEach(v=>{if(text.toLowerCase().includes(v))verbScore-=5;});
+  return Math.max(0,Math.min(metricScore+verbScore+20,100));
 }
 
 function calculateJobMatch(resumeText,jobPosting){
@@ -245,29 +255,49 @@ function calculateJobMatch(resumeText,jobPosting){
   return Math.round((matchCount/totalFound)*100);
 }
 
-function runToneCheck(text){
-  if(!text)return null;
+function auditTone(text){
+  if(!text)return[];
   const buzzwords=[
-    {bad:"spearheaded",    good:"Led"},
-    {bad:"leveraged",      good:"Used"},
-    {bad:"utilized",       good:"Used"},
-    {bad:"orchestrated",   good:"Managed"},
-    {bad:"championed",     good:"Drove"},
-    {bad:"synergy",        good:"teamwork"},
-    {bad:"holistic",       good:"thorough"},
-    {bad:"robust",         good:"strong"},
-    {bad:"deep dive",      good:"review"},
-    {bad:"stakeholder coordination", good:"clear communication"},
-    {bad:"cross-functional alignment", good:"team collaboration"},
-    {bad:"innovative",     good:"new"},
-    {bad:"passionate",     good:"committed"},
-    {bad:"dynamic",        good:"adaptable"},
-    {bad:"results-driven", good:"results-focused"},
+    {word:"spearheaded",hint:"Use 'Led'"},
+    {word:"leveraged",hint:"Use 'Used'"},
+    {word:"utilized",hint:"Use 'Used'"},
+    {word:"orchestrated",hint:"Use 'Managed'"},
+    {word:"championed",hint:"Use 'Drove'"},
+    {word:"passionate",hint:"Show, don't tell"},
+    {word:"synergy",hint:"Delete"},
+    {word:"holistic",hint:"Use 'thorough'"},
+    {word:"transformative",hint:"Be specific"},
+    {word:"robust",hint:"Use 'strong'"},
+    {word:"innovative",hint:"Show via results"},
+    {word:"dynamic",hint:"Use 'adaptable'"},
+    {word:"results-driven",hint:"Show via results"},
+    {word:"deep dive",hint:"Use 'review'"},
+    {word:"pragmatic",hint:"Be specific — say what you actually did"},
   ];
-  const lower=text.toLowerCase();
-  const found=buzzwords.filter(b=>lower.includes(b.bad));
-  return found.length?found:null;
+  return buzzwords.filter(b=>text.toLowerCase().includes(b.word));
 }
+
+function updateMetricWarning(text){
+  const val=text||"";
+  const metricCount=(val.match(/[\d\$%]+/g)||[]).length;
+  const wordCount=val.split(/\s+/).filter(Boolean).length;
+  const shouldWarn=wordCount>50&&metricCount===0;
+  S.metricAlert=shouldWarn;
+  const el=document.getElementById("metric-alert");
+  if(el){
+    el.style.display=shouldWarn?"block":"none";
+    el.style.background="rgba(133,77,14,0.1)";
+    el.style.border="1px solid #854d0e";
+    el.style.borderRadius="8px";
+    el.style.padding="8px 12px";
+    el.style.marginBottom="8px";
+  }
+  return !shouldWarn;
+}
+
+
+// Alias for backward compat with existing UI code
+function runToneCheck(text){ const r=auditTone(text||""); return r.map(b=>({bad:b.word,good:b.hint})); }
 
 
 
@@ -1037,7 +1067,10 @@ REWRITE THIS RESUME:
         S.polished?span({style:{fontSize:"12px",color:T.done.text,background:T.done.bg,border:`1px solid ${T.done.border}`,padding:"3px 10px",borderRadius:"10px",fontWeight:"600"}},["✓ Already polished"]):null,
       ].filter(Boolean));
 
-      const ta=mkTextarea(S.raw,v=>{S.raw=v;debounceSave("resume-raw",v);if(polishBtn)polishBtn.disabled=!v.trim();},200,"Paste your resume text here…");
+      const metricAlert=div({style:{display:"none",background:"rgba(133,77,14,0.1)",border:"1px solid #854d0e",color:"#fbbf24",padding:"8px 12px",borderRadius:"8px",fontSize:"12px",marginBottom:"8px",fontWeight:"600",lineHeight:"1.5"},id:"metric-alert"},["⚠️ Low Impact Score: Scanners are marking this at 66%. Add numbers ($ or %) to prove your results."]);
+      const ta=mkTextarea(S.raw,v=>{S.raw=v;debounceSave("resume-raw",v);if(polishBtn)polishBtn.disabled=!v.trim();updateMetricWarning(v);},200,"Paste your resume text here…");
+      // Run on mount too
+      setTimeout(()=>updateMetricWarning(S.raw),50);
       const formatHint=S.tone==="format"?div({style:{marginTop:"6px",fontSize:"12px",color:T.muted,lineHeight:"1.5"}},["Format Only skips the AI entirely — your resume text is used exactly as written, converted to a clean PDF with your header. Perfect when your content is already polished."]):null;
       const errBanner=S.polishError?div({style:{marginTop:"10px",padding:"10px 14px",background:T.danger.bg,border:`1px solid ${T.danger.border}`,borderRadius:"8px",fontSize:"13px",color:T.danger.text}},["⚠ "+S.polishError]):null;
 
@@ -1119,40 +1152,44 @@ REWRITE THIS RESUME:
       ].filter(Boolean));
 
       // ── Analyze card — impact score + tone check ──
-      const analyzeCard=S.raw.trim()?div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"14px"}},[
-        div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}},[
-          div({style:{fontSize:"13px",fontWeight:"700",color:T.text}},["📊 Resume Analysis"]),
-          mkBtn("ghost","Analyze",()=>{S.toneCheck=runToneCheck(S.raw);rerender();},{fontSize:"11px",padding:"4px 10px"}),
-        ]),
-        // Impact score
-        (()=>{
-          const score=calculateImpactScore(S.raw);
-          const col=score>=75?"#4ade80":score>=50?"#fbbf24":"#f87171";
-          const border=score>=75?"#166534":score>=50?"#854d0e":"#7f1d1d";
-          const msg=score>=75?"Strong — good use of metrics and action verbs":score>=50?"Good — add more specific numbers to strengthen it":"Low — add $, %, team sizes, and strong verbs";
-          return div({style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:S.toneCheck!==null?"12px":"0"}},[
-            div({style:{flexShrink:"0",width:"42px",height:"42px",borderRadius:"50%",border:`3px solid ${border}`,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:"700",color:col,fontSize:"14px"}},[String(score)]),
-            div({},[
-              div({style:{fontSize:"12px",fontWeight:"600",color:T.text}},["Impact Score / 100"]),
-              div({style:{fontSize:"11px",color:T.muted,marginTop:"2px"}},[msg]),
+      const analyzeCard=S.raw.trim()?(()=>{
+        const score=calculateImpactScore(S.raw);
+        const scoreCol=score>=75?"#4ade80":score>=50?"#fbbf24":"#f87171";
+        const scoreBarCol=score>=75?"#16a34a":score>=50?"#d97706":"#dc2626";
+        const issues=S.toneCheck||[];
+        return div({className:"score-card"},[
+          // Header row
+          div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}},[
+            span({style:{fontWeight:"700",color:"#93c5fd",fontSize:"13px"}},["📊 Resume Impact Score"]),
+            div({style:{display:"flex",alignItems:"center",gap:"8px"}},[
+              span({style:{fontSize:"22px",fontWeight:"800",color:scoreCol}},[score+"%"]),
+              mkBtn("ghost","Audit tone",()=>{S.toneCheck=auditTone(S.raw||S.polished||"");rerender();},{fontSize:"11px",padding:"3px 9px"}),
             ]),
-          ]);
-        })(),
-        // Tone check results
-        S.toneCheck===null?null:
-        S.toneCheck&&S.toneCheck.length?div({style:{borderTop:`1px solid ${T.div}`,paddingTop:"10px"}},[
-          div({style:{fontSize:"11px",fontWeight:"700",color:"#fbbf24",marginBottom:"6px"}},["⚠ Buzzwords detected — consider replacing:"]),
-          ...S.toneCheck.map(b=>div({style:{display:"flex",gap:"8px",alignItems:"center",fontSize:"11px",marginBottom:"4px"}},[
-            span({style:{color:"#f87171",textDecoration:"line-through"}},[b.bad]),
-            span({style:{color:T.muted}},["→"]),
-            span({style:{color:"#4ade80",fontWeight:"600"}},[b.good]),
-          ])),
-        ]):div({style:{borderTop:`1px solid ${T.div}`,paddingTop:"10px",fontSize:"11px",color:"#4ade80"}},[
-          "✓ No buzzwords detected — tone looks clean"
-        ]),
-      ].filter(Boolean)):null;
+          ]),
+          // Progress bar
+          div({style:{height:"6px",background:"#111827",borderRadius:"3px",marginBottom:"10px"}},[
+            div({style:{height:"100%",width:score+"%",background:scoreBarCol,borderRadius:"3px",transition:"width 0.6s ease"}}),
+          ]),
+          // Pro tip if low
+          score<75?div({style:{fontSize:"12px",color:"#9ca3af",marginBottom:"10px",lineHeight:"1.5"}},[
+            "💡 Pro-tip: Score is low due to missing metrics. Add dollar amounts ($1.5M), percentages (80%), and timeframes (17+ years) to your achievements."
+          ]):null,
+          // Tone audit results
+          S.toneCheck!==null?div({style:{borderTop:"1px solid #374151",paddingTop:"10px"}},[
+            issues.length?div({},[
+              div({style:{fontSize:"11px",fontWeight:"700",color:"#fbbf24",marginBottom:"8px"}},["⚠ Buzzwords found — consider replacing:"]),
+              div({style:{lineHeight:"2"}},[
+                ...issues.map(b=>div({style:{display:"inline-block",marginRight:"6px",marginBottom:"4px"}},[
+                  h("span",{className:"buzzword-tag"},[b.word]),
+                  span({style:{fontSize:"11px",color:"#9ca3af"}},[" → "+b.hint]),
+                ])),
+              ]),
+            ]):div({style:{fontSize:"11px",color:"#4ade80"}},["✓ No buzzwords detected — tone looks clean"]),
+          ]):null,
+        ].filter(Boolean));
+      })():null;
 
-      tabBody=div({},[ciCard,uploadWrap,ta,analyzeCard,polishRow,formatHint,errBanner,tmplCard].filter(Boolean));
+      tabBody=div({},[ciCard,uploadWrap,metricAlert,ta,analyzeCard,polishRow,formatHint,errBanner,tmplCard].filter(Boolean));
 
     }else{
       // PDF Preview
