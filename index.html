@@ -1135,6 +1135,40 @@ REWRITE THIS RESUME:
         ]);
       })();
 
+      // ── Analyze card ──
+      const analyzeCard=S.raw.trim()?(()=>{
+        const score=calculateImpactScore(S.raw);
+        const scoreCol=score>=75?"#4ade80":score>=50?"#fbbf24":"#f87171";
+        const scoreBarCol=score>=75?"#16a34a":score>=50?"#d97706":"#dc2626";
+        const issues=S.toneCheck||[];
+        return div({className:"score-card"},[
+          div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}},[
+            span({style:{fontWeight:"700",color:"#93c5fd",fontSize:"13px"}},["📊 Resume Impact Score"]),
+            div({style:{display:"flex",alignItems:"center",gap:"8px"}},[
+              span({style:{fontSize:"22px",fontWeight:"800",color:scoreCol}},[score+"%"]),
+              mkBtn("ghost","Audit tone",()=>{S.toneCheck=auditTone(S.raw||"");rerender();},{fontSize:"11px",padding:"3px 9px"}),
+            ]),
+          ]),
+          div({style:{height:"6px",background:"#111827",borderRadius:"3px",marginBottom:"10px"}},[
+            div({style:{height:"100%",width:score+"%",background:scoreBarCol,borderRadius:"3px",transition:"width 0.6s ease"}}),
+          ]),
+          score<75?div({style:{fontSize:"12px",color:"#9ca3af",marginBottom:"10px",lineHeight:"1.5"}},[
+            "💡 Pro-tip: Score is low due to missing metrics. Add dollar amounts ($1.5M), percentages (80%), and timeframes (17+ years)."
+          ]):null,
+          S.toneCheck!==null?div({style:{borderTop:"1px solid #374151",paddingTop:"10px"}},[
+            issues.length?div({},[
+              div({style:{fontSize:"11px",fontWeight:"700",color:"#fbbf24",marginBottom:"8px"}},["⚠ Buzzwords found — consider replacing:"]),
+              div({style:{lineHeight:"2"}},[
+                ...issues.map(b=>div({style:{display:"inline-block",marginRight:"6px",marginBottom:"4px"}},[
+                  h("span",{className:"buzzword-tag"},[b.word]),
+                  span({style:{fontSize:"11px",color:"#9ca3af"}},[" → "+b.hint]),
+                ])),
+              ]),
+            ]):div({style:{fontSize:"11px",color:"#4ade80"}},["✓ No buzzwords detected — tone looks clean"]),
+          ]):null,
+        ].filter(Boolean));
+      })():null;
+
       tabBody=div({},[ciCard,uploadWrap,metricAlert,ta,analyzeCard,structureCheck,polishRow,formatHint,errBanner].filter(Boolean));
 
     }else{
