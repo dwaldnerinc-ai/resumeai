@@ -2,8 +2,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ResumeAI — Powered by Claude</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&amp;display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -17,34 +15,47 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:#3b82f6!import
 button:active{transform:scale(0.97)}
 .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;flex-shrink:0}
 
-/* ── PDF RESUME STYLES (DM Sans) ── */
-.pdf-wrap{background:#fff;color:#1a1a1a;font-family:'DM Sans',sans-serif;font-size:10.5pt;font-weight:400;padding:36px 44px;max-width:800px;margin:0 auto;line-height:1.6}
+/* ── PDF RESUME STYLES ── */
+.pdf-wrap{background:#fff;color:#1a1a1a;font-family:'Inter',system-ui,sans-serif;font-size:10pt;font-weight:400;padding:24px 36px;max-width:800px;margin:0 auto;line-height:1.5}
 .pdf-wrap *{color:inherit}
-.pdf-name{font-size:22pt;font-weight:700;color:#0d2b4e;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:4px}
-.pdf-tagline{font-size:11pt;color:#2e6da4;font-weight:600;text-align:center;margin-bottom:8px}
-.pdf-contact{font-size:9.5pt;color:#555;font-weight:400;display:flex;justify-content:center;flex-wrap:wrap;gap:4px 12px;margin-bottom:0}
-.pdf-divider{border:none;border-top:3px solid #1e3a6e;margin:14px 0 16px}
-.pdf-exp-block{margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid #eef0f4;font-weight:400}
-.pdf-exp-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
-.pdf-exp-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 12px;margin-bottom:4px}
-.pdf-exp-left{font-size:11pt;font-weight:700;color:#0d2b4e;flex:1 1 auto}
-.pdf-exp-right{font-size:9.5pt;color:#2e6da4;font-weight:600;flex-shrink:0;white-space:nowrap}
-.pdf-bullet{display:flex;gap:7px;margin-bottom:1px;font-size:10pt}
-.pdf-bullet-dot{color:#2e6da4;flex-shrink:0;margin-top:1px;font-weight:400}
-.pdf-bullet-text{color:#333;line-height:1.4;font-weight:400;font-size:10pt}
-.pdf-text-line{font-size:10pt;margin-bottom:3px;color:#333;line-height:1.4;font-weight:400}
-/* Flexbox grid — replaces table layout */
-.pdf-grid-flex{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 0;width:100%;margin-top:4px}
-.pdf-grid-flex-item{flex:0 0 33.33%;text-align:center;font-size:9.5pt;color:#222;font-weight:400}
-.pdf-grid-item{display:flex;gap:0;align-items:center;justify-content:center;color:#222;font-weight:400}
-.pdf-grid-item span{color:#222}
-.pdf-grid-item .pdf-bullet-dot{display:none}
+.pdf-name{font-size:20pt;font-weight:700;color:#0d2b4e;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:3px}
+.pdf-tagline{font-size:10.5pt;color:#2e6da4;font-weight:600;text-align:center;margin-bottom:6px}
+.pdf-contact{font-size:9pt;color:#555;font-weight:400;display:flex;justify-content:center;flex-wrap:wrap;gap:4px 10px;margin-bottom:4px}
+.pdf-divider{border:none;border-top:2px solid #0d2b4e;margin:10px 0 12px}
+.pdf-sec-title{font-size:9.5pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.08em;border-bottom:1.5px solid #0d2b4e;padding-bottom:3px;margin-top:12px;margin-bottom:7px;text-align:center}
+.pdf-exp-block{margin-bottom:10px;padding-bottom:8px;font-weight:400}
+.pdf-exp-block:last-child{margin-bottom:0;padding-bottom:0}
+.pdf-exp-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 12px;margin-bottom:3px}
+.pdf-exp-left{font-size:10.5pt;font-weight:700;color:#0d2b4e;flex:1 1 auto}
+.pdf-exp-right{font-size:9pt;color:#2e6da4;font-weight:600;flex-shrink:0;white-space:nowrap}
+.pdf-bullet{display:flex;gap:6px;margin-bottom:1px;font-size:9.5pt}
+.pdf-bullet-dot{color:#2e6da4;flex-shrink:0;font-weight:400}
+.pdf-bullet-text{color:#333;line-height:1.4;font-weight:400}
+.pdf-text-line{font-size:9.5pt;margin-bottom:2px;color:#333;line-height:1.4;font-weight:400}
+.pdf-bullet-text strong,.pdf-text-line strong{font-weight:700;color:#1e40af}
+.pdf-grid-flex{display:flex;flex-wrap:wrap;justify-content:center;gap:3px 0;width:100%;margin-top:2px}
+.pdf-grid-flex-item{flex:0 0 33.33%;text-align:center;font-size:9pt;color:#222;font-weight:400;padding:1px 4px}
+@media print{
+  body>*:not(#print-area){display:none!important}
+  #print-area{display:block!important;position:static}
+  .pdf-wrap{padding:16px 28px;max-width:none}
+}
 .score-card{background:#1e2937;border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid #374151}
 .buzzword-tag{background:#450a0a;color:#f87171;padding:2px 8px;border-radius:4px;font-size:11px;margin-right:4px;display:inline-block;margin-bottom:4px}
+.btn-key-active{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s ease;background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.3);color:#4ade80;font-family:inherit}
+.btn-key-active:hover{background:rgba(22,163,74,0.2);border-color:#4ade80;box-shadow:0 0 12px rgba(74,222,128,0.1)}
+.btn-key-missing{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;background:rgba(133,77,14,0.1);border:1px solid rgba(133,77,14,0.4);color:#fbbf24;font-family:inherit}
+.key-dot{width:6px;height:6px;background:#4ade80;border-radius:50%;box-shadow:0 0 6px #4ade80;flex-shrink:0}
+.key-dot-missing{width:6px;height:6px;background:#fbbf24;border-radius:50%;flex-shrink:0}
 .app-stale{border:1.5px solid #854d0e!important;background:rgba(133,77,14,0.1)!important;position:relative}
 .app-stale::after{content:"⚠ Follow up?";position:absolute;top:-10px;right:10px;background:#854d0e;color:white;font-size:10px;padding:2px 6px;border-radius:4px;font-family:inherit}
 .pdf-bullet-text strong,.pdf-text-line strong{font-weight:700;color:#1e40af;background:rgba(30,64,175,0.03);padding:0 1px;border-radius:2px}
-.pdf-sec-title{font-size:10pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.08em;border-bottom:1.5px solid #0d2b4e;padding-bottom:4px;margin-top:20px;margin-bottom:10px;text-align:left}
+.pdf-sec-title{font-size:10pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.08em;border-bottom:1.5px solid #0d2b4e;padding-bottom:3px;margin-top:12px;margin-bottom:7px;text-align:center}
+
+.app-stale{border:1.5px solid #854d0e!important;background:rgba(133,77,14,0.1)!important;position:relative}
+.app-stale::after{content:"⚠ Follow up?";position:absolute;top:-10px;right:10px;background:#854d0e;color:white;font-size:10px;padding:2px 6px;border-radius:4px;font-family:inherit}
+.pdf-bullet-text strong,.pdf-text-line strong{font-weight:700;color:#1e40af;background:rgba(30,64,175,0.03);padding:0 1px;border-radius:2px}
+.pdf-sec-title{font-size:10pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.08em;border-bottom:1.5px solid #0d2b4e;padding-bottom:3px;margin-top:12px;margin-bottom:7px;text-align:center}
 
 @media print{
   body>*:not(#print-area){display:none!important}
@@ -66,8 +77,6 @@ button:active{transform:scale(0.97)}
 </head>
 <body style="background: rgb(13, 17, 23); color: rgb(232, 237, 245);">
 <div id="app"><div style="min-height: 100vh; background: rgb(13, 17, 23); color: rgb(232, 237, 245); font-family: Inter, system-ui, sans-serif;"><div style="background: rgb(22, 28, 39); border-bottom: 1px solid rgb(33, 41, 58); padding: 8px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0px; z-index: 10; min-height: 54px; flex-wrap: wrap; gap: 8px;"><div style="display: flex; align-items: center; gap: 10px;"><div title="Reload" style="width: 28px; height: 28px; background: rgb(37, 99, 235); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: rgb(255, 255, 255); cursor: pointer;">R</div><span style="font-size: 15px; font-weight: 700; letter-spacing: -0.01em;">ResumeAI</span><span style="font-size: 11px; color: rgb(75, 85, 99); margin-left: 2px;">powered by Claude</span></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><div style="font-size: 11px; color: rgb(75, 85, 99); display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: rgb(22, 163, 74); display: inline-block;"></span> Auto-saved</div><div style="display: flex; align-items: center; gap: 6px;"><button style="padding: 5px 11px; border-radius: 20px; font-size: 11px; cursor: pointer; border: 1px solid rgb(22, 101, 52); background: rgb(5, 46, 22); color: rgb(74, 222, 128); display: flex; align-items: center; gap: 5px;">🔑 Key set</button></div><button style="padding: 5px 13px; border-radius: 20px; border: 1px solid rgb(33, 41, 58); background: rgb(22, 28, 39); color: rgb(139, 149, 168); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">☀ Light</button><button style="padding: 5px 10px; border-radius: 20px; border: 1px solid rgb(33, 41, 58); background: transparent; color: rgb(75, 85, 99); font-size: 11px; cursor: pointer;">Reset</button></div></div><div style="max-width: 1080px; margin: 0px auto; padding: 24px 20px;"><div style="display: flex; gap: 7px; margin-bottom: 24px; flex-wrap: wrap;"><button style="padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgb(33, 41, 58); background: rgb(22, 28, 39); color: rgb(75, 85, 99); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500;"><span style="width: 18px; height: 18px; border-radius: 50%; background: rgb(75, 85, 99); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: rgb(255, 255, 255); flex-shrink: 0; font-weight: 700;">1</span> Resume</button><button style="padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgb(30, 64, 175); background: rgb(12, 30, 62); color: rgb(147, 197, 253); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600;"><span style="width: 18px; height: 18px; border-radius: 50%; background: rgb(37, 99, 235); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: rgb(255, 255, 255); flex-shrink: 0; font-weight: 700;">2</span> Find Jobs</button><button style="padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgb(22, 101, 52); background: rgb(5, 46, 22); color: rgb(74, 222, 128); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500;"><span style="width: 18px; height: 18px; border-radius: 50%; background: rgb(22, 163, 74); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: rgb(255, 255, 255); flex-shrink: 0; font-weight: 700;">✓</span> Job Board</button><button style="padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgb(33, 41, 58); background: rgb(22, 28, 39); color: rgb(75, 85, 99); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500;"><span style="width: 18px; height: 18px; border-radius: 50%; background: rgb(75, 85, 99); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: rgb(255, 255, 255); flex-shrink: 0; font-weight: 700;">4</span> Apply</button><button style="padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgb(33, 41, 58); background: rgb(22, 28, 39); color: rgb(75, 85, 99); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500;"><span style="width: 18px; height: 18px; border-radius: 50%; background: rgb(75, 85, 99); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: rgb(255, 255, 255); flex-shrink: 0; font-weight: 700;">5</span> Tracker<span style="font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; background: rgb(12, 30, 62); color: rgb(147, 197, 253);">5</span></button><button style="padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgb(33, 41, 58); background: rgb(22, 28, 39); color: rgb(75, 85, 99); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500;"><span style="width: 18px; height: 18px; border-radius: 50%; background: rgb(75, 85, 99); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: rgb(255, 255, 255); flex-shrink: 0; font-weight: 700;">6</span> Interview Prep</button></div><div><div style="background: rgb(22, 28, 39); border: 1px solid rgb(33, 41, 58); border-radius: 14px; padding: 22px 24px; margin-bottom: 18px;"><div style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Find matching jobs</div><div style="font-size: 13px; color: rgb(139, 149, 168); margin-bottom: 16px;">Tip: polish your resume first for personalized match scores.</div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;"><div><label style="font-size: 11px; color: rgb(75, 85, 99); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600;">Keywords</label><input placeholder="e.g. Project Manager, Construction…" style="background: rgb(13, 17, 23); border: 1px solid rgb(33, 41, 58); border-radius: 8px; color: rgb(232, 237, 245); padding: 9px 13px; font-size: 13px; font-family: inherit; width: 100%; box-sizing: border-box;"></div><div><label style="font-size: 11px; color: rgb(75, 85, 99); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600;">Location</label><input placeholder="e.g. Vancouver, BC" style="background: rgb(13, 17, 23); border: 1px solid rgb(33, 41, 58); border-radius: 8px; color: rgb(232, 237, 245); padding: 9px 13px; font-size: 13px; font-family: inherit; width: 100%; box-sizing: border-box;"></div></div><div style="margin-bottom: 16px;"><label style="font-size: 11px; color: rgb(75, 85, 99); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600;">Work type</label><div style="display: flex; gap: 7px; flex-wrap: wrap;"><button style="padding: 6px 13px; border-radius: 16px; border: 1.5px solid rgb(33, 41, 58); background: transparent; color: rgb(139, 149, 168); font-size: 12px; cursor: pointer; font-weight: 400;">Remote</button><button style="padding: 6px 13px; border-radius: 16px; border: 1.5px solid rgb(33, 41, 58); background: transparent; color: rgb(139, 149, 168); font-size: 12px; cursor: pointer; font-weight: 400;">Hybrid</button><button style="padding: 6px 13px; border-radius: 16px; border: 1.5px solid rgb(33, 41, 58); background: transparent; color: rgb(139, 149, 168); font-size: 12px; cursor: pointer; font-weight: 400;">On-site</button><button style="padding: 6px 13px; border-radius: 16px; border: 1.5px solid rgb(33, 41, 58); background: transparent; color: rgb(139, 149, 168); font-size: 12px; cursor: pointer; font-weight: 400;">Contract</button></div></div><div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;"><button style="padding: 9px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; background: rgb(13, 148, 136); color: rgb(255, 255, 255); display: inline-flex; align-items: center; gap: 7px;">⌕ Search jobs</button></div></div><div style="background: rgb(22, 28, 39); border: 1px solid rgb(33, 41, 58); border-radius: 14px; padding: 48px 24px; margin-bottom: 18px; text-align: center; color: rgb(139, 149, 168);"><div style="font-size: 32px; margin-bottom: 10px;">⌕</div><div style="font-size: 15px; font-weight: 600; color: rgb(232, 237, 245); margin-bottom: 6px;">Search for relevant jobs</div><div style="font-size: 13px; line-height: 1.6;">Leave keywords blank to see all roles, or filter by type.</div></div></div></div></div></div>
-<div id="print-area" style="display:none"></div>
-
 <script>
 // ─────────────────────────────────────────────────────────
 // DATA & CONSTANTS
@@ -85,28 +94,16 @@ const smeta=k=>STATUSES.find(s=>s.key===k)||STATUSES[0];
 const SEED_APPS=[];
 
 
-const TONE_RULES={
-  natural:`VOICE: Senior Leader talking to a peer. Honest, direct, and zero-fluff.
-SENTENCE STRUCTURE: Use "I" or start with strong simple verbs. No passive voice.
-CRITICAL BAN LIST (do not use any of these): spearheaded, leveraged, utilized, orchestrated, championed, fostered, robust, seamless, synergy, dynamic, innovative, results-driven, passionate, proven track record, end-to-end, holistic, transformative, pragmatic, strategic, mission-critical.
-THE RULE OF THREE:
-1. If a word has 4 syllables, find a 2-syllable version.
-2. If a sentence sounds like a corporate brochure, delete it.
-3. Focus on "What I fixed" and "How much I saved" — not "What I was responsible for."`,
-  bold:`VOICE: Short, punchy, aggressive. Results only. No filler. No adjectives.`,
-  polished:`VOICE: Professional and structured. Strong action verbs, quantified results.`,
-  format:null
-};
 
 // ─────────────────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────────────────
 const S={
   dark:true, tab:"resume",
-  raw:"", polished:"", resumeView:"edit", tone:"natural",
+  raw:"", 
   ci:{name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""},
-  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, tipsOpen:false,tmplOpen:false,tmpl:null,followUpText:"",followUpJob:null,toneCheck:null,metricAlert:false,pdfStyle:"default",
-  selectedJob:null, posting:"", tailored:"", cover:"", applyOut:"resume", genWhat:"both",
+  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, tipsOpen:false,followUpText:"",followUpJob:null,toneCheck:null,metricAlert:false,pdfStyle:"default",resumeView:"edit",auditResult:null,auditError:"",structure:{hasContact:false,hasSummary:false,hasMetrics:false,hasPMP:false},
+  
   apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
   searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
   addedJobs:new Set(), aiSuggestions:[], aiSuggestionsError:"", recentlyAdded:[], addToast:"", pastePosting:"",
@@ -133,16 +130,11 @@ function loadAll(){
   if(!apps)lsSet("tracker-apps-v2",JSON.stringify([]));
 
   const raw=lsGet("resume-raw",""); S.raw=raw;
-  const pol=lsGet("resume-polished",""); S.polished=pol;
-  if(pol)S.resumeView="preview";
   const ci=lsGet("resume-ci"); if(ci)S.ci=JSON.parse(ci);
   const tone=lsGet("resume-tone"); if(tone)S.tone=tone;
   const dark=lsGet("app-dark"); if(dark!==null)S.dark=(dark==="true");
   const posting=lsGet("apply-posting",""); S.posting=posting;
   S.apiKey=lsGet("api-key","")||"";
-  const tailored=lsGet("apply-tailored",""); S.tailored=tailored;
-  const cover=lsGet("apply-cover",""); S.cover=cover;
-  if(tailored||cover) S.applyOut=cover&&!tailored?"cover":"resume";
   S.storageReady=true;
 }
 
@@ -235,7 +227,7 @@ function spinEl(){
 }
 
 function isDone(s){
-  return {resume:!!S.polished,search:S.searchDone,board:S.apps.length>0,apply:!!(S.tailored||S.cover),tracker:S.apps.some(a=>a.status!=="saved"),interview:S.intQs.length>0}[s]||false;
+  return {resume:!!S.raw,search:S.searchDone,board:S.apps.length>0,tracker:S.apps.some(a=>a.status!=="saved"),interview:S.intQs.length>0}[s]||false;
 }
 
 function calculateImpactScore(text){
@@ -328,362 +320,6 @@ function matchBg(m){const d=S.dark;return m>=90?(d?"#052e16":"#f0fdf4"):m>=80?(d
 // ─────────────────────────────────────────────────────────
 // PDF RESUME RENDERER
 // ─────────────────────────────────────────────────────────
-function buildPDFHTML(text,ci){
-  // Header comes purely from S.ci — set on the Resume edit tab
-  const name=ci.name||"";
-  const tagline=ci.tagline||"";
-  const phone=ci.phone||"";
-  const email=ci.email||"";
-  const location=ci.location||"";
-  const linkedin=ci.linkedin||"";
-
-  const contactParts=[
-    location?`<span class="pdf-contact-item pdf-ci-location">\uD83D\uDCCD ${esc(location)}</span>`:"",
-    phone?`<span class="pdf-contact-item pdf-ci-phone">\uD83D\uDCDE ${esc(phone)}</span>`:"",
-    email?`<span class="pdf-contact-item pdf-ci-email">\u2709 ${esc(email)}</span>`:"",
-    linkedin?`<span class="pdf-contact-item pdf-ci-linkedin">\uD83D\uDD17 ${esc(linkedin)}</span>`:"",
-  ].filter(Boolean).join('<span style="color:#ccc"> | </span>');
-
-  // Parse resume body — skip any lines that look like header info
-  // (name/contact at top before the first ALL CAPS section)
-  const allLines=text.split("\n").map(l=>l.trim()).filter(Boolean);
-  const sections=[];
-  let cur=null;
-
-  // Section header detection — ALL CAPS line, allows &, /, spaces, common punctuation
-  function isSectionHeader(line){
-    if(line.length<3||line.length>70)return false;
-    // Must be mostly uppercase — allow &, /, spaces, digits, common punctuation
-    const stripped=line.replace(/[\s&\/\-.,|:()]/g,"");
-    if(!stripped)return false;
-    const upperRatio=stripped.split("").filter(ch=>ch===ch.toUpperCase()&&ch!==ch.toLowerCase()).length/stripped.length;
-    return upperRatio>=0.85&&line===line.toUpperCase();
-  }
-
-  // Detect a job title line: "Title | Company" or "Title — Company" pattern
-  function isJobTitle(line){
-    return (line.includes(" | ")||line.includes(" — "))&&
-      !line.includes("@")&&line.length<120&&
-      /[A-Z]/.test(line)&&
-      !isSectionHeader(line);
-  }
-
-  allLines.forEach(line=>{
-    const isH=isSectionHeader(line);
-    // Auto-create PROFESSIONAL EXPERIENCE section when we hit a job title line
-    // and the current section is not already an experience section
-    const looksLikeJob=isJobTitle(line);
-    const inExpSection=cur&&(cur.title.includes("EXPERIENCE")||cur.title.includes("EMPLOYMENT")||cur._isExp);
-    if(looksLikeJob&&!inExpSection){
-      if(cur)sections.push(cur);
-      cur={title:"PROFESSIONAL EXPERIENCE",items:[],_isExp:true};
-    }
-    if(isH){if(cur)sections.push(cur);cur={title:line,items:[]};}
-    else if(cur){
-      const isBullet=/^[•\u2022\u2013\-\*]/.test(line)||line.trim().startsWith("*");
-      if(isBullet)cur.items.push({type:"bullet",text:line.replace(/^[•\u2022\u2013\-\*\s]+/,"")});
-      else cur.items.push({type:"text",text:line});
-    }else{if(!cur)cur={title:"__hdr__",items:[]};cur.items.push({type:"text",text:line});}
-  });
-  if(cur)sections.push(cur);
-  // If __hdr__ has content beyond just the name/tagline, treat it as Professional Summary
-  const hdrSec=sections.find(s=>s.title==="__hdr__");
-  const hdrItems=hdrSec?hdrSec.items:[];
-  // Items beyond name/tagline (short lines without contact info) become summary content
-  const summaryItems=hdrItems.filter(it=>{
-    const t=it.text;
-    return t.length>60||t.includes(":")||t.startsWith("•");
-  });
-  // Check if there's already a PROFESSIONAL SUMMARY section
-  const hasSummary=sections.some(s=>s.title.includes("SUMMARY")||s.title.includes("PROFILE")||s.title.includes("OBJECTIVE"));
-  const rest=[
-    ...(!hasSummary&&summaryItems.length?[{title:"PROFESSIONAL SUMMARY",items:summaryItems}]:[]),
-    ...sections.filter(s=>s.title!=="__hdr__"),
-  ];  function renderExp(items){
-    const blocks=[];let block=null;
-    const highlightMetrics=(text)=>text.replace(/(\$\d+(?:\.\d+)?[MKkBb+]?|\d+(?:\.\d+)?[MKkBb%+]|\d+\+\s*(?:years?|yrs?|months?))/gi,'<strong>$1</strong>');
-    const isSubLine=(tx)=>/\d{4}/.test(tx)||tx.includes(" – ")||tx.includes(" - ")||tx.includes("Present")||tx.includes("present")||(tx.length<70&&block&&block.bullets.length===0&&block.left);
-    items.forEach(it=>{
-      if(it.type==="bullet"){
-        if(!block)block={left:"Experience",right:"",bullets:[]};
-        block.bullets.push(highlightMetrics(esc(it.text)));
-      }else{
-        const tr=it.text.trim();
-        // Only create a new bold header if the line contains a separator like | or — or -
-        const isHeaderLine=tr.includes(" | ")||tr.includes(" — ")||tr.includes(" – ")||(tr.includes(" - ")&&tr.length<100);
-        if(isHeaderLine){
-          if(block&&(block.left||block.bullets.length>0))blocks.push(block);
-          block={left:tr,right:"",bullets:[]};
-        }else if(block){
-          // Sub-description line (date, location, context) — treat as normal-weight bullet
-          block.bullets.push(highlightMetrics(esc(tr)));
-        }else{
-          // No block yet — start one
-          block={left:tr,right:"",bullets:[]};
-        }
-      }
-    });
-    if(block&&(block.left||block.bullets.length>0))blocks.push(block);
-    return blocks.map((b,i)=>{
-      const isLast=i===blocks.length-1;
-      let left=b.left,right=b.right;
-      if(!right&&left){
-        const dateMatch=left.match(/[\|\-\–]\s*(\d{4}[\–\-–]\d{4}|\d{4}[\–\-–]Present|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}[\s\–\-–]+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}[\s\–\-–]+Present|\d{4})\s*$/i);
-        if(dateMatch){right=dateMatch[1].trim();left=left.slice(0,dateMatch.index).replace(/[\|\–\-]\s*$/,"").trim();}
-      }
-      return `<div class="pdf-exp-block"${isLast?' style="border-bottom:none;margin-bottom:0;padding-bottom:0"':''}>
-        ${(left||right)?`<div class="pdf-exp-header">
-          <span class="pdf-exp-left">${esc(left)}</span>
-          ${right?`<span class="pdf-exp-right">${esc(right)}</span>`:""}
-        </div>`:""}
-        ${b.bullets.map(bl=>`<div class="pdf-bullet"><span class="pdf-bullet-dot">▪</span><span class="pdf-bullet-text">${bl}</span></div>`).join("")}
-      </div>`;
-    }).join("");
-  }
-
-  function renderGrid(items, title){
-    const entries=items.map(it=>it.text.replace(/^[•\u2022\u2013\-]\s*/,"").trim()).filter(Boolean);
-    if(!entries.length)return"";
-    // Flexbox: each item is 50% wide, wrapping naturally
-    return`<div class="pdf-grid-flex">${entries.map(entry=>
-      `<div class="pdf-grid-flex-item">${esc(entry)}</div>`
-    ).join("")}</div>`;
-  }
-
-  const GRID_KEYS=["EXPERTISE","SKILLS","CERTIF","AWARD","DEVELOPMENT","EDUCATION","LICENCE","LICENSE","VOLUNTEER","ADDITIONAL","QUALIFICATION","TRAINING","LANGUAGE","OPERATIONAL","TECHNICAL","AREA OF"];
-  const sectionsHTML=rest.map(sec=>{
-    const isGrid=GRID_KEYS.some(k=>sec.title.toUpperCase().includes(k));
-    const isExp=sec.title.includes("EXPERIENCE")||sec.title.includes("EMPLOYMENT")||sec.title.includes("WORK HISTORY")||
-      // Auto-detect: section has items that look like job title lines (contains | or —)
-      (!GRID_KEYS.some(k=>sec.title.toUpperCase().includes(k))&&
-       !sec.title.includes("SUMMARY")&&!sec.title.includes("PROFILE")&&
-       sec.items.some(it=>it.type==="text"&&(it.text.includes(" | ")||it.text.includes(" — "))&&
-         /\d{4}/.test(it.text)));
-    let bodyHTML="";
-    if(isExp)bodyHTML=renderExp(sec.items);
-    else if(isGrid)bodyHTML=renderGrid(sec.items,sec.title);
-    else bodyHTML=sec.items.map(it=>it.type==="bullet"
-      ?`<div class="pdf-bullet"><span class="pdf-bullet-dot">▪</span><span class="pdf-bullet-text">${esc(it.text)}</span></div>`
-      :`<div class="pdf-text-line">${esc(it.text)}</div>`
-    ).join("");
-    return`<div style="margin-bottom:10px"><div class="pdf-sec-title">${esc(sec.title)}</div>${bodyHTML}</div>`;
-  }).join("");
-
-  // ── Semantic HTML for print-area (machine-readable for job boards) ──
-  function buildSemanticHTML(){
-    const semSections=rest.map(sec=>{
-      const isExp=sec.title.includes("EXPERIENCE")||sec.title.includes("EMPLOYMENT")||sec.title.includes("WORK HISTORY")||
-      // Auto-detect: section has items that look like job title lines (contains | or —)
-      (!GRID_KEYS.some(k=>sec.title.toUpperCase().includes(k))&&
-       !sec.title.includes("SUMMARY")&&!sec.title.includes("PROFILE")&&
-       sec.items.some(it=>it.type==="text"&&(it.text.includes(" | ")||it.text.includes(" — "))&&
-         /\d{4}/.test(it.text)));
-      const isGrid=GRID_KEYS.some(k=>sec.title.toUpperCase().includes(k));
-      let body="";
-      if(isExp){
-        // Re-use the same block parsing logic
-        const blocks=[];let block=null;
-        const isSubLine=(tx)=>/\d{4}/.test(tx)||tx.includes(" – ")||tx.includes(" - ")||tx.includes("Present");
-        sec.items.forEach(it=>{
-          if(it.type==="bullet"){if(!block)block={left:"",right:"",bullets:[]};block.bullets.push(it.text);}
-          else{const tr=it.text.trim();if(!block){block={left:tr,right:"",bullets:[]};}
-          else if(block.bullets.length===0&&block.left&&!block.right&&isSubLine(tr)){block.right=tr;}
-          else{if(block.left||block.bullets.length>0)blocks.push(block);block={left:tr,right:"",bullets:[]};}}
-        });
-        if(block&&(block.left||block.bullets.length>0))blocks.push(block);
-        body=blocks.map(b=>{
-          let left=b.left,right=b.right;
-          if(!right&&left){
-            const dm=left.match(/[\|\-\–]\s*(\d{4}[\–\-–]\d{4}|\d{4}[\–\-–]Present|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}[\s\–\-–]+(?:Present|\d{4}))\s*$/i);
-            if(dm){right=dm[1].trim();left=left.slice(0,dm.index).replace(/[\|\–\-]\s*$/,"").trim();}
-          }
-          return`<article><h3>${esc(left)}${right?" | "+esc(right):""}</h3><ul>${b.bullets.map(bl=>`<li>${esc(bl)}</li>`).join("")}</ul></article>`;
-        }).join("");
-      }else if(isGrid){
-        const entries=sec.items.map(it=>it.text.replace(/^[•\u2022\u2013\-]\s*/,"").trim()).filter(Boolean);
-        body=`<ul>${entries.map(e=>`<li>${esc(e)}</li>`).join("")}</ul>`;
-      }else{
-        body=sec.items.map(it=>it.type==="bullet"?`<li>${esc(it.text)}</li>`:`<p>${esc(it.text)}</p>`).join("");
-        if(sec.items.some(it=>it.type==="bullet"))body=`<ul>${body}</ul>`;
-      }
-      return`<section><h2>${esc(sec.title)}</h2>${body}</section>`;
-    }).join("");
-    return`<div class="pdf-wrap">
-      ${name?`<h1 class="pdf-name">${esc(name)}</h1>`:""}
-      ${tagline?`<p class="pdf-tagline">${esc(tagline)}</p>`:""}
-      ${contactParts?`<p class="pdf-contact">${contactParts}</p>`:""}
-      ${(name||contactParts)?`<hr class="pdf-divider"/>`:""}
-      ${semSections}
-    </div>`;
-  }
-
-  return`<div class="pdf-wrap">
-    ${name?`<div class="pdf-name">${esc(name)}</div>`:""}
-    ${tagline?`<div class="pdf-tagline">${esc(tagline)}</div>`:""}
-    ${contactParts?`<div class="pdf-contact">${contactParts}</div>`:""}
-    ${(name||contactParts)?`<hr class="pdf-divider"/>`:""}
-    ${sectionsHTML}
-  </div>`;
-}
-
-// Export semantic version for print area
-function buildSemanticPDFHTML(text,ci){return buildPDFHTML(text,ci,true);}
-
-
-// ─────────────────────────────────────────────────────────
-// EDITABLE PDF HELPER
-// ─────────────────────────────────────────────────────────
-function wireEditable(previewBox,getText,onSave){
-  let editing=false;
-  let undoStack=[];
-
-  function extractText(){
-    const lines=[];
-    // Skip header elements — name/tagline/contact live in S.ci, not the body text
-    previewBox.querySelectorAll(".pdf-sec-title,.pdf-exp-left,.pdf-exp-right,.pdf-bullet-text,.pdf-text-line").forEach(el=>{
-      const tx=el.innerText.trim();if(!tx)return;
-      if(el.classList.contains("pdf-sec-title"))lines.push("\n"+tx.toUpperCase());
-      else if(el.classList.contains("pdf-bullet-text"))lines.push("\u2022 "+tx);
-      else lines.push(tx);
-    });
-    return lines.join("\n").trim();
-  }
-
-  function syncCiFromHeader(){
-    // Sync edited header fields back to S.ci using specific element classes
-    const nameEl=previewBox.querySelector(".pdf-name");
-    const tagEl=previewBox.querySelector(".pdf-tagline");
-    const locationEl=previewBox.querySelector(".pdf-ci-location");
-    const phoneEl=previewBox.querySelector(".pdf-ci-phone");
-    const emailEl=previewBox.querySelector(".pdf-ci-email");
-    const linkedinEl=previewBox.querySelector(".pdf-ci-linkedin");
-
-    function clean(el,prefix){
-      if(!el)return null;
-      // Remove the emoji prefix (📍 📞 ✉ 🔗) to get just the value
-      return el.innerText.replace(prefix,"").trim();
-    }
-
-    const updates={};
-    if(nameEl)updates.name=nameEl.innerText.trim();
-    if(tagEl)updates.tagline=tagEl.innerText.trim();
-    if(locationEl)updates.location=clean(locationEl,"📍");
-    if(phoneEl)updates.phone=clean(phoneEl,"📞");
-    if(emailEl)updates.email=clean(emailEl,"✉");
-    // If linkedin element is gone (user deleted it) or empty, clear it
-    updates.linkedin=linkedinEl?clean(linkedinEl,"🔗"):"";
-
-    S.ci={...S.ci,...updates};
-    lsSet("resume-ci",JSON.stringify(S.ci));
-  }
-
-  // ── Toolbar: Edit / Save / Revert / Undo ──
-  const toolbar=div({style:{
-    position:"absolute",top:"10px",right:"10px",display:"flex",gap:"6px",
-    alignItems:"center",zIndex:"10",
-  }});
-
-  const editBtn=h("button",{style:{
-    fontSize:"11px",padding:"4px 11px",borderRadius:"6px",cursor:"pointer",
-    border:"1px solid #374151",background:"rgba(17,24,39,0.88)",color:"#e5e7eb",
-    fontFamily:"inherit",fontWeight:"600",display:"flex",alignItems:"center",gap:"5px",
-  }}); editBtn.textContent="\u270E Edit";
-
-  const saveBtn=h("button",{style:{
-    fontSize:"11px",padding:"4px 11px",borderRadius:"6px",cursor:"pointer",
-    border:"1px solid #166534",background:"#052e16",color:"#4ade80",
-    fontFamily:"inherit",fontWeight:"600",display:"none",
-  }}); saveBtn.textContent="\u2713 Save";
-
-  const revertBtn=h("button",{style:{
-    fontSize:"11px",padding:"4px 11px",borderRadius:"6px",cursor:"pointer",
-    border:"1px solid #374151",background:"rgba(17,24,39,0.88)",color:"#fca5a5",
-    fontFamily:"inherit",fontWeight:"600",display:"none",
-  }}); revertBtn.textContent="\u21BA Revert";
-
-  const undoBtn=h("button",{style:{
-    fontSize:"11px",padding:"4px 11px",borderRadius:"6px",cursor:"pointer",
-    border:"1px solid #374151",background:"rgba(17,24,39,0.88)",color:"#93c5fd",
-    fontFamily:"inherit",fontWeight:"600",display:"none",
-  }}); undoBtn.textContent="\u21B6 Undo";
-
-  function startEdit(){
-    const wrap=previewBox.querySelector(".pdf-wrap");
-    if(!wrap)return;
-    undoStack.push(getText()); // snapshot before editing
-    undoBtn.style.display=undoStack.length>0?"":"none";
-    editing=true;
-    wrap.contentEditable="true";
-    wrap.spellcheck=true;
-    wrap.style.outline="2px solid #2563eb44";
-    wrap.style.borderRadius="4px";
-    wrap.style.cursor="text";
-    wrap.style.caretColor="#2563eb";
-    editBtn.style.display="none";
-    saveBtn.style.display="";
-    revertBtn.style.display="";
-    undoBtn.style.display=undoStack.length>1?"":"none";
-    setTimeout(()=>wrap.focus(),50);
-  }
-
-  function stopEdit(){
-    const wrap=previewBox.querySelector(".pdf-wrap");
-    if(!wrap)return;
-    editing=false;
-    wrap.contentEditable="false";
-    wrap.style.outline="none";
-    wrap.style.cursor="default";
-    editBtn.style.display="";
-    saveBtn.style.display="none";
-    revertBtn.style.display="none";
-    undoBtn.style.display="none";
-  }
-
-  editBtn.addEventListener("click",()=>startEdit());
-
-  saveBtn.addEventListener("click",()=>{
-    syncCiFromHeader();
-    const newText=extractText();
-    if(newText&&newText!==getText())onSave(newText);
-    stopEdit();
-  });
-
-  revertBtn.addEventListener("click",()=>{
-    if(!confirm("Revert to the last saved version? Your current edits will be lost."))return;
-    // Restore from the snapshot taken when editing started
-    const prev=undoStack[undoStack.length-1];
-    if(prev){
-      onSave(prev);
-      // Rebuild the preview with the reverted text
-      const wrap=previewBox.querySelector(".pdf-wrap");
-      if(wrap){wrap.contentEditable="false";}
-      stopEdit();
-      rerender(); // re-render to show reverted version
-    }
-  });
-
-  undoBtn.addEventListener("click",()=>{
-    if(undoStack.length===0)return;
-    const prev=undoStack.pop();
-    onSave(prev);
-    stopEdit();
-    rerender();
-  });
-
-  toolbar.appendChild(undoBtn);
-  toolbar.appendChild(revertBtn);
-  toolbar.appendChild(saveBtn);
-  toolbar.appendChild(editBtn);
-  previewBox.appendChild(toolbar);
-
-  // Ctrl+S to save, Escape to revert while editing
-  previewBox.addEventListener("keydown",e=>{
-    if(!editing)return;
-    if((e.ctrlKey||e.metaKey)&&e.key==="s"){e.preventDefault();saveBtn.click();}
-    if(e.key==="Escape"){revertBtn.click();}
-  });
-}
-
 // ─────────────────────────────────────────────────────────
 // RENDER ENGINE
 // ─────────────────────────────────────────────────────────
@@ -750,7 +386,7 @@ function _render(){
   }
 
   // ── HEADER ──
-  const TABS=[["resume","1","Resume"],["search","2","Find Jobs"],["board","3","Job Board"],["apply","4","Craft"],["tracker","5","Apply & Track"],["interview","6","Interview Prep"]];
+  const TABS=[["resume","1","My Resume"],["search","2","Find Jobs"],["board","3","Job Board"],["tracker","4","Apply & Track"],["interview","5","Interview Prep"]];
 
   const hasKey=!!S.apiKey;
   const header=div({style:{background:T.hBg,borderBottom:`1px solid ${T.hBorder}`,padding:"0 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:"0",zIndex:"10",minHeight:"54px",flexWrap:"wrap",gap:"8px",paddingTop:"8px",paddingBottom:"8px"}},[
@@ -765,14 +401,17 @@ function _render(){
         " Auto-saved"
       ]):span(),
       div({style:{display:"flex",alignItems:"center",gap:"6px"}},[
-        h("button",{style:{padding:"5px 11px",borderRadius:"20px",fontSize:"11px",cursor:"pointer",border:`1px solid ${hasKey?T.done.border:T.warn.border}`,background:hasKey?T.done.bg:T.warn.bg,color:hasKey?T.done.text:T.warn.text,display:"flex",alignItems:"center",gap:"5px"},onClick:()=>{S.showApiKey=!S.showApiKey;rerender();}},[hasKey?"🔑 Key set":"🔑 Add API key"]),
+        h("button",{className:hasKey?"btn-key-active":"btn-key-missing",onClick:()=>{S.showApiKey=!S.showApiKey;rerender();}},[
+          div({className:hasKey?"key-dot":"key-dot-missing"}),
+          hasKey?"API Active":"Set API Key",
+        ]),
         S.showApiKey?div({style:{display:"flex",alignItems:"center",gap:"6px"}},[
           (()=>{const inp=h("input",{style:{padding:"5px 10px",borderRadius:"8px",fontSize:"12px",width:"240px",border:`1px solid ${T.inB}`,background:T.inBg,color:T.text},placeholder:"sk-ant-api03-…",type:"password"});inp.value=S.apiKey;inp.addEventListener("input",e=>S.apiKey=e.target.value);inp.addEventListener("keydown",e=>{if(e.key==="Enter"){lsSet("api-key",S.apiKey.trim());S.showApiKey=false;S.apiKeyError=false;rerender();}});setTimeout(()=>inp.focus(),50);return inp;})(),
           h("button",{style:{padding:"5px 12px",borderRadius:"8px",fontSize:"12px",cursor:"pointer",border:"none",background:"#2563eb",color:"#fff",fontWeight:"600"},onClick:()=>{lsSet("api-key",S.apiKey.trim());S.showApiKey=false;S.apiKeyError=false;rerender();}},["Save"]),
         ]):null,
       ].filter(Boolean)),
       h("button",{style:{padding:"5px 13px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:T.card,color:T.sub,fontSize:"12px",cursor:"pointer",display:"flex",alignItems:"center",gap:"5px"},onClick:()=>{S.dark=!S.dark;lsSet("app-dark",String(S.dark));rerender();}},[S.dark?"☀ Light":"☾ Dark"]),
-      h("button",{style:{padding:"5px 10px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:"transparent",color:T.muted,fontSize:"11px",cursor:"pointer"},onClick:()=>{if(!confirm("Clear all saved data and start fresh?"))return;["tracker-apps-v2","resume-raw","resume-polished","resume-ci","resume-tone","apply-posting","apply-tailored","apply-cover"].forEach(lsDel);S.raw="";S.polished="";S.ci={name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""};S.tone="natural";S.posting="";S.tailored="";S.cover="";S.apps=[...SEED_APPS];S.resumeView="edit";lsSet("tracker-apps-v2",JSON.stringify(SEED_APPS));rerender();}},["Reset"]),
+      h("button",{style:{padding:"5px 10px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:"transparent",color:T.muted,fontSize:"11px",cursor:"pointer"},onClick:()=>{if(!confirm("Clear all saved data and start fresh?"))return;["tracker-apps-v2","resume-raw","resume-polished","resume-ci","resume-tone","apply-posting","apply-tailored","apply-cover"].forEach(lsDel);S.raw="";S.ci={name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""};S.tone="natural";S.posting="";S.tailored="";S.cover="";S.apps=[...SEED_APPS];S.resumeView="edit";lsSet("tracker-apps-v2",JSON.stringify(SEED_APPS));rerender();}},["Reset"]),
     ]),
   ]);
 
@@ -801,454 +440,200 @@ function _render(){
   // ── TAB CONTENT ──
   let content=div();
 
-  // ── TAB 1: RESUME ──
+  // ── TAB 1: MY RESUME ──
   if(S.tab==="resume"){
-    const viewToggle=div({style:{display:"flex",gap:"6px"}},["edit","preview"].map(v=>
-      pillBtn(v==="edit"?"Edit":"PDF Preview",S.resumeView===v,"#2563eb",()=>{S.resumeView=v;rerender();},{padding:"6px 14px",borderRadius:"7px"})
-    ));
 
-    // Shared polish action (used in both edit and preview views)
-    async function doPolish(){
-      if(!S.raw.trim()||S.load==="polish")return;
-      // Format Only — skip AI entirely, use raw text as-is
-      if(S.tone==="format"){
-        S.polished=S.raw.trim();
-        lsSet("resume-polished",S.polished);
-        S.resumeView="preview";S.polishError="";rerender();
-        return;
-      }
-      S.load="polish";S.polishError="";rerender();
+    async function runAudit(){
+      if(!S.raw.trim()||S.load==="audit")return;
+      S.load="audit";S.auditResult=null;rerender();
       try{
         const r=await callAI(
-          `ROLE: You are an expert Executive Resume Writer specializing in Senior Project/Program Management roles (Director, Senior PM, Program Manager).
+          `You are a senior hiring manager and executive recruiter. Analyze this resume and return ONLY a JSON object with these exact keys:
+{
+  "score": integer 0-100,
+  "grade": one of "Strong" | "Good" | "Needs Work" | "Weak",
+  "strengths": array of 3 short strings (what is working),
+  "gaps": array of 3 short strings (what is missing or weak),
+  "quickWins": array of 3 actionable suggestions the candidate can do TODAY to improve,
+  "atsFriendly": boolean,
+  "toneIssues": array of buzzwords found (e.g. "spearheaded", "leveraged", "pragmatic")
+}
+No markdown, no backticks, just valid JSON.`,
+          `Resume to analyze:
 
-STRICT ANTI-HALLUCINATION RULES (highest priority):
-1. DATA INTEGRITY: Use ONLY the facts, numbers, achievements, and dates provided. Never invent or assume.
-2. NO FABRICATION: Do not create fake budgets, team sizes, project names, or certifications.
-3. MISSING METRICS: If a metric is missing but would be impactful, use [X] as a placeholder (e.g. "Led a team of [X]"). Never invent a number.
-4. NO ADDED EXPERIENCE: Do not insert industry names, project types, or responsibilities not in the original.
-
-MANDATORY STYLE GUIDELINES:
-1. CONCISION: Bullets under 2 lines, 8-12 words ideal. Cut every non-essential word.
-2. OUTCOMES OVER TACTICS: Lead with results ($$, %, milestones). Never list table-stakes responsibilities.
-3. STRONG VERBS: Directed, Delivered, Built, Optimized, Mentored, Captured, Led, Reduced, Achieved.
-4. HUMAN TONE: Professional and authoritative. Never robotic or corporate-sounding.
-
-SECTION RULES:
-PROFESSIONAL SUMMARY (60-75 words, 3 sentences max):
-- Sentence 1: Years of experience + what you deliver + on-time/budget track record
-- Sentence 2: Scale and complexity (multi-project, cross-team, locations)
-- Sentence 3: Key strengths + subtle emotional intelligence ("trust-building communication")
-
-AREAS OF EXPERTISE (6 lines max, 2-4 words each):
-- Examples: "Project Planning & Delivery", "Cost Management", "Team Collaboration"
-- Include "Relationship Building" to reflect emotional intelligence
-
-TECHNICAL SKILLS (4-6 lines):
-- List tools and platforms only if mentioned in the original
-- Add "Quick to learn new systems" if appropriate
-
-PROFESSIONAL EXPERIENCE (3-4 bullets per role MAX):
-- Start with the strongest result bullet
-- Use [X] for any missing metrics rather than inventing numbers
-- Action verbs: Directed, Delivered, Built, Led, Optimized, Reduced, Achieved
-
-CERTIFICATIONS: List only certifications explicitly mentioned. Issuing org only, no dates unless provided.
-
-${TONE_RULES[S.tone]?TONE_RULES[S.tone]:""}
-
-OUTPUT FORMAT: ALL CAPS section headers, • bullets, plain text only. No markdown, no asterisks, no # headers.
-
-For PROFESSIONAL EXPERIENCE, each role must follow this exact pattern:
-Line 1: Job Title | Company Name | Location
-Line 2: Month Year – Month Year (or Present)
-• Achievement bullet
-(3-4 bullets max per role. Never group or nest roles.)`,
-          `Rewrite:\n\n${S.raw}`
+${S.raw.substring(0,3000)}`
         );
-        if(r&&r.trim().length>50){
-          // Strip any markdown the AI snuck in
-          const clean=r
-            .replace(/\*\*([^*]+)\*\*/g,"$1")  // **bold** -> plain
-            .replace(/\*([^*]+)\*/g,"$1")        // *italic* -> plain
-            .replace(/^#{1,3}\s+/gm,"")           // ## headers -> plain
-            .replace(/^---+$/gm,"")                // horizontal rules
-            .trim();
-          S.polished=clean;lsSet("resume-polished",clean);S.resumeView="preview";S.polishError="";}
-        else{S.polishError="Empty response — check your API key has credits.";}
-      }catch(e){S.polishError=e.message||"API error. Check your key and try again.";console.error("Polish error:",e);}
+        S.auditResult=JSON.parse(r.replace(/\`\`\`json|\`\`\`/g,"").trim());
+      }catch(e){S.auditError=e.message||"Analysis failed.";}
       S.load="";rerender();
     }
 
-    // Refine action — apply plain-English instruction to polished resume
-    function mkToneRow(){
-      return div({style:{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap"}},[
-        span({style:{fontSize:"11px",color:T.muted,fontWeight:"600",textTransform:"uppercase",letterSpacing:"0.06em",marginRight:"2px"}},["Tone:"]),
-        ...[["natural","Human","#0d9488"],["bold","Bold","#7c3aed"],["polished","Formal","#2563eb"],["format","Format Only","#b45309"]].map(([v,l,c])=>
-          pillBtn(l,S.tone===v,c,()=>{S.tone=v;lsSet("resume-tone",v);rerender();},{padding:"5px 12px",borderRadius:"16px"})
-        )
-      ]);
-    }
+    // Impact score live
+    const score=calculateImpactScore(S.raw);
+    const scoreCol=score>=75?"#4ade80":score>=50?"#fbbf24":"#f87171";
+    const scoreBarCol=score>=75?"#16a34a":score>=50?"#d97706":"#dc2626";
 
-      // ── Resume Tips card ──
-      const TIPS_PROMPT=`ROLE: You are an expert Executive Resume Writer specializing in Senior Project/Program Management roles (Director, Senior PM, Program Manager).
+    // Structure check
+    const text=S.raw||"";
+    const checks=[
+      [!!(S.ci.name||S.ci.email||S.ci.phone),"Contact info set"],
+      [/SUMMARY|PROFILE|OBJECTIVE/i.test(text),"Professional Summary present"],
+      [(text.match(/ \| | — | – /g)||[]).length>=2,"3+ Experience blocks found"],
+      [(text.match(/(\$\d+|\d+%|\d+\+\s*years?)/gi)||[]).length>=5,"5+ Metrics found"],
+    ];
 
-STRICT ANTI-HALLUCINATION RULES (highest priority):
-1. DATA INTEGRITY: Use ONLY facts, numbers, and achievements provided. Never invent or assume.
-2. NO FABRICATION: Do not create fake budgets, team sizes, project names, or certifications.
-3. MISSING METRICS: Use [X] as a placeholder for missing metrics (e.g. "Led a team of [X]"). Never invent a number.
-4. NO ADDED EXPERIENCE: Do not insert industry names, project types, or responsibilities not in the original.
-
-MANDATORY STYLE GUIDELINES:
-1. CONCISION: Bullets under 2 lines, 8-12 words ideal.
-2. OUTCOMES OVER TACTICS: Lead with results ($$, %, milestones). Never list table-stakes responsibilities.
-3. STRONG VERBS: Directed, Delivered, Built, Optimized, Mentored, Captured, Led, Reduced, Achieved.
-4. NO BUZZWORDS — replace these exactly:
-   "Stakeholder coordination" → "clear communication" or "relationship building"
-   "Cross-functional alignment" → "team collaboration"
-   "Hands-on leadership" → describe specifically what was directed
-   "Strong background in X" → "Skilled in X" or show via results
-   "Synergy", "Holistic", "Deep dive", "Passion for excellence" → delete entirely
-5. HUMAN TONE: Professional and authoritative. Never robotic or corporate-sounding.
-
-SECTION RULES:
-PROFESSIONAL SUMMARY (60-75 words, 3 sentences max):
-- Sentence 1: Years of experience + what you deliver + on-time/budget track record
-- Sentence 2: Scale and complexity (multi-project, cross-team, locations)
-- Sentence 3: Key strengths + subtle emotional intelligence ("trust-building communication")
-
-AREAS OF EXPERTISE (6 lines max, 2-4 words each):
-- Examples: "Project Planning & Delivery", "Cost Management", "Team Collaboration"
-
-TECHNICAL SKILLS (4-6 lines):
-- List only tools mentioned in the original resume
-- Add "Quick to learn new systems" if appropriate
-
-PROFESSIONAL EXPERIENCE (3-4 bullets per role MAX):
-- Start with the strongest result bullet
-- Use [X] for missing metrics — never invent numbers
-- Action verbs: Directed, Delivered, Built, Led, Optimized, Reduced, Achieved
-
-CERTIFICATIONS: List only certifications explicitly mentioned. Issuing org only.
-
-OUTPUT FORMAT: ALL CAPS section headers, • bullets, plain text only. No markdown.
-
-For PROFESSIONAL EXPERIENCE, each role:
-Line 1: Job Title | Company Name | Location
-Line 2: Month Year – Month Year (or Present)
-• Achievement bullet (3-4 max)
-
-REWRITE THIS RESUME:
-[PASTE YOUR RESUME HERE]`;
-
-      const tipsOpen=S.tipsOpen||false;
-      const tipsCard=div({style:{...card_s,marginTop:"16px"}},[
-        // Header row — always visible
-        h("button",{style:{width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",background:"transparent",border:"none",cursor:"pointer",padding:"0",textAlign:"left"},
-          onClick:()=>{S.tipsOpen=!S.tipsOpen;rerender();}},[
-          div({style:{display:"flex",alignItems:"center",gap:"8px"}},[
-            span({style:{fontSize:"16px"}},["💡"]),
-            div({},[
-              div({style:{fontSize:"14px",fontWeight:"700",color:T.text}},["Resume writing tips"]),
-              div({style:{fontSize:"12px",color:T.muted,marginTop:"1px"}},["Guidelines + a prompt you can copy to use with any AI"]),
-            ]),
-          ]),
-          span({style:{fontSize:"14px",color:T.muted,transition:"transform 0.2s",transform:tipsOpen?"rotate(180deg)":"rotate(0deg)"}},["\u25BE"]),
-        ]),
-
-        // Expandable content
-        tipsOpen?div({style:{marginTop:"14px",borderTop:`1px solid ${T.div}`,paddingTop:"14px"}},[
-
-          // Quick tips grid
-          div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginBottom:"14px"}},[
-            ...[
-              ["✂","8-12 words per bullet","Cut every non-essential word"],
-              ["🎯","Outcomes over tactics","Results ($, %, milestones) not responsibilities"],
-              ["🚫","No buzzwords","Stakeholder coordination → clear communication"],
-              ["✅","No hallucinations","Only use what's in your actual experience"],
-              ["💪","Strong action verbs","Delivered, Led, Built, Directed, Achieved"],
-              ["📊","Bold your metrics","$1.5M, 80%, 35 locations — make them pop"],
-            ].map(([icon,title,desc])=>div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"8px",padding:"10px 12px"}},[
-              div({style:{display:"flex",alignItems:"center",gap:"6px",marginBottom:"3px"}},[
-                span({style:{fontSize:"14px"}},[icon]),
-                span({style:{fontSize:"12px",fontWeight:"700",color:T.text}},[title]),
-              ]),
-              div({style:{fontSize:"11px",color:T.muted,lineHeight:"1.4"}},[desc]),
-            ])),
-          ]),
-
-          // Avoid list
-          div({style:{background:T.danger.bg,border:`1px solid ${T.danger.border}`,borderRadius:"8px",padding:"10px 14px",marginBottom:"14px"}},[
-            div({style:{fontSize:"12px",fontWeight:"700",color:T.danger.text,marginBottom:"6px"}},["❌ Phrases to avoid:"]),
-            ...[
-              ['"Stakeholder coordination"','"clear communication" or "relationship building"'],
-              ['"Cross-functional alignment"','"team collaboration"'],
-              ['"Hands-on leadership"','"directed programs across X locations"'],
-              ['"Strong background in X"','"Skilled in X" — or show it via results'],
-              ['"Scheduling"',"imply it through on-time delivery"],
-            ].map(([bad,good])=>div({style:{fontSize:"11px",color:T.danger.text,marginBottom:"3px",display:"flex",gap:"6px"}},[
-              span({style:{flexShrink:"0"}},[bad]),
-              span({style:{color:T.muted}},["\u2192"]),
-              span({style:{color:T.text}},[good]),
-            ])),
-          ]),
-
-          // Copyable prompt
-          div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"8px",padding:"12px 14px"}},[
-            div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},[
-              div({style:{fontSize:"12px",fontWeight:"700",color:T.sub}},["📋 Prompt to use with any AI (ChatGPT, Gemini, etc.)"]),
-              (()=>{
-                const b=mkBtn("ghost",S.copied==="tips"?"✓ Copied!":"Copy prompt",()=>{
-                  navigator.clipboard.writeText(TIPS_PROMPT).catch(()=>{});
-                  S.copied="tips";setTimeout(()=>{S.copied="";rerender();},2500);rerender();
-                },{fontSize:"11px",padding:"4px 10px"});
-                return b;
-              })(),
-            ]),
-            div({style:{fontSize:"11px",color:T.muted,lineHeight:"1.6",whiteSpace:"pre-wrap",maxHeight:"120px",overflow:"hidden",maskImage:"linear-gradient(to bottom, black 60%, transparent 100%)"}},[TIPS_PROMPT.substring(0,300)+"…"]),
-          ]),
-
-        ]):null,
-      ].filter(Boolean));
-
-
-    let tabBody;
-    if(S.resumeView==="edit"){
-      // PDF upload button
-      const uploadWrap=div({style:{marginBottom:"10px",display:"flex",alignItems:"center",gap:"10px",padding:"10px 14px",background:T.inBg,border:`1px dashed ${T.inB}`,borderRadius:"9px"}});
-      const fileInput=h("input",{type:"file",style:{display:"none"}});
-      fileInput.accept=".pdf";
-      fileInput.addEventListener("change",async e=>{
-        const file=e.target.files[0];
-        if(!file)return;
-        S.load="pdf";rerender();
-        try{
-          const arrayBuffer=await file.arrayBuffer();
-          // Use PDF.js from CDN (loaded lazily)
-          if(!window.pdfjsLib){
-            await new Promise((res,rej)=>{
-              const s=document.createElement("script");
-              s.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
-              s.onload=res;s.onerror=rej;document.head.appendChild(s);
-            });
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-          }
-          const pdf=await window.pdfjsLib.getDocument({data:arrayBuffer}).promise;
-          let text="";
-          for(let i=1;i<=pdf.numPages;i++){
-            const page=await pdf.getPage(i);
-            const content=await page.getTextContent();
-            const pageText=content.items.map(item=>item.str).join(" ");
-            text+=pageText+"\n";
-          }
-          S.raw=text.trim();
-          lsSet("resume-raw",S.raw);
-        }catch(err){
-          S.raw="Error reading PDF. Try copy-pasting the text instead.";
-        }
-        S.load="";
-        fileInput.value="";
-        rerender();
-      });
-      uploadWrap.appendChild(fileInput);
-      const uploadBtn=h("button",{style:{padding:"6px 14px",borderRadius:"8px",border:`1px solid ${T.cardB}`,background:T.card,color:T.sub,fontSize:"12px",cursor:"pointer",fontWeight:"600",display:"flex",alignItems:"center",gap:"6px"},onClick:()=>fileInput.click()},[
-        span({style:{fontSize:"15px"}},["📄"]),
-        S.load==="pdf"?"Reading PDF…":"Upload PDF resume"
-      ]);
-      uploadWrap.appendChild(uploadBtn);
-      uploadWrap.appendChild(span({style:{fontSize:"12px",color:T.muted}},["— or paste text below"]));
-
-      // ── Contact info card ──
-      const ciCard=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"14px"}},[
-        div({style:{fontSize:"12px",fontWeight:"700",color:T.sub,marginBottom:"10px",textTransform:"uppercase",letterSpacing:"0.07em"}},["\uD83D\uDC64 Your contact info — shown on all PDFs"]),
-        div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}},[
-          ...[
-            ["name","Full Name","e.g. David Waldner"],
-            ["tagline","Title / Tagline","e.g. Senior Program Manager | PMP"],
-            ["phone","Phone","e.g. (604) 555-1234"],
-            ["email","Email","e.g. david@email.com"],
-            ["location","Location","e.g. Vancouver, BC"],
-            ["linkedin","LinkedIn","linkedin.com/in/yourprofile (optional)"],
-          ].map(([f,lb,ph])=>div({},[
-            mkLabel(lb),
-            (()=>{
-              const i=mkInput(S.ci[f]||"",v=>{S.ci={...S.ci,[f]:v};lsSet("resume-ci",JSON.stringify(S.ci));},{placeholder:ph});
-              return i;
-            })(),
-          ])),
-        ]),
-      ]);
-
-
-      let polishBtn;
-      const polishRow=div({style:{marginTop:"12px",display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap"}},[
-        mkToneRow(),
-        (()=>{
-          const b=mkBtn("primary",S.load==="polish"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Formatting…"));return w;})():S.tone==="format"?"⬡ Format as PDF":"✦ Polish resume",doPolish);
-          b.disabled=S.load==="polish"||!S.raw.trim();
-          polishBtn=b;
-          return b;
-        })(),
-        S.polished?span({style:{fontSize:"12px",color:T.done.text,background:T.done.bg,border:`1px solid ${T.done.border}`,padding:"3px 10px",borderRadius:"10px",fontWeight:"600"}},["✓ Already polished"]):null,
-      ].filter(Boolean));
-
-      const metricAlert=div({style:{display:"none",background:"rgba(133,77,14,0.1)",border:"1px solid #854d0e",color:"#fbbf24",padding:"8px 12px",borderRadius:"8px",fontSize:"12px",marginBottom:"8px",fontWeight:"600",lineHeight:"1.5"},id:"metric-alert"},["⚠️ Low Impact Score: Scanners are marking this at 66%. Add numbers ($ or %) to prove your results."]);
-      const ta=mkTextarea(S.raw,v=>{S.raw=v;debounceSave("resume-raw",v);if(polishBtn)polishBtn.disabled=!v.trim();updateMetricWarning(v);},200,"Paste your resume text here…");
-      // Run on mount too
-      setTimeout(()=>updateMetricWarning(S.raw),50);
-      const formatHint=S.tone==="format"?div({style:{marginTop:"6px",fontSize:"12px",color:T.muted,lineHeight:"1.5"}},["Format Only skips the AI entirely — your resume text is used exactly as written, converted to a clean PDF with your header. Perfect when your content is already polished."]):null;
-      const errBanner=S.polishError?div({style:{marginTop:"10px",padding:"10px 14px",background:T.danger.bg,border:`1px solid ${T.danger.border}`,borderRadius:"8px",fontSize:"13px",color:T.danger.text}},["⚠ "+S.polishError]):null;
-
-
-      // ── Structure Check + Style Toggles ──
-      const structureCheck=(()=>{
-        const text=S.raw||"";
-        const hasContact=!!(S.ci.name||S.ci.email||S.ci.phone);
-        const hasSummary=/SUMMARY|PROFILE|OBJECTIVE/i.test(text);
-        const expMatches=(text.match(/ \| | \u2014 | \u2013 /g)||[]).length;
-        const hasExp=expMatches>=2;
-        const metricMatches=(text.match(/(\$\d+|\d+%|\d+\+\s*years?)/gi)||[]);
-        const hasMetrics=metricMatches.length>=5;
-        const items=[
-          [hasContact,"Contact info detected"],
-          [hasSummary,"Professional Summary detected"],
-          [hasExp,"3+ Experience blocks found"],
-          [hasMetrics,"5+ Metrics ($/%) found"],
-        ];
-        return div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"14px"}},[
-          div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}},[
-            div({style:{fontSize:"13px",fontWeight:"700",color:T.text}},["\u2705 Structure Check"]),
-            div({style:{fontSize:"11px",color:T.muted}},[(items.filter(i=>i[0]).length)+"/"+items.length+" complete"]),
-          ]),
-          ...items.map(([ok,label])=>div({style:{display:"flex",alignItems:"center",gap:"8px",fontSize:"12px",color:ok?T.text:T.muted,marginBottom:"5px"}},[
-            div({style:{width:"16px",height:"16px",borderRadius:"3px",border:`1.5px solid ${ok?"#16a34a":T.cardB}`,background:ok?"#052e16":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:"0",fontSize:"10px",color:"#4ade80"}},[ok?"\u2713":""]),
-            label,
-          ])),
-          div({style:{marginTop:"12px",paddingTop:"10px",borderTop:`1px solid ${T.div}`}},[
-            div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,marginBottom:"7px",textTransform:"uppercase",letterSpacing:"0.06em"}},["PDF Style"]),
-            div({style:{display:"flex",gap:"6px",flexWrap:"wrap"}},[
-              ...[["default","Default"],["compact","Compact"],["modern","Modern"],["classic","Classic"]].map(([v,l])=>
-                h("button",{style:{fontSize:"11px",padding:"4px 10px",borderRadius:"7px",cursor:"pointer",fontFamily:"inherit",border:`1px solid ${S.pdfStyle===v?T.active.border:T.cardB}`,background:S.pdfStyle===v?T.active.bg:"transparent",color:S.pdfStyle===v?T.active.text:T.muted,fontWeight:S.pdfStyle===v?"700":"400"},onClick:()=>{S.pdfStyle=v;rerender();}},l)
-              ),
-            ]),
-          ]),
-        ]);
-      })();
-
-      // ── Analyze card ──
-      const analyzeCard=S.raw.trim()?(()=>{
-        const score=calculateImpactScore(S.raw);
-        const scoreCol=score>=75?"#4ade80":score>=50?"#fbbf24":"#f87171";
-        const scoreBarCol=score>=75?"#16a34a":score>=50?"#d97706":"#dc2626";
-        const issues=S.toneCheck||[];
-        return div({className:"score-card"},[
-          div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}},[
-            span({style:{fontWeight:"700",color:"#93c5fd",fontSize:"13px"}},["📊 Resume Impact Score"]),
-            div({style:{display:"flex",alignItems:"center",gap:"8px"}},[
-              span({style:{fontSize:"22px",fontWeight:"800",color:scoreCol}},[score+"%"]),
-              mkBtn("ghost","Audit tone",()=>{S.toneCheck=auditTone(S.raw||"");rerender();},{fontSize:"11px",padding:"3px 9px"}),
-            ]),
-          ]),
-          div({style:{height:"6px",background:"#111827",borderRadius:"3px",marginBottom:"10px"}},[
-            div({style:{height:"100%",width:score+"%",background:scoreBarCol,borderRadius:"3px",transition:"width 0.6s ease"}}),
-          ]),
-          score<75?div({style:{fontSize:"12px",color:"#9ca3af",marginBottom:"10px",lineHeight:"1.5"}},[
-            "💡 Pro-tip: Score is low due to missing metrics. Add dollar amounts ($1.5M), percentages (80%), and timeframes (17+ years)."
-          ]):null,
-          S.toneCheck!==null?div({style:{borderTop:"1px solid #374151",paddingTop:"10px"}},[
-            issues.length?div({},[
-              div({style:{fontSize:"11px",fontWeight:"700",color:"#fbbf24",marginBottom:"8px"}},["⚠ Buzzwords found — consider replacing:"]),
-              div({style:{lineHeight:"2"}},[
-                ...issues.map(b=>div({style:{display:"inline-block",marginRight:"6px",marginBottom:"4px"}},[
-                  h("span",{className:"buzzword-tag"},[b.word]),
-                  span({style:{fontSize:"11px",color:"#9ca3af"}},[" → "+b.hint]),
-                ])),
-              ]),
-            ]):div({style:{fontSize:"11px",color:"#4ade80"}},["✓ No buzzwords detected — tone looks clean"]),
-          ]):null,
-        ].filter(Boolean));
-      })():null;
-
-      tabBody=div({},[ciCard,uploadWrap,metricAlert,ta,analyzeCard,structureCheck,polishRow,formatHint,errBanner].filter(Boolean));
-
-    }else{
-      // PDF Preview
-      if(!S.polished){
-        tabBody=div({style:{color:T.muted,fontSize:"13px",padding:"20px 0"}},["Polish your resume first to see the PDF preview."]);
-      }else{
-
-        // Re-polish bar — visible when already polished
-        const repolishBar=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"12px 16px",marginBottom:"14px",display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},[
-          span({style:{fontSize:"12px",color:T.sub,fontWeight:"600",flexShrink:"0"}},["Re-polish as:"]),
-          mkToneRow(),
-          (()=>{
-            const b=mkBtn("primary",S.load==="polish"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Re-polishing…"));return w;})():"↺ Re-polish",doPolish,{padding:"7px 16px",fontSize:"12px"});
-            b.disabled=S.load==="polish"||!S.raw.trim();
-            return b;
-          })(),
-        ]);
-
-        const actionRow=div({style:{display:"flex",gap:"8px",marginBottom:"14px",justifyContent:"flex-end"}},[
-          (()=>{const b=mkBtn("ghost",S.copied==="resume"?"✓ Copied":"Copy text",()=>{
-            navigator.clipboard.writeText(S.polished).catch(()=>{});
-            S.copied="resume";setTimeout(()=>{S.copied="";rerender();},2000);rerender();
-          },{padding:"6px 14px",fontSize:"12px"});return b;})(),
-          mkBtn("ghost","Print / Save PDF",()=>{
-            const pa=document.getElementById("print-area");
-            pa.style.display="block";
-            pa.innerHTML=buildSemanticPDFHTML(S.polished,S.ci);
-            if(S.pdfStyle&&S.pdfStyle!=="default")pa.classList.add("pdf-"+S.pdfStyle);
-            window.print();
-            pa.classList.remove("pdf-compact","pdf-modern","pdf-classic");
-            pa.style.display="none";
-          },{padding:"6px 14px",fontSize:"12px"}),
-        ]);
-
-        const previewBox=div({style:{border:`1px solid ${T.cardB}`,borderRadius:"10px",overflow:"hidden",position:"relative"}});
-        previewBox.innerHTML=buildPDFHTML(S.polished,S.ci);
-        if(S.pdfStyle&&S.pdfStyle!=="default")previewBox.classList.add("pdf-"+S.pdfStyle);
-        wireEditable(previewBox,()=>S.polished,v=>{S.polished=v;lsSet("resume-polished",v);});
-
-        // Impact score badge
-        const score=calculateImpactScore(S.polished);
-        const scoreColor=score>=75?"#4ade80":score>=50?"#fbbf24":"#f87171";
-        const scoreBorder=score>=75?"#166534":score>=50?"#854d0e":"#7f1d1d";
-        const scoreBg=score>=75?(S.dark?"#052e16":"#f0fdf4"):score>=50?(S.dark?"#1c1200":"#fffbeb"):(S.dark?"#3b1212":"#fee2e2");
-        const scoreMsg=score>=75?"Great — your resume has strong metrics and action verbs.":score>=50?"Good start — add more specific numbers and results to stand out.":"Add measurable results ($, %, team size) to improve your score.";
-        const impactBadge=div({style:{marginBottom:"14px",padding:"12px",background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"10px",display:"flex",alignItems:"center",gap:"15px"}},[
-          div({style:{flexShrink:"0",width:"45px",height:"45px",borderRadius:"50%",border:`3px solid ${scoreBorder}`,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:"700",color:scoreColor,fontSize:"15px"}},[
-            String(score),
-          ]),
-          div({},[
-            div({style:{fontSize:"13px",fontWeight:"600",color:T.text}},["Resume Impact Score"]),
-            div({style:{fontSize:"11px",color:T.muted,marginTop:"2px"}},[scoreMsg]),
-          ]),
-        ]);
-
-        tabBody=div({},[repolishBar,impactBadge,actionRow,previewBox]);
-      }
-    }
+    const auditR=S.auditResult;
 
     content=div({},[
-      div({style:card_s},[
-        div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px",flexWrap:"wrap",gap:"10px"}},[
+      // Header card
+      div({style:{...card_s,marginBottom:"16px"}},[
+        div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"14px",flexWrap:"wrap",gap:"10px"}},[
           div({},[
-            div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"3px"}},["Your resume"]),
-            div({style:{fontSize:"13px",color:T.sub}},["Upload a PDF or paste text — then polish with AI."]),
+            div({style:{fontSize:"15px",fontWeight:"700",color:T.text}},["My Resume"]),
+            div({style:{fontSize:"13px",color:T.sub,marginTop:"2px"}},["Paste your resume — get an instant rating, gap analysis, and quick wins."]),
           ]),
-          viewToggle,
+          mkBtn("primary",S.load==="audit"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Analyzing…"));return w;})():"✦ Analyze resume",runAudit,{fontSize:"13px"}),
         ]),
-        tabBody,
-      ]),
-      tipsCard,
-      S.polished?div({style:{...card_s,borderColor:S.dark?"#1e40af":"#93c5fd",background:S.dark?"#0c1e3e":"#eff6ff",padding:"14px 20px"}},[
-        div({style:{fontSize:"13px",color:S.dark?"#93c5fd":"#1d4ed8",fontWeight:"600",marginBottom:"6px"}},["Resume polished — find your jobs next"]),
-        mkBtn("primary","Go to Find Jobs →",()=>{S.tab="search";rerender();},{fontSize:"13px"}),
+
+        // Textarea
+        div({style:{position:"relative"}},[
+          S.metricAlert?div({style:{background:"rgba(133,77,14,0.1)",border:"1px solid #854d0e",color:"#fbbf24",padding:"8px 12px",borderRadius:"8px",fontSize:"12px",marginBottom:"8px",fontWeight:"600"}},
+            ["\u26a0\ufe0f Low Impact Score: Add numbers ($ or %) to prove your results."]):null,
+          (()=>{
+            const ta=h("textarea",{style:{width:"100%",minHeight:"280px",background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"9px",color:T.text,padding:"12px 14px",fontSize:"13px",lineHeight:"1.7",resize:"vertical",boxSizing:"border-box",fontFamily:"ui-monospace,monospace"}});
+            ta.placeholder="Paste your resume text here…";
+            ta.value=S.raw||"";
+            ta.addEventListener("input",e=>{
+              S.raw=e.target.value;
+              debounceSave("resume-raw",e.target.value);
+              updateMetricWarning(e.target.value);
+            });
+            return ta;
+          })(),
+        ].filter(Boolean)),
+
+        // PDF preview toggle
+        div({style:{marginTop:"12px",display:"flex",gap:"8px",alignItems:"center",justifyContent:"flex-end"}},[
+          pillBtn("📄 PDF Preview",S.resumeView==="preview","#2563eb",()=>{S.resumeView=S.resumeView==="preview"?"edit":"preview";rerender();},{padding:"6px 14px",borderRadius:"7px",fontSize:"12px"}),
+          S.resumeView==="preview"?mkBtn("ghost","🖨 Print / Save PDF",()=>{
+            const pa=document.getElementById("print-area");
+            if(!pa)return;
+            pa.style.display="block";
+            pa.innerHTML=buildPDFHTML(S.raw,S.ci||{});
+            window.print();
+            pa.style.display="none";
+          },{fontSize:"12px",padding:"6px 14px"}):null,
+        ].filter(Boolean)),
+
+        S.resumeView==="preview"&&S.raw.trim()?div({style:{marginTop:"14px",border:"1px solid "+T.cardB,borderRadius:"10px",overflow:"hidden"}},[(()=>{
+          const box=document.createElement("div");
+          box.innerHTML=buildPDFHTML(S.raw,S.ci||{});
+          return box;
+        })()])
+        :null,
+      ].filter(Boolean)),
+
+      // Live metrics row
+      S.raw.trim()?div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"14px",marginBottom:"16px"}},[
+
+        // Impact score card
+        div({className:"score-card"},[
+          div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},[
+            span({style:{fontWeight:"700",color:"#93c5fd",fontSize:"12px"}},["\uD83D\uDCCA Impact Score"]),
+            span({style:{fontSize:"20px",fontWeight:"800",color:scoreCol}},[score+"%"]),
+          ]),
+          div({style:{height:"5px",background:"#111827",borderRadius:"3px",marginBottom:"8px"}},[
+            div({style:{height:"100%",width:score+"%",background:scoreBarCol,borderRadius:"3px"}}),
+          ]),
+          score<75?div({style:{fontSize:"11px",color:"#9ca3af"}},["Add $ amounts, percentages, and timeframes to boost your score."]):
+          div({style:{fontSize:"11px",color:"#4ade80"}},["\u2713 Good metric density"]),
+          div({style:{marginTop:"8px",display:"flex",gap:"6px",flexWrap:"wrap"}},[
+            mkBtn("ghost","Audit tone",()=>{S.toneCheck=auditTone(S.raw||"");rerender();},{fontSize:"10px",padding:"3px 8px"}),
+          ]),
+          S.toneCheck!==null?div({style:{marginTop:"8px",borderTop:"1px solid #374151",paddingTop:"8px"}},[
+            S.toneCheck.length?div({},[
+              div({style:{fontSize:"10px",fontWeight:"700",color:"#fbbf24",marginBottom:"4px"}},["Buzzwords found:"]),
+              ...S.toneCheck.map(b=>span({className:"buzzword-tag",style:{marginBottom:"3px",display:"inline-block"}},[b.word+" \u2192 "+b.hint])),
+            ]):div({style:{fontSize:"11px",color:"#4ade80"}},["\u2713 No buzzwords"]),
+          ]):null,
+        ].filter(Boolean)),
+
+        // Structure check card
+        div({className:"score-card"},[
+          div({style:{display:"flex",justifyContent:"space-between",marginBottom:"10px"}},[
+            span({style:{fontWeight:"700",color:"#93c5fd",fontSize:"12px"}},["\u2705 Structure"]),
+            span({style:{fontSize:"11px",color:T.muted}},[(checks.filter(c=>c[0]).length)+"/"+checks.length]),
+          ]),
+          ...checks.map(([ok,label])=>div({style:{display:"flex",alignItems:"center",gap:"8px",fontSize:"12px",color:ok?T.text:T.muted,marginBottom:"6px"}},[
+            div({style:{width:"14px",height:"14px",borderRadius:"3px",border:`1.5px solid ${ok?"#16a34a":T.cardB}`,background:ok?"#052e16":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"9px",color:"#4ade80",flexShrink:"0"}},[ok?"\u2713":""]),
+            label,
+          ])),
+        ]),
+
       ]):null,
+
+      // AI Audit results
+      auditR?div({style:card_s},[
+        div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}},[
+          div({},[
+            div({style:{fontSize:"15px",fontWeight:"700",color:T.text}},["Resume Analysis"]),
+            div({style:{fontSize:"12px",color:T.sub,marginTop:"2px"}},["Based on AI hiring manager review"]),
+          ]),
+          div({style:{display:"flex",alignItems:"center",gap:"10px"}},[
+            div({style:{fontSize:"24px",fontWeight:"800",color:auditR.score>=75?"#4ade80":auditR.score>=50?"#fbbf24":"#f87171"}},[auditR.score+"/100"]),
+            span({style:{fontSize:"12px",fontWeight:"700",padding:"3px 10px",borderRadius:"8px",
+              background:auditR.score>=75?"#052e16":auditR.score>=50?"#1c1200":"#3b1212",
+              color:auditR.score>=75?"#4ade80":auditR.score>=50?"#fbbf24":"#f87171",
+              border:`1px solid ${auditR.score>=75?"#166534":auditR.score>=50?"#854d0e":"#7f1d1d"}`,
+            }},[auditR.grade]),
+          ]),
+        ]),
+
+        div({style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"12px",marginBottom:"14px"}},[
+
+          // Strengths
+          div({style:{background:T.inBg,border:"1px solid #166534",borderRadius:"8px",padding:"12px"}},[
+            div({style:{fontSize:"11px",fontWeight:"700",color:"#4ade80",marginBottom:"8px",textTransform:"uppercase",letterSpacing:"0.06em"}},["\u2714 Strengths"]),
+            ...(auditR.strengths||[]).map(s=>div({style:{fontSize:"12px",color:T.text,marginBottom:"5px",lineHeight:"1.5",display:"flex",gap:"6px"}},[
+              span({style:{color:"#4ade80",flexShrink:"0"}},["\u2022"]),s
+            ])),
+          ]),
+
+          // Gaps
+          div({style:{background:T.inBg,border:"1px solid #7f1d1d",borderRadius:"8px",padding:"12px"}},[
+            div({style:{fontSize:"11px",fontWeight:"700",color:"#f87171",marginBottom:"8px",textTransform:"uppercase",letterSpacing:"0.06em"}},["\u26A0 Gaps"]),
+            ...(auditR.gaps||[]).map(g=>div({style:{fontSize:"12px",color:T.text,marginBottom:"5px",lineHeight:"1.5",display:"flex",gap:"6px"}},[
+              span({style:{color:"#f87171",flexShrink:"0"}},["\u2022"]),g
+            ])),
+          ]),
+
+          // Quick wins
+          div({style:{background:T.inBg,border:"1px solid #1e40af",borderRadius:"8px",padding:"12px"}},[
+            div({style:{fontSize:"11px",fontWeight:"700",color:"#93c5fd",marginBottom:"8px",textTransform:"uppercase",letterSpacing:"0.06em"}},["\u26A1 Quick Wins"]),
+            ...(auditR.quickWins||[]).map((w,i)=>div({style:{fontSize:"12px",color:T.text,marginBottom:"5px",lineHeight:"1.5",display:"flex",gap:"6px"}},[
+              span({style:{color:"#93c5fd",flexShrink:"0",fontWeight:"700"}},[(i+1)+"."]),w
+            ])),
+          ]),
+
+        ]),
+
+        div({style:{display:"flex",alignItems:"center",gap:"10px",padding:"10px 14px",background:T.inBg,borderRadius:"8px"}},[
+          span({style:{fontSize:"12px",color:T.muted}},["ATS friendly:"]),
+          span({style:{fontSize:"12px",fontWeight:"700",color:auditR.atsFriendly?"#4ade80":"#f87171"}},[auditR.atsFriendly?"\u2713 Yes":"\u2717 Issues found"]),
+          auditR.toneIssues&&auditR.toneIssues.length?div({style:{marginLeft:"16px",display:"flex",gap:"4px",flexWrap:"wrap",alignItems:"center"}},[
+            span({style:{fontSize:"12px",color:T.muted}},["Tone: "]),
+            ...auditR.toneIssues.map(w=>span({className:"buzzword-tag"},[w])),
+          ]):span({style:{marginLeft:"16px",fontSize:"12px",color:"#4ade80"}},["\u2713 Tone: clean"]),
+        ]),
+
+      ]):S.auditError?div({style:{...card_s,borderColor:T.danger.border,background:T.danger.bg}},[
+        span({style:{fontSize:"13px",color:T.danger.text}},["\u26A0 "+S.auditError]),
+      ]):null,
+
     ].filter(Boolean));
   }
 
-  // ── TAB 2: FIND JOBS ──
+    // ── TAB 2: FIND JOBS ──
   else if(S.tab==="search"){
 
     const JOB_BOARDS=[
@@ -1284,11 +669,11 @@ REWRITE THIS RESUME:
       S.addToast=newApp.title+" at "+newApp.company;
       rerender();
       // Background match scoring
-      if(S.polished){
+      if(S.raw){
         try{
           const r=await callAI(
             "Resume-job matcher. Return ONLY valid JSON: {score: integer 0-100, keywords: array of 3-4 short matching skill strings}. No markdown.",
-            "RESUME:\n"+S.polished.substring(0,500)+"\n\nJOB: "+newApp.title+" at "+newApp.company+"\n"+newApp.notes.substring(0,200)
+            "RESUME:\n"+S.raw.substring(0,500)+"\n\nJOB: "+newApp.title+" at "+newApp.company+"\n"+newApp.notes.substring(0,200)
           );
           const sc=JSON.parse(r.replace(/```json|```/g,"").trim());
           S.apps=S.apps.map(a=>a.id===newApp.id?{...a,matchScore:sc.score,matchKeywords:sc.keywords||[]}:a);
@@ -1425,19 +810,19 @@ REWRITE THIS RESUME:
       try{
         const r=await callAI(
           "Canadian job market expert. Return ONLY a JSON array of 8 job leads. Each: {title, company (real employer), location, type (Remote/Hybrid/On-site/Contract), salaryRange, whyGoodFit (1 sentence), searchTip (1 actionable tip)}. No markdown, no backticks.",
-          "Search: \""+kwVal+"\" in \""+(locVal||"Canada")+"\"."+(S.polished?" Resume summary: "+S.polished.substring(0,400):"")
+          "Search: \""+kwVal+"\" in \""+(locVal||"Canada")+"\"."+(S.raw?" Resume summary: "+S.raw.substring(0,400):"")
         );
         const parsed=JSON.parse(r.replace(/```json|```/g,"").trim());
         S.aiSuggestions=Array.isArray(parsed)?parsed.map(j=>({...j,matchScore:null,matchKeywords:[]})):[];
         S.searchDone=true;
         S.load="";rerender();
         // Score all leads against resume in background if resume is loaded
-        if(S.polished){
+        if(S.raw){
           S.load="scoring";rerender();
           try{
             const scoreR=await callAI(
               "Resume-job match scorer. The user has a resume and a list of job leads. For EACH job return a match score and matching keywords. Return ONLY a JSON array (same order as input), each item: {score: integer 0-100, keywords: array of 3 short matching skill/keyword strings}. No markdown.",
-              "RESUME SUMMARY:\n"+S.polished.substring(0,600)+"\n\nJOB LEADS:\n"+
+              "RESUME SUMMARY:\n"+S.raw.substring(0,600)+"\n\nJOB LEADS:\n"+
               S.aiSuggestions.map((j,i)=>`${i+1}. ${j.title} at ${j.company} — ${j.whyGoodFit||""}`).join("\n")
             );
             const scores=JSON.parse(scoreR.replace(/```json|```/g,"").trim());
@@ -1461,7 +846,7 @@ REWRITE THIS RESUME:
       aiBody=div({},[
         div({style:{textAlign:"center",padding:"12px",background:T.inBg,borderRadius:"8px",marginBottom:"10px",fontSize:"12px",color:T.muted,display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}},[
           spinEl(),
-          span({},[S.polished?"Scoring leads against your resume\u2026":"Leads ready \u2014 polish your resume to see match scores"]),
+          span({},[S.raw?"Scoring leads against your resume\u2026":"Leads ready \u2014 polish your resume to see match scores"]),
         ]),
         ...S.aiSuggestions.map(job=>{
           const already=S.apps.some(a=>a.title===job.title&&a.company===job.company);
@@ -1491,7 +876,7 @@ REWRITE THIS RESUME:
                 span({style:{width:"6px",height:"6px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}}),
                 " Scored against your resume"
               ])
-            :!S.polished?div({style:{fontSize:"11px",color:T.muted}},["Polish your resume to see match scores"]):null,
+            :!S.raw?div({style:{fontSize:"11px",color:T.muted}},["Polish your resume to see match scores"]):null,
         ].filter(Boolean)),
         ...S.aiSuggestions.map(job=>{
           const already=S.apps.some(a=>a.title===job.title&&a.company===job.company);
@@ -1635,7 +1020,7 @@ REWRITE THIS RESUME:
             }},[app.matchScore+"%"]),
             span({style:{fontSize:"9px",color:T.muted,textTransform:"uppercase",letterSpacing:"0.05em"}},["match"]),
           ])
-        :S.polished?(()=>{
+        :S.raw?(()=>{
             const b=h("button",{style:{fontSize:"10px",padding:"3px 8px",borderRadius:"7px",border:"1px solid "+T.inB,background:"transparent",color:T.muted,cursor:"pointer",flexShrink:"0",whiteSpace:"nowrap"}});
             b.textContent="Score";
             b.addEventListener("click",async e=>{
@@ -1644,7 +1029,7 @@ REWRITE THIS RESUME:
               try{
                 const r=await callAI(
                   "Resume-job match scorer. Return ONLY valid JSON: {score: integer 0-100, keywords: array of 3 short matching skill strings}. No markdown.",
-                  "RESUME:\n"+S.polished.substring(0,500)+"\n\nJOB: "+app.title+" at "+app.company+"\n"+(app.notes||"").substring(0,200)
+                  "RESUME:\n"+S.raw.substring(0,500)+"\n\nJOB: "+app.title+" at "+app.company+"\n"+(app.notes||"").substring(0,200)
                 );
                 const sc=JSON.parse(r.replace(/```json|```/g,"").trim());
                 S.apps=S.apps.map(a=>a.id===app.id?{...a,matchScore:sc.score,matchKeywords:sc.keywords||[]}:a);
@@ -1834,230 +1219,6 @@ REWRITE THIS RESUME:
     ].filter(Boolean));
   }
 
-  // ── TAB 4: APPLY ──
-  else if(S.tab==="apply"){
-    const warnBanner=S.selectedJob
-      ?div({style:{...card_s,borderColor:S.dark?"#166534":"#86efac",background:S.dark?"#052e16":"#f0fdf4",padding:"14px 20px",marginBottom:"16px"}},[
-        span({style:{fontSize:"13px",fontWeight:"600",color:S.dark?"#4ade80":"#15803d"}},["✓ Selected: "]),
-        span({style:{fontSize:"13px",color:S.dark?"#bbf7d0":"#166534"}},[S.selectedJob.title+" at "+S.selectedJob.company]),
-      ])
-      :div({style:{background:T.warn.bg,border:`1px solid ${T.warn.border}`,borderRadius:"10px",padding:"11px 16px",marginBottom:"16px",fontSize:"13px",color:T.warn.text}},["⚠ No job selected — pick one from Job Board, or paste a posting below."]);
-
-    const genChoices=div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"20px",marginBottom:"16px"}},[
-      div({},[mkLabel("Generate"),div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
-        ...[ ["both","Resume + Cover Letter"],["resume","Resume only"],["cover","Cover Letter only"] ].map(([v,l])=>pillBtn(l,S.genWhat===v,"#2563eb",()=>{S.genWhat=v;rerender();},{padding:"6px 13px",borderRadius:"8px"}))
-      ])]),
-      div({},[mkLabel("Tone"),div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
-        ...[["natural","Human & natural","#0d9488"],["bold","Bold & direct","#7c3aed"],["polished","Formal","#2563eb"],["format","Format Only","#b45309"]].map(([v,l,c])=>pillBtn(l,S.tone===v,c,()=>{S.tone=v;lsSet("resume-tone",v);rerender();},{padding:"6px 13px",borderRadius:"8px"}))
-      ]),span({style:{fontSize:"11px",color:T.muted,marginTop:"6px",display:"block"}},[S.tone==="natural"?"Sounds human — plain language, no buzzwords.":S.tone==="bold"?"Short, punchy, zero filler.":"Professional and structured."])]),
-    ]);
-
-    const genBtn=(()=>{
-      const b=mkBtn("purple",S.load==="gen"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Generating…"));return w;})():"✦ Generate tailored documents",async()=>{
-        const base=S.polished||S.raw;
-        // Strip any header lines (name, email, phone etc.) from the top of the resume
-        // so Claude only sees the actual resume body content
-        const stripHeader=(txt)=>{
-          const lines=txt.split("\n");
-          let bodyStart=0;
-          for(let i=0;i<Math.min(8,lines.length);i++){
-            const l=lines[i].trim();
-            // Skip lines that look like header info: short name lines, emails, phones, LinkedIn, locations
-            if(!l||l.includes("@")||l.match(/^\(?\d{3}\)?[\s.-]\d{3}/)||l.toLowerCase().includes("linkedin")||
-               (l.length<50&&i<3&&!l.includes("|")&&!l.match(/[A-Z]{3,}/))){
-              bodyStart=i+1;
-            } else break;
-          }
-          return lines.slice(bodyStart).join("\n").trim()||txt;
-        };
-        const cleanBase=stripHeader(base);
-        if(!base.trim()||!S.posting.trim()||S.load==="gen")return;
-        S.load="gen";S.tailored="";S.cover="";rerender();
-        try{
-          if(S.genWhat!=="cover"){const r=await callAI(`ROLE: Senior Executive Resume Tailor.\n${TONE_RULES[S.tone]?TONE_RULES[S.tone]+"\n\n":""}STRATEGY:\n1. Compare the resume to the job posting. Identify the top 3 skills or keywords the posting emphasizes.\n2. If the candidate has these skills, bring them forward — reorder bullets, strengthen the summary, weave in keywords naturally.\n3. If a skill is missing but the candidate has TRANSFERABLE experience, reframe existing experience to highlight the overlap (e.g., 'Telecom Operations' → 'Complex Infrastructure Oversight' if the job is construction).\n4. If the candidate has NO relevant background for a requirement, omit that gap entirely. Do NOT invent it.\n5. NEVER fabricate budgets, team sizes, project names, metrics, or certifications not in the original resume.\n6. ALL CAPS section headers, • bullets. Output ONLY the resume text — no explanations.`,`JOB:\n${S.posting}\n\nRESUME:\n${cleanBase}`);const cleanR=r.replace(/\*\*([^*]+)\*\*/g,"$1").replace(/\*([^*]+)\*/g,"$1").replace(/^#{1,3}\s+/gm,"").trim();S.tailored=cleanR;lsSet("apply-tailored",cleanR);}
-          if(S.genWhat!=="resume"){const r=await callAI(`ROLE: High-level Executive Consultant writing on behalf of a Senior Leader.\nTONE: Peer-to-peer, confident, solution-oriented. No "I am writing to apply." No "Dear Sir/Madam." No over-explaining. No begging.\n${TONE_RULES[S.tone]?TONE_RULES[S.tone]+"\n\n":""}STRUCTURE:\n1. THE HOOK: Open with a business challenge the company faces (infer from the posting). One sentence.\n2. THE PROOF: Connect one specific metric from the resume ($, %, milestone) directly to a requirement in the posting. Be precise.\n3. THE FIT: Briefly state why this industry/company is a natural extension of the candidate's 17+ years — no fluff, just logic.\n4. THE CLOSE: A confident peer-level ask — "When is a good time to discuss..." Not "I look forward to hearing from you."\nRULES: Under 320 words. Only use facts from the resume — no invented experience. Output ONLY the cover letter text.`,`JOB:\n${S.posting}\n\nRESUME:\n${cleanBase}`);S.cover=r;lsSet("apply-cover",r);}
-          S.applyOut=S.genWhat==="cover"?"cover":"resume";
-          if(S.selectedJob){
-            const _date=new Date().toLocaleDateString("en-CA");
-            S.apps=S.apps.map(a=>a.id===S.selectedJob.id?{...a,
-              savedResume:S.tailored||a.savedResume||"",
-              savedCover:S.cover||a.savedCover||"",
-              savedDocsDate:_date,
-            }:a);
-            lsSet("tracker-apps-v2",JSON.stringify(S.apps));
-          }
-        }catch{S.tailored="Error. Try again.";}
-        S.load="";rerender();
-      });
-      b.disabled=S.load==="gen"||!S.posting.trim()||(!S.polished&&!S.raw.trim()); // uses cleanBase
-      return b;
-    })();
-
-    let outputSection=null;
-    if(S.tailored||S.cover){
-
-      // helpers for export
-      function exportTxt(text,filename){
-        const a=document.createElement("a");
-        a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(text);
-        a.download=filename;a.click();
-      }
-      function exportPdf(text){
-        const pa=document.getElementById("print-area");
-        pa.style.display="block";
-        pa.innerHTML=buildPDFHTML(text,S.ci);
-        window.print();
-        pa.style.display="none";
-      }
-
-      const tabs=div({style:{display:"flex",gap:"6px",marginBottom:"16px",borderBottom:`1px solid ${T.div}`,paddingBottom:"12px",flexWrap:"wrap",alignItems:"center"}},[
-        S.tailored?pillBtn("Tailored Resume",S.applyOut==="resume","#2563eb",()=>{S.applyOut="resume";rerender();},{padding:"6px 14px",borderRadius:"7px"}):null,
-        S.tailored?pillBtn("PDF Preview",S.applyOut==="resumepdf","#2563eb",()=>{S.applyOut="resumepdf";rerender();},{padding:"6px 14px",borderRadius:"7px"}):null,
-        S.cover?pillBtn("Cover Letter",S.applyOut==="cover","#2563eb",()=>{S.applyOut="cover";rerender();},{padding:"6px 14px",borderRadius:"7px"}):null,
-        (S.tailored&&(S.polished||S.raw))?pillBtn("Side-by-side",S.applyOut==="compare","#2563eb",()=>{S.applyOut="compare";rerender();},{padding:"6px 14px",borderRadius:"7px"}):null,
-        div({style:{marginLeft:"auto",display:"flex",gap:"7px",flexWrap:"wrap"}},[
-          // Tailored resume raw view actions
-          S.applyOut==="resume"&&S.tailored?mkBtn("ghost",S.copied==="tailored"?"✓ Copied":"Copy text",()=>{navigator.clipboard.writeText(S.tailored).catch(()=>{});S.copied="tailored";setTimeout(()=>{S.copied="";rerender();},2000);rerender();},{fontSize:"12px",padding:"6px 12px"}):null,
-          S.applyOut==="resume"&&S.tailored?mkBtn("ghost","⬇ Save .txt",()=>exportTxt(S.tailored,(S.selectedJob?S.selectedJob.company.replace(/\s+/g,"_"):"resume")+"_tailored.txt"),{fontSize:"12px",padding:"6px 12px"}):null,
-          // PDF preview actions
-          S.applyOut==="resumepdf"&&S.tailored?mkBtn("ghost",S.copied==="tailoredpdf"?"✓ Copied":"Copy text",()=>{navigator.clipboard.writeText(S.tailored).catch(()=>{});S.copied="tailoredpdf";setTimeout(()=>{S.copied="";rerender();},2000);rerender();},{fontSize:"12px",padding:"6px 12px"}):null,
-          S.applyOut==="resumepdf"&&S.tailored?mkBtn("ghost","⬇ Save .txt",()=>exportTxt(S.tailored,(S.selectedJob?S.selectedJob.company.replace(/\s+/g,"_"):"resume")+"_tailored.txt"),{fontSize:"12px",padding:"6px 12px"}):null,
-          S.applyOut==="resumepdf"&&S.tailored?mkBtn("ghost","🖨 Print / PDF",()=>exportPdf(S.tailored),{fontSize:"12px",padding:"6px 12px"}):null,
-          // Cover letter actions
-          S.applyOut==="cover"&&S.cover?mkBtn("ghost",S.copied==="cover"?"✓ Copied":"Copy text",()=>{navigator.clipboard.writeText(S.cover).catch(()=>{});S.copied="cover";setTimeout(()=>{S.copied="";rerender();},2000);rerender();},{fontSize:"12px",padding:"6px 12px"}):null,
-          S.applyOut==="cover"&&S.cover?mkBtn("ghost","⬇ Save .txt",()=>exportTxt(S.cover,(S.selectedJob?S.selectedJob.company.replace(/\s+/g,"_"):"cover")+"_cover_letter.txt"),{fontSize:"12px",padding:"6px 12px"}):null,
-          S.selectedJob?mkBtn("green","✓ Mark as Applied",()=>{S.apps=S.apps.map(a=>a.id===S.selectedJob.id?{...a,status:"applied"}:a);lsSet("tracker-apps-v2",JSON.stringify(S.apps));S.tab="tracker";rerender();},{fontSize:"12px",padding:"6px 12px"}):null,
-        ].filter(Boolean)),
-      ].filter(Boolean));
-
-      let body=div();
-      if(S.applyOut==="resume"&&S.tailored){
-        body=div({},[
-          div({style:out_s},[S.tailored]),
-        ]);
-      }else if(S.applyOut==="resumepdf"&&S.tailored){
-        const jobSlug=S.selectedJob?S.selectedJob.company.replace(/[^a-z0-9]/gi,"_").toLowerCase():"tailored";
-
-
-        // Refine box wired to S.tailored
-        const refineInp=h("input",{style:{...inp_s,flex:"1"},placeholder:'e.g. "Change all locations to Vancouver, BC" or "Tighten the summary"'});
-        refineInp.value=S.refineText||"";
-        refineInp.addEventListener("input",e=>S.refineText=e.target.value);
-        const doTailoredRefine=async()=>{
-          if(!S.tailored||!S.refineText.trim()||S.load==="refine")return;
-          S.load="refine";rerender();
-          try{
-            const r=await callAI(
-              `You are editing a resume. Apply the instruction precisely and return the COMPLETE updated resume text — same format, ALL CAPS section headers, • bullets. Output ONLY the resume text.`,
-              `INSTRUCTION: ${S.refineText}\n\nRESUME:\n${S.tailored}`
-            );
-            S.tailored=r;lsSet("apply-tailored",r);
-            S.refineText="";
-          }catch{}
-          S.load="";rerender();
-        };
-        refineInp.addEventListener("keydown",async e=>{if(e.key==="Enter"){e.preventDefault();await doTailoredRefine();}});
-        const refineBox=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"12px 16px",marginBottom:"12px"}},[
-          div({style:{fontSize:"12px",fontWeight:"600",color:T.sub,marginBottom:"8px",display:"flex",alignItems:"center",gap:"6px"}},[
-            span({style:{fontSize:"14px"}},["✏️"])," Refine with a quick instruction",
-          ]),
-          div({style:{display:"flex",gap:"8px",alignItems:"center"}},[
-            refineInp,
-            (()=>{
-              const b=mkBtn("teal",S.load==="refine"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Applying…"));return w;})():"Apply",doTailoredRefine,{padding:"9px 16px",fontSize:"13px",flexShrink:"0"});
-              b.disabled=S.load==="refine"||!S.refineText||!S.tailored;
-              return b;
-            })(),
-          ]),
-          div({style:{marginTop:"8px",display:"flex",gap:"6px",flexWrap:"wrap"}},
-            ['Change all locations to Vancouver, BC','Remove buzzwords','Shorten the summary','Add more quantified results'].map(hint=>
-              h("button",{style:{fontSize:"11px",padding:"3px 10px",borderRadius:"12px",border:`1px solid ${T.cardB}`,background:"transparent",color:T.muted,cursor:"pointer"},onClick:()=>{S.refineText=hint;rerender();}},[hint])
-            )
-          ),
-        ]);
-
-        // Export action row
-        const exportRow=div({style:{display:"flex",gap:"8px",marginBottom:"12px",justifyContent:"flex-end",flexWrap:"wrap"}},[
-          mkBtn("ghost",S.copied==="tailoredpdf"?"✓ Copied":"Copy text",()=>{navigator.clipboard.writeText(S.tailored).catch(()=>{});S.copied="tailoredpdf";setTimeout(()=>{S.copied="";rerender();},2000);rerender();},{fontSize:"12px",padding:"6px 12px"}),
-          mkBtn("ghost","⬇ Save .txt",()=>exportTxt(S.tailored,jobSlug+"_tailored.txt"),{fontSize:"12px",padding:"6px 12px"}),
-          mkBtn("ghost","🖨 Print / Save PDF",()=>{
-            const pa=document.getElementById("print-area");
-            pa.style.display="block";
-            pa.innerHTML=buildSemanticPDFHTML(S.tailored,S.ci);
-            window.print();
-            pa.style.display="none";
-          },{fontSize:"12px",padding:"6px 12px"}),
-        ]);
-
-        const previewBox=div({style:{border:`1px solid ${T.cardB}`,borderRadius:"10px",overflow:"hidden",position:"relative"}});
-        previewBox.innerHTML=buildPDFHTML(S.tailored,S.ci);
-        wireEditable(previewBox,()=>S.tailored,v=>{S.tailored=v;lsSet("apply-tailored",v);});
-        body=div({},[exportRow,previewBox]);
-      }else if(S.applyOut==="cover"&&S.cover){
-        body=div({style:out_s},[S.cover]);
-      }else if(S.applyOut==="compare"){
-        body=div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"14px"}},[
-          div({},[div({style:{fontSize:"11px",color:T.muted,fontWeight:"700",textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:"7px"}},["Original"]),div({style:{...out_s,minHeight:"300px"}},[S.polished||S.raw])]),
-          div({},[div({style:{fontSize:"11px",color:T.cmpL,fontWeight:"700",textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:"7px"}},["Tailored ✦"]),div({style:{...out_s,minHeight:"300px",borderColor:T.cmpB}},[S.tailored])]),
-        ]);
-      }
-      outputSection=div({style:card_s},[tabs,body]);
-    }
-
-    content=div({},[
-      div({style:card_s},[
-        div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"4px"}},["Craft your application"]),
-        div({style:{fontSize:"13px",color:T.sub,marginBottom:"12px"}},["Select a job from your board to generate a tailored resume and cover letter. Then head to Apply & Track to submit and track your application."]),
-        S.apps.length>0?div({style:{marginBottom:"12px"}},[
-          mkLabel("Choose from your job board"),
-          div({style:{display:"flex",gap:"8px",alignItems:"center"}},[
-            (()=>{
-              const sel=h("select",{style:{...inp_s,flex:"1",fontFamily:"inherit"}});
-              const blank=h("option",{value:""}); blank.textContent="— Select a job —"; sel.appendChild(blank);
-              S.apps.forEach(app=>{
-                const o=h("option",{value:app.id});
-                const sm=smeta(app.status);
-                o.textContent=app.title+" — "+app.company+" ("+sm.label+")";
-                if(S.selectedJob&&S.selectedJob.id===app.id)o.selected=true;
-                sel.appendChild(o);
-              });
-              sel.addEventListener("change",e=>{
-                const app=S.apps.find(a=>a.id===e.target.value);
-                if(!app)return;
-                S.selectedJob=app;
-                S.posting=app.title+" at "+app.company+"\nLocation: "+app.location+"\nType: "+app.type+(app.salary?"\nSalary: "+app.salary:"")+"\n\n"+(app.notes||"");
-                S.tailored="";S.cover="";debounceSave("apply-posting",S.posting);rerender();
-              });
-              return sel;
-            })(),
-            S.selectedJob?span({style:{fontSize:"11px",fontWeight:"600",color:T.done.text,background:T.done.bg,border:`1px solid ${T.done.border}`,padding:"4px 10px",borderRadius:"8px",flexShrink:"0",whiteSpace:"nowrap"}},[ "✓ "+S.selectedJob.company]):null,
-          ].filter(Boolean)),
-        ]):div({style:{fontSize:"13px",color:T.muted,marginBottom:"10px"}},["No jobs on your board yet — add some in Find Jobs or Job Board."]),
-        div({style:{borderTop:`1px solid ${T.div}`,margin:"12px 0"}}),
-        mkLabel("Job posting text"),
-        mkTextarea(S.posting,v=>{S.posting=v;debounceSave("apply-posting",v);},140,"Paste the full job posting here…"),
-      ]),
-      div({style:card_s},[mkLabel(`Base resume${S.polished?" ✓ POLISHED":""}`),mkTextarea(S.polished||S.raw,v=>{if(S.polished)S.polished=v;else S.raw=v;debounceSave(S.polished?"resume-polished":"resume-raw",v);},140,"Paste resume…")]),
-      div({style:card_s},[genChoices,genBtn,
-        // Job match bar — shown when both posting and resume are loaded
-        S.posting.trim()&&(S.polished||S.raw)?(()=>{
-          const matchScore=calculateJobMatch(S.polished||S.raw,S.posting);
-          const barColor=matchScore>=80?"#16a34a":matchScore>=60?"#d97706":"#dc2626";
-          const barText=matchScore>=80?"Strong match":matchScore>=60?"Partial match":"Low match — consider tailoring";
-          return div({style:{marginTop:"14px",paddingTop:"14px",borderTop:`1px solid ${T.div}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",flexWrap:"wrap"}},[
-            div({style:{fontSize:"12px",color:T.muted,flexShrink:"0"}},["\uD83C\uDFAF Resume match:"]),
-            div({style:{flex:"1",minWidth:"80px",height:"8px",background:S.dark?"#1f2937":"#e5e7eb",borderRadius:"4px",overflow:"hidden"}},[
-              div({style:{width:matchScore+"%",height:"100%",background:barColor,borderRadius:"4px",transition:"width 0.5s ease"}}),
-            ]),
-            span({style:{fontSize:"12px",fontWeight:"700",color:barColor,flexShrink:"0"}},[matchScore+"%"]),
-            span({style:{fontSize:"11px",color:T.muted,flexShrink:"0"}},[barText]),
-          ]);
-        })():null,
-      ].filter(Boolean)),
-      outputSection,
-    ].filter(Boolean));
-  }
-
   // ── TAB 5: TRACKER ──
   else if(S.tab==="tracker"){
     const counts=STATUSES.reduce((acc,s)=>({...acc,[s.key]:S.apps.filter(a=>a.status===s.key).length}),{});
@@ -2118,7 +1279,7 @@ REWRITE THIS RESUME:
               div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"5px"}},["Tailored Resume"]),
               div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",maxHeight:"44px",overflow:"hidden"}},[app.savedResume.substring(0,130)+"…"]),
               div({style:{display:"flex",gap:"5px",marginTop:"7px",flexWrap:"wrap"}},[
-                mkBtn("ghost","View PDF",()=>{const pa=document.getElementById("print-area");pa.style.display="block";pa.innerHTML=buildSemanticPDFHTML(app.savedResume,S.ci);window.print();pa.style.display="none";},{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","View PDF",()=>{const pa=document.getElementById("print-area");pa.style.display="block";alert("PDF export removed in this version. Copy the text instead.");pa.style.display="none";},{fontSize:"11px",padding:"3px 8px"}),
                 mkBtn("ghost","Copy",()=>navigator.clipboard.writeText(app.savedResume).catch(()=>{}),{fontSize:"11px",padding:"3px 8px"}),
                 mkBtn("ghost","⬇ .txt",()=>{const a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(app.savedResume);a.download=app.company.replace(/[\s]+/g,"_")+"_resume.txt";a.click();},{fontSize:"11px",padding:"3px 8px"}),
               ]),
