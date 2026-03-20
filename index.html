@@ -34,7 +34,7 @@ button:active{transform:scale(0.97)}
 .pdf-text-line{font-size:9.5pt;margin-bottom:2px;color:#333;line-height:1.4;font-weight:400}
 .pdf-bullet-text strong,.pdf-text-line strong{font-weight:700;color:#1e40af}
 .pdf-grid-flex{display:flex;flex-wrap:wrap;justify-content:center;gap:3px 0;width:100%;margin-top:2px}
-.pdf-grid-flex-item{flex:0 0 33.33%;text-align:center;font-size:9pt;color:#222;font-weight:400;padding:1px 4px}
+.pdf-grid-flex-item{flex:0 0 50%;text-align:center;font-size:9pt;color:#222;font-weight:400;padding:2px 8px;box-sizing:border-box}
 @media print{
   body>*:not(#print-area){display:none!important}
   #print-area{display:block!important;position:static}
@@ -320,6 +320,193 @@ function matchBg(m){const d=S.dark;return m>=90?(d?"#052e16":"#f0fdf4"):m>=80?(d
 // ─────────────────────────────────────────────────────────
 // PDF RESUME RENDERER
 // ─────────────────────────────────────────────────────────
+function buildPDFHTML(text,ci){
+  ci=ci||{};
+  var name=ci.name||"",tagline=ci.tagline||"",phone=ci.phone||"",email=ci.email||"",location=ci.location||"",linkedin=ci.linkedin||"";
+  function e(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+  var sep='<span style="color:#ccc"> | </span>';
+  var cp=[
+    location?"<span>📍 "+e(location)+"</span>":"",
+    phone?"<span>📞 "+e(phone)+"</span>":"",
+    email?"<span>✉ "+e(email)+"</span>":"",
+    linkedin?"<span>🔗 "+e(linkedin)+"</span>":"",
+  ].filter(Boolean).join(sep);
+  var allLines=text.split("\n").map(function(l){return l.trim();}).filter(Boolean);
+  var sections=[],cur=null;
+  function isSH(line){
+    if(line.length<3||line.length>70)return false;
+    var s=line.replace(/[\s&\/\-.,|:()]/g,"");
+    if(!s)return false;
+    var up=s.split("").filter(function(ch){return ch===ch.toUpperCase()&&ch!==ch.toLowerCase();}).length;
+    return(up/s.length)>=0.85&&line===line.toUpperCase();
+  }
+  function isJob(line){
+    return(line.indexOf(" | ")!==-1||line.indexOf(" — ")!==-1)&&line.indexOf("@")===-1&&line.length<120&&/[A-Z]/.test(line)&&!isSH(line);
+  }
+  allLines.forEach(function(line){
+    var h=isSH(line),j=isJob(line),inExp=cur&&(cur.title.indexOf("EXPERIENCE")!==-1||cur._isExp);
+    if(j&&!inExp){if(cur)sections.push(cur);cur={title:"PROFESSIONAL EXPERIENCE",items:[],_isExp:true};}
+    if(h){if(cur)sections.push(cur);cur={title:line,items:[]};}
+    else if(cur){
+      var b=/^[•–\-\*]/.test(line)||line.indexOf("* ")===0;
+      if(b)cur.items.push({type:"bullet",text:line.replace(/^[•–\-\*\s]+/,"")});
+      else cur.items.push({type:"text",text:line});
+    }else{if(!cur)cur={title:"__hdr__",items:[]};cur.items.push({type:"text",text:line});}
+  });
+  if(cur)sections.push(cur);
+  var hdrItems=(sections.find(function(s){return s.title==="__hdr__";})||{items:[]}).items;
+  var sumItems=hdrItems.filter(function(it){return it.text.length>60||it.text.indexOf(":")!==-1;});
+  var hasSumSec=sections.some(function(s){return s.title.indexOf("SUMMARY")!==-1||s.title.indexOf("PROFILE")!==-1;});
+  var rest=[].concat(!hasSumSec&&sumItems.length?[{title:"PROFESSIONAL SUMMARY",items:sumItems}]:[]).concat(sections.filter(function(s){return s.title!=="__hdr__";}));
+  var GKEYS=["EXPERTISE","SKILLS","CERTIF","AWARD","EDUCATION","LICENCE","LICENSE","VOLUNTEER","ADDITIONAL","QUALIFICATION","TRAINING","LANGUAGE","OPERATIONAL","TECHNICAL","AREA"];
+  function hlm(t){return t.replace(/(\$\d+(?:\.\d+)?[MKkBb]?|\d+(?:\.\d+)?%|\d+\+\s*(?:years?|yrs?))/gi,"<strong>$1</strong>");}
+  function renderExp(items){
+    var blocks=[],bl=null;
+    items.forEach(function(it){
+      if(it.type==="bullet"){
+        if(!bl)bl={left:"",right:"",bullets:[]};
+        bl.bullets.push(hlm(e(it.text)));
+      }else{
+        var tr=it.text.trim();
+        // A new job header must have a separator AND start with a capital letter job title
+        // Pure location lines (e.g. "Vancouver, BC | 2019") attach to current block as sub-text
+        var hasSep=tr.indexOf(" | ")!==-1||tr.indexOf(" — ")!==-1||tr.indexOf(" – ")!==-1||(tr.indexOf(" - ")!==-1&&tr.length<100);
+        // Location lines have "City, XX" (comma + 2 caps) or a year range — treat as sub-line
+        var isLocation=hasSep&&(/,\s*[A-Z]{2}/.test(tr)||/\d{4}\s*[-–—]\s*(?:\d{4}|Present)/i.test(tr));
+        var looksLikeTitle=hasSep&&!isLocation;
+        if(looksLikeTitle){
+          if(bl&&(bl.left||bl.bullets.length))blocks.push(bl);
+          bl={left:tr,right:"",bullets:[]};
+        }else if(hasSep&&bl&&!bl.right){
+          // Location/date line — append to existing block left, let date extractor split it
+          bl.left=bl.left+" | "+tr;
+        }else if(bl){
+          bl.bullets.push(hlm(e(tr)));
+        }else bl={left:tr,right:"",bullets:[]};
+      }
+    });
+    if(bl&&(bl.left||bl.bullets.length))blocks.push(bl);
+    return blocks.map(function(b,i){
+      var left=b.left,right=b.right;
+      if(!right&&left){
+        var dm=left.match(/\|?\s*(\d{4}\s*[–—\-]\s*(?:\d{4}|Present))/i);
+        if(dm){right=dm[1].trim();left=left.slice(0,dm.index).replace(/[|–—\-]\s*$/,"").trim();}
+      }
+      var last=i===blocks.length-1;
+      return'<div class="pdf-exp-block"'+(last?' style="margin-bottom:0;padding-bottom:0"':'')+'>'+
+        '<div class="pdf-exp-header"><span class="pdf-exp-left">'+e(left)+'</span>'+(right?'<span class="pdf-exp-right">'+e(right)+'</span>':"")+
+        '</div>'+b.bullets.map(function(bl){return'<div class="pdf-bullet"><span class="pdf-bullet-dot">▪</span><span class="pdf-bullet-text">'+bl+'</span></div>';}).join("")+'</div>';
+    }).join("");
+  }
+  function renderGrid(items){
+    var entries=items.map(function(it){return it.text.replace(/^[•–\-]\s*/,"").trim();}).filter(Boolean);
+    if(!entries.length)return"";
+    return'<div class="pdf-grid-flex">'+entries.map(function(en){return'<div class="pdf-grid-flex-item">'+e(en)+'</div>';}).join("")+'</div>';
+  }
+  var secHTML=rest.map(function(sec){
+    var isG=GKEYS.some(function(k){return sec.title.toUpperCase().indexOf(k)!==-1;});
+    var isE=sec.title.indexOf("EXPERIENCE")!==-1||sec.title.indexOf("EMPLOYMENT")!==-1||sec._isExp;
+    var isS=sec.title.indexOf("SUMMARY")!==-1||sec.title.indexOf("PROFILE")!==-1;
+    var body="";
+    if(isE)body=renderExp(sec.items);
+    else if(isG)body=renderGrid(sec.items);
+    else body=sec.items.map(function(it){
+      return it.type==="bullet"
+        ?'<div class="pdf-bullet"><span class="pdf-bullet-dot">▪</span><span class="pdf-bullet-text">'+hlm(e(it.text))+'</span></div>'
+        :'<div class="pdf-text-line"'+(isS?' style="text-align:center"':'')+'>'+hlm(e(it.text))+'</div>';
+    }).join("");
+    return'<div style="margin-bottom:8px"><div class="pdf-sec-title">'+e(sec.title)+'</div>'+body+'</div>';
+  }).join("");
+  return'<div class="pdf-wrap">'+(name?'<div class="pdf-name">'+e(name)+'</div>':"")+(tagline?'<div class="pdf-tagline">'+e(tagline)+'</div>':"")+(cp?'<div class="pdf-contact">'+cp+'</div>':"")+((name||cp)?'<hr class="pdf-divider"/>':"")+ secHTML+'</div>';
+}
+
+// ─────────────────────────────────────────────────────────
+// EDITABLE PDF
+// ─────────────────────────────────────────────────────────
+function wireEditable(previewBox, getText, onSave){
+  var editing=false, undoStack=[];
+
+  function extractText(){
+    var lines=[];
+    previewBox.querySelectorAll(".pdf-sec-title,.pdf-exp-left,.pdf-exp-right,.pdf-bullet-text,.pdf-text-line,.pdf-name,.pdf-tagline").forEach(function(el){
+      var tx=el.innerText.trim();
+      if(!tx)return;
+      if(el.classList.contains("pdf-sec-title"))lines.push("\n"+tx.toUpperCase());
+      else if(el.classList.contains("pdf-bullet-text"))lines.push("• "+tx);
+      else lines.push(tx);
+    });
+    return lines.join("\n").trim();
+  }
+
+  var toolbar=document.createElement("div");
+  toolbar.style.cssText="position:absolute;top:10px;right:10px;display:flex;gap:6px;align-items:center;z-index:10";
+
+  function mkTBtn(label,bg,color,border){
+    var b=document.createElement("button");
+    b.textContent=label;
+    b.style.cssText="font-size:11px;padding:4px 11px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;background:"+bg+";color:"+color+";border:1px solid "+border;
+    return b;
+  }
+
+  var editBtn=mkTBtn("✎ Edit","rgba(17,24,39,0.88)","#e5e7eb","#374151");
+  var saveBtn=mkTBtn("✓ Save","#052e16","#4ade80","#166534");
+  var revertBtn=mkTBtn("↺ Revert","rgba(17,24,39,0.88)","#fca5a5","#374151");
+  saveBtn.style.display="none"; revertBtn.style.display="none";
+
+  function startEdit(){
+    var wrap=previewBox.querySelector(".pdf-wrap");
+    if(!wrap)return;
+    undoStack.push(getText());
+    editing=true;
+    wrap.contentEditable="true";
+    wrap.spellcheck=true;
+    wrap.style.outline="2px solid rgba(37,99,235,0.4)";
+    wrap.style.borderRadius="4px";
+    wrap.style.caretColor="#2563eb";
+    editBtn.style.display="none";
+    saveBtn.style.display="";
+    revertBtn.style.display="";
+    setTimeout(function(){wrap.focus();},50);
+  }
+
+  function stopEdit(){
+    var wrap=previewBox.querySelector(".pdf-wrap");
+    if(!wrap)return;
+    editing=false;
+    wrap.contentEditable="false";
+    wrap.style.outline="none";
+    wrap.style.caretColor="";
+    editBtn.style.display="";
+    saveBtn.style.display="none";
+    revertBtn.style.display="none";
+  }
+
+  editBtn.addEventListener("click",function(){startEdit();});
+
+  saveBtn.addEventListener("click",function(){
+    var newText=extractText();
+    if(newText&&newText!==getText())onSave(newText);
+    stopEdit();
+  });
+
+  revertBtn.addEventListener("click",function(){
+    if(!confirm("Revert to original? Edits will be lost."))return;
+    var prev=undoStack[undoStack.length-1];
+    if(prev){onSave(prev);stopEdit();rerender();}
+  });
+
+  previewBox.addEventListener("keydown",function(ev){
+    if(!editing)return;
+    if((ev.ctrlKey||ev.metaKey)&&ev.key==="s"){ev.preventDefault();saveBtn.click();}
+    if(ev.key==="Escape"){revertBtn.click();}
+  });
+
+  toolbar.appendChild(revertBtn);
+  toolbar.appendChild(saveBtn);
+  toolbar.appendChild(editBtn);
+  previewBox.appendChild(toolbar);
+}
+
 // ─────────────────────────────────────────────────────────
 // RENDER ENGINE
 // ─────────────────────────────────────────────────────────
@@ -525,11 +712,12 @@ ${S.raw.substring(0,3000)}`
           },{fontSize:"12px",padding:"6px 14px"}):null,
         ].filter(Boolean)),
 
-        S.resumeView==="preview"&&S.raw.trim()?div({style:{marginTop:"14px",border:"1px solid "+T.cardB,borderRadius:"10px",overflow:"hidden"}},[(()=>{
-          const box=document.createElement("div");
-          box.innerHTML=buildPDFHTML(S.raw,S.ci||{});
-          return box;
-        })()])
+        S.resumeView==="preview"&&S.raw.trim()?(()=>{
+          const pBox=div({style:{marginTop:"14px",border:"1px solid "+T.cardB,borderRadius:"10px",overflow:"hidden",position:"relative"}});
+          pBox.innerHTML=buildPDFHTML(S.raw,S.ci||{});
+          wireEditable(pBox,()=>S.raw,v=>{S.raw=v;lsSet("resume-raw",v);});
+          return pBox;
+        })()
         :null,
       ].filter(Boolean)),
 
