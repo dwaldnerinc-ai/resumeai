@@ -24,15 +24,15 @@ button:active{transform:scale(0.97)}
 .pdf-tagline{font-size:11pt;color:#2e6da4;font-weight:600;text-align:center;margin-bottom:8px}
 .pdf-contact{font-size:9.5pt;color:#555;font-weight:400;display:flex;justify-content:center;flex-wrap:wrap;gap:4px 12px;margin-bottom:0}
 .pdf-divider{border:none;border-top:3px solid #1e3a6e;margin:14px 0 16px}
-.pdf-exp-block{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #eef0f4;font-weight:400}
+.pdf-exp-block{margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid #eef0f4;font-weight:400}
 .pdf-exp-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
 .pdf-exp-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 12px;margin-bottom:4px}
-.pdf-exp-left{font-size:10.5pt;font-weight:700;color:#0d2b4e;flex:1 1 auto}
+.pdf-exp-left{font-size:11pt;font-weight:700;color:#0d2b4e;flex:1 1 auto}
 .pdf-exp-right{font-size:9.5pt;color:#2e6da4;font-weight:600;flex-shrink:0;white-space:nowrap}
-.pdf-bullet{display:flex;gap:7px;margin-bottom:2px;font-size:10pt}
+.pdf-bullet{display:flex;gap:7px;margin-bottom:1px;font-size:10pt}
 .pdf-bullet-dot{color:#2e6da4;flex-shrink:0;margin-top:1px;font-weight:400}
-.pdf-bullet-text{color:#222;line-height:1.55;font-weight:400}
-.pdf-text-line{font-size:10pt;margin-bottom:3px;color:#222;line-height:1.55;font-weight:400}
+.pdf-bullet-text{color:#333;line-height:1.4;font-weight:400;font-size:10pt}
+.pdf-text-line{font-size:10pt;margin-bottom:3px;color:#333;line-height:1.4;font-weight:400}
 /* Flexbox grid — replaces table layout */
 .pdf-grid-flex{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 0;width:100%;margin-top:4px}
 .pdf-grid-flex-item{flex:0 0 33.33%;text-align:center;font-size:9.5pt;color:#222;font-weight:400}
@@ -44,13 +44,24 @@ button:active{transform:scale(0.97)}
 .app-stale{border:1.5px solid #854d0e!important;background:rgba(133,77,14,0.1)!important;position:relative}
 .app-stale::after{content:"⚠ Follow up?";position:absolute;top:-10px;right:10px;background:#854d0e;color:white;font-size:10px;padding:2px 6px;border-radius:4px;font-family:inherit}
 .pdf-bullet-text strong,.pdf-text-line strong{font-weight:700;color:#1e40af;background:rgba(30,64,175,0.03);padding:0 1px;border-radius:2px}
-.pdf-sec-title{font-size:9.5pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.09em;border-bottom:2px solid #1e40af;padding-bottom:4px;margin-bottom:7px;text-align:center}
+.pdf-sec-title{font-size:10pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.08em;border-bottom:1.5px solid #0d2b4e;padding-bottom:4px;margin-top:20px;margin-bottom:10px;text-align:left}
 
 @media print{
   body>*:not(#print-area){display:none!important}
   #print-area{display:block!important;position:static}
   .pdf-wrap{padding:20px 30px;max-width:none}
 }
+/* ── PDF Style Toggles ── */
+.pdf-compact .pdf-wrap{font-size:9.5pt;padding:24px 32px}
+.pdf-compact .pdf-exp-block{margin-bottom:10px;padding-bottom:8px}
+.pdf-compact .pdf-sec-title{margin-top:12px;margin-bottom:6px}
+.pdf-modern .pdf-name{font-family:"Inter",system-ui,sans-serif;color:#334155}
+.pdf-modern .pdf-sec-title{color:#475569;border-bottom-color:#94a3b8}
+.pdf-modern .pdf-exp-left{color:#334155}
+.pdf-modern .pdf-exp-right{color:#64748b}
+.pdf-classic .pdf-wrap{font-family:Georgia,serif}
+.pdf-classic .pdf-name{font-family:Georgia,serif}
+.pdf-classic .pdf-sec-title{border-bottom:1px solid #999;letter-spacing:.05em}
 </style>
 </head>
 <body style="background: rgb(13, 17, 23); color: rgb(232, 237, 245);">
@@ -94,7 +105,7 @@ const S={
   dark:true, tab:"resume",
   raw:"", polished:"", resumeView:"edit", tone:"natural",
   ci:{name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""},
-  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, tipsOpen:false,tmplOpen:false,tmpl:null,followUpText:"",followUpJob:null,toneCheck:null,metricAlert:false,
+  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, tipsOpen:false,tmplOpen:false,tmpl:null,followUpText:"",followUpJob:null,toneCheck:null,metricAlert:false,pdfStyle:"default",
   selectedJob:null, posting:"", tailored:"", cover:"", applyOut:"resume", genWhat:"both",
   apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
   searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
@@ -369,7 +380,7 @@ function buildPDFHTML(text,ci){
     }
     if(isH){if(cur)sections.push(cur);cur={title:line,items:[]};}
     else if(cur){
-      const isBullet=/^[•\u2022\u2013\-\*]\s/.test(line)||/^\s{2,}[A-Z]/.test(line);
+      const isBullet=/^[•\u2022\u2013\-\*]/.test(line)||line.trim().startsWith("*");
       if(isBullet)cur.items.push({type:"bullet",text:line.replace(/^[•\u2022\u2013\-\*\s]+/,"")});
       else cur.items.push({type:"text",text:line});
     }else{if(!cur)cur={title:"__hdr__",items:[]};cur.items.push({type:"text",text:line});}
@@ -393,10 +404,24 @@ function buildPDFHTML(text,ci){
     const highlightMetrics=(text)=>text.replace(/(\$\d+(?:\.\d+)?[MKkBb+]?|\d+(?:\.\d+)?[MKkBb%+]|\d+\+\s*(?:years?|yrs?|months?))/gi,'<strong>$1</strong>');
     const isSubLine=(tx)=>/\d{4}/.test(tx)||tx.includes(" – ")||tx.includes(" - ")||tx.includes("Present")||tx.includes("present")||(tx.length<70&&block&&block.bullets.length===0&&block.left);
     items.forEach(it=>{
-      if(it.type==="bullet"){if(!block)block={left:"",right:"",bullets:[]};block.bullets.push(highlightMetrics(esc(it.text)));}
-      else{const tr=it.text.trim();if(!block){block={left:tr,right:"",bullets:[]};}
-      else if(block.bullets.length===0&&block.left&&!block.right&&isSubLine(tr)){block.right=tr;}
-      else{if(block.left||block.bullets.length>0)blocks.push(block);block={left:tr,right:"",bullets:[]};}}
+      if(it.type==="bullet"){
+        if(!block)block={left:"Experience",right:"",bullets:[]};
+        block.bullets.push(highlightMetrics(esc(it.text)));
+      }else{
+        const tr=it.text.trim();
+        // Only create a new bold header if the line contains a separator like | or — or -
+        const isHeaderLine=tr.includes(" | ")||tr.includes(" — ")||tr.includes(" – ")||(tr.includes(" - ")&&tr.length<100);
+        if(isHeaderLine){
+          if(block&&(block.left||block.bullets.length>0))blocks.push(block);
+          block={left:tr,right:"",bullets:[]};
+        }else if(block){
+          // Sub-description line (date, location, context) — treat as normal-weight bullet
+          block.bullets.push(highlightMetrics(esc(tr)));
+        }else{
+          // No block yet — start one
+          block={left:tr,right:"",bullets:[]};
+        }
+      }
     });
     if(block&&(block.left||block.bullets.length>0))blocks.push(block);
     return blocks.map((b,i)=>{
@@ -1075,121 +1100,42 @@ REWRITE THIS RESUME:
       const errBanner=S.polishError?div({style:{marginTop:"10px",padding:"10px 14px",background:T.danger.bg,border:`1px solid ${T.danger.border}`,borderRadius:"8px",fontSize:"13px",color:T.danger.text}},["⚠ "+S.polishError]):null;
 
 
-      // ── Resume Template card ──
-      if(!S.tmpl)S.tmpl={summary:"",expertise:"",skills:"",certs:"",additional:"",jobs:[{title:"",company:"",location:"",dates:"",bullets:""}]};
-
-      function buildFromTemplate(){
-        const T2=S.tmpl;
-        const lines=[];
-        if(T2.summary.trim()){lines.push("PROFESSIONAL SUMMARY");lines.push(T2.summary.trim());lines.push("");}
-        if(T2.expertise.trim()){lines.push("AREAS OF EXPERTISE");T2.expertise.split("\n").map(l=>l.trim()).filter(Boolean).forEach(l=>lines.push("\u2022 "+l));lines.push("");}
-        if(T2.skills.trim()){lines.push("TECHNICAL SKILLS");T2.skills.split("\n").map(l=>l.trim()).filter(Boolean).forEach(l=>lines.push("\u2022 "+l));lines.push("");}
-        const jobs=(T2.jobs||[]).filter(j=>j.title||j.company);
-        if(jobs.length){
-          lines.push("PROFESSIONAL EXPERIENCE");
-          jobs.forEach(j=>{
-            lines.push((j.title||"Role")+" \u2014 "+(j.company||"Company")+(j.location?", "+j.location:""));
-            if(j.dates)lines.push(j.dates);
-            (j.bullets||"").split("\n").map(l=>l.trim()).filter(Boolean).forEach(l=>lines.push("\u2022 "+l));
-            lines.push("");
-          });
-        }
-        if(T2.certs.trim()){lines.push("CERTIFICATIONS");T2.certs.split("\n").map(l=>l.trim()).filter(Boolean).forEach(l=>lines.push("\u2022 "+l));lines.push("");}
-        if(T2.additional.trim()){lines.push("ADDITIONAL QUALIFICATIONS");T2.additional.split("\n").map(l=>l.trim()).filter(Boolean).forEach(l=>lines.push("\u2022 "+l));lines.push("");}
-        S.raw=lines.join("\n").trim();lsSet("resume-raw",S.raw);S.tmplOpen=false;rerender();
-      }
-
-      const tmplCard=div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"14px"}},[
-        h("button",{style:{width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",background:"transparent",border:"none",cursor:"pointer",padding:"0"},
-          onClick:()=>{S.tmplOpen=!S.tmplOpen;rerender();}},[
-          div({style:{display:"flex",alignItems:"center",gap:"8px"}},[
-            span({style:{fontSize:"16px"}},["\uD83D\uDCCB"]),
-            div({},[
-              div({style:{fontSize:"13px",fontWeight:"700",color:T.text}},["Resume template"]),
-              div({style:{fontSize:"11px",color:T.muted}},["Having trouble with formatting? Fill in the fields and we\u2019ll build it for you"]),
-            ]),
-          ]),
-          span({style:{fontSize:"12px",color:T.muted}},[S.tmplOpen?"\u25B2":"\u25BE"]),
-        ]),
-        S.tmplOpen?div({style:{marginTop:"14px",borderTop:`1px solid ${T.div}`,paddingTop:"14px"}},[
-          div({style:{marginBottom:"12px"}},[
-            mkLabel("Professional Summary (2-3 sentences)"),
-            mkTextarea(S.tmpl.summary,v=>{S.tmpl.summary=v;},60,"e.g. 17+ years delivering complex infrastructure projects on time and budget..."),
-          ]),
-          div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"12px"}},[
-            div({},[mkLabel("Areas of Expertise \u2014 one per line"),mkTextarea(S.tmpl.expertise,v=>{S.tmpl.expertise=v;},90,"Project Planning & Delivery\nBudgeting & Cost Management\nRisk Management")]),
-            div({},[mkLabel("Technical Skills \u2014 one per line"),mkTextarea(S.tmpl.skills,v=>{S.tmpl.skills=v;},90,"Microsoft Project\nExcel\nTeams\nQuick to learn new systems")]),
-          ]),
-          div({style:{marginBottom:"12px"}},[
-            div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},[
-              mkLabel("Professional Experience"),
-              mkBtn("ghost","+ Add role",()=>{S.tmpl.jobs=[...(S.tmpl.jobs||[]),{title:"",company:"",location:"",dates:"",bullets:""}];rerender();},{fontSize:"11px",padding:"3px 10px"}),
-            ]),
-            ...((S.tmpl.jobs||[]).map((job,i)=>div({style:{background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"12px",marginBottom:"8px"}},[
-              div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},[
-                span({style:{fontSize:"11px",fontWeight:"700",color:T.muted}},["Role "+(i+1)]),
-                i>0?mkBtn("ghost","\u2715",()=>{S.tmpl.jobs=S.tmpl.jobs.filter((_,j)=>j!==i);rerender();},{fontSize:"11px",padding:"2px 8px"}):null,
-              ].filter(Boolean)),
-              div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginBottom:"8px"}},[
-                div({},[mkLabel("Job Title"),(()=>{const inp=mkInput(job.title,v=>{S.tmpl.jobs[i].title=v;},{placeholder:"e.g. Senior Project Manager"});return inp;})()]),
-                div({},[mkLabel("Company"),(()=>{const inp=mkInput(job.company,v=>{S.tmpl.jobs[i].company=v;},{placeholder:"e.g. TELUS"});return inp;})()]),
-                div({},[mkLabel("Location"),(()=>{const inp=mkInput(job.location,v=>{S.tmpl.jobs[i].location=v;},{placeholder:"e.g. Vancouver, BC"});return inp;})()]),
-                div({},[mkLabel("Dates"),(()=>{const inp=mkInput(job.dates,v=>{S.tmpl.jobs[i].dates=v;},{placeholder:"e.g. Jan 2018 \u2013 Mar 2023"});return inp;})()]),
-              ]),
-              mkLabel("Key achievements \u2014 one bullet per line"),
-              mkTextarea(job.bullets,v=>{S.tmpl.jobs[i].bullets=v;},70,"Delivered $4.2M project on time\nReduced vendor costs by 18%"),
-            ]))),
-          ]),
-          div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"16px"}},[
-            div({},[mkLabel("Certifications \u2014 one per line"),mkTextarea(S.tmpl.certs,v=>{S.tmpl.certs=v;},80,"PMP \u2013 Project Management Institute\nAgile/Scrum \u2013 TELUS")]),
-            div({},[mkLabel("Additional Qualifications \u2014 one per line"),mkTextarea(S.tmpl.additional,v=>{S.tmpl.additional=v;},80,"Valid Driver\u2019s License\nBilingual (English/French)")]),
-          ]),
-          div({style:{display:"flex",gap:"8px",alignItems:"center"}},[
-            mkBtn("primary","\u29C6 Build resume from template",buildFromTemplate),
-            span({style:{fontSize:"11px",color:T.muted}},["Fills the text area above \u2014 then choose a tone and polish"]),
-          ]),
-        ]):null,
-      ].filter(Boolean));
-
-      // ── Analyze card — impact score + tone check ──
-      const analyzeCard=S.raw.trim()?(()=>{
-        const score=calculateImpactScore(S.raw);
-        const scoreCol=score>=75?"#4ade80":score>=50?"#fbbf24":"#f87171";
-        const scoreBarCol=score>=75?"#16a34a":score>=50?"#d97706":"#dc2626";
-        const issues=S.toneCheck||[];
-        return div({className:"score-card"},[
-          // Header row
+      // ── Structure Check + Style Toggles ──
+      const structureCheck=(()=>{
+        const text=S.raw||"";
+        const hasContact=!!(S.ci.name||S.ci.email||S.ci.phone);
+        const hasSummary=/SUMMARY|PROFILE|OBJECTIVE/i.test(text);
+        const expMatches=(text.match(/ \| | \u2014 | \u2013 /g)||[]).length;
+        const hasExp=expMatches>=2;
+        const metricMatches=(text.match(/(\$\d+|\d+%|\d+\+\s*years?)/gi)||[]);
+        const hasMetrics=metricMatches.length>=5;
+        const items=[
+          [hasContact,"Contact info detected"],
+          [hasSummary,"Professional Summary detected"],
+          [hasExp,"3+ Experience blocks found"],
+          [hasMetrics,"5+ Metrics ($/%) found"],
+        ];
+        return div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"14px"}},[
           div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}},[
-            span({style:{fontWeight:"700",color:"#93c5fd",fontSize:"13px"}},["📊 Resume Impact Score"]),
-            div({style:{display:"flex",alignItems:"center",gap:"8px"}},[
-              span({style:{fontSize:"22px",fontWeight:"800",color:scoreCol}},[score+"%"]),
-              mkBtn("ghost","Audit tone",()=>{S.toneCheck=auditTone(S.raw||S.polished||"");rerender();},{fontSize:"11px",padding:"3px 9px"}),
+            div({style:{fontSize:"13px",fontWeight:"700",color:T.text}},["\u2705 Structure Check"]),
+            div({style:{fontSize:"11px",color:T.muted}},[(items.filter(i=>i[0]).length)+"/"+items.length+" complete"]),
+          ]),
+          ...items.map(([ok,label])=>div({style:{display:"flex",alignItems:"center",gap:"8px",fontSize:"12px",color:ok?T.text:T.muted,marginBottom:"5px"}},[
+            div({style:{width:"16px",height:"16px",borderRadius:"3px",border:`1.5px solid ${ok?"#16a34a":T.cardB}`,background:ok?"#052e16":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:"0",fontSize:"10px",color:"#4ade80"}},[ok?"\u2713":""]),
+            label,
+          ])),
+          div({style:{marginTop:"12px",paddingTop:"10px",borderTop:`1px solid ${T.div}`}},[
+            div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,marginBottom:"7px",textTransform:"uppercase",letterSpacing:"0.06em"}},["PDF Style"]),
+            div({style:{display:"flex",gap:"6px",flexWrap:"wrap"}},[
+              ...[["default","Default"],["compact","Compact"],["modern","Modern"],["classic","Classic"]].map(([v,l])=>
+                h("button",{style:{fontSize:"11px",padding:"4px 10px",borderRadius:"7px",cursor:"pointer",fontFamily:"inherit",border:`1px solid ${S.pdfStyle===v?T.active.border:T.cardB}`,background:S.pdfStyle===v?T.active.bg:"transparent",color:S.pdfStyle===v?T.active.text:T.muted,fontWeight:S.pdfStyle===v?"700":"400"},onClick:()=>{S.pdfStyle=v;rerender();}},l)
+              ),
             ]),
           ]),
-          // Progress bar
-          div({style:{height:"6px",background:"#111827",borderRadius:"3px",marginBottom:"10px"}},[
-            div({style:{height:"100%",width:score+"%",background:scoreBarCol,borderRadius:"3px",transition:"width 0.6s ease"}}),
-          ]),
-          // Pro tip if low
-          score<75?div({style:{fontSize:"12px",color:"#9ca3af",marginBottom:"10px",lineHeight:"1.5"}},[
-            "💡 Pro-tip: Score is low due to missing metrics. Add dollar amounts ($1.5M), percentages (80%), and timeframes (17+ years) to your achievements."
-          ]):null,
-          // Tone audit results
-          S.toneCheck!==null?div({style:{borderTop:"1px solid #374151",paddingTop:"10px"}},[
-            issues.length?div({},[
-              div({style:{fontSize:"11px",fontWeight:"700",color:"#fbbf24",marginBottom:"8px"}},["⚠ Buzzwords found — consider replacing:"]),
-              div({style:{lineHeight:"2"}},[
-                ...issues.map(b=>div({style:{display:"inline-block",marginRight:"6px",marginBottom:"4px"}},[
-                  h("span",{className:"buzzword-tag"},[b.word]),
-                  span({style:{fontSize:"11px",color:"#9ca3af"}},[" → "+b.hint]),
-                ])),
-              ]),
-            ]):div({style:{fontSize:"11px",color:"#4ade80"}},["✓ No buzzwords detected — tone looks clean"]),
-          ]):null,
-        ].filter(Boolean));
-      })():null;
+        ]);
+      })();
 
-      tabBody=div({},[ciCard,uploadWrap,metricAlert,ta,analyzeCard,polishRow,formatHint,errBanner,tmplCard].filter(Boolean));
+      tabBody=div({},[ciCard,uploadWrap,metricAlert,ta,analyzeCard,structureCheck,polishRow,formatHint,errBanner].filter(Boolean));
 
     }else{
       // PDF Preview
@@ -1217,13 +1163,16 @@ REWRITE THIS RESUME:
             const pa=document.getElementById("print-area");
             pa.style.display="block";
             pa.innerHTML=buildSemanticPDFHTML(S.polished,S.ci);
+            if(S.pdfStyle&&S.pdfStyle!=="default")pa.classList.add("pdf-"+S.pdfStyle);
             window.print();
+            pa.classList.remove("pdf-compact","pdf-modern","pdf-classic");
             pa.style.display="none";
           },{padding:"6px 14px",fontSize:"12px"}),
         ]);
 
         const previewBox=div({style:{border:`1px solid ${T.cardB}`,borderRadius:"10px",overflow:"hidden",position:"relative"}});
         previewBox.innerHTML=buildPDFHTML(S.polished,S.ci);
+        if(S.pdfStyle&&S.pdfStyle!=="default")previewBox.classList.add("pdf-"+S.pdfStyle);
         wireEditable(previewBox,()=>S.polished,v=>{S.polished=v;lsSet("resume-polished",v);});
 
         // Impact score badge
