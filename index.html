@@ -281,16 +281,57 @@ function buildPDFHTML(text,ci){
   const allLines=text.split("\n").map(l=>l.trim()).filter(Boolean);
   const sections=[];
   let cur=null;
+
+  // Section header detection — ALL CAPS line, allows &, /, spaces, common punctuation
+  function isSectionHeader(line){
+    if(line.length<3||line.length>70)return false;
+    // Must be mostly uppercase — allow &, /, spaces, digits, common punctuation
+    const stripped=line.replace(/[\s&\/\-.,|:()]/g,"");
+    if(!stripped)return false;
+    const upperRatio=stripped.split("").filter(ch=>ch===ch.toUpperCase()&&ch!==ch.toLowerCase()).length/stripped.length;
+    return upperRatio>=0.85&&line===line.toUpperCase();
+  }
+
+  // Detect a job title line: "Title | Company" or "Title — Company" pattern
+  function isJobTitle(line){
+    return (line.includes(" | ")||line.includes(" — "))&&
+      !line.includes("@")&&line.length<120&&
+      /[A-Z]/.test(line)&&
+      !isSectionHeader(line);
+  }
+
   allLines.forEach(line=>{
-    const isH=/^[A-Z][A-Z\s&\/,\-:.']{3,}$/.test(line)&&line===line.toUpperCase()&&line.length<60;
+    const isH=isSectionHeader(line);
+    // Auto-create PROFESSIONAL EXPERIENCE section when we hit a job title line
+    // and the current section is not already an experience section
+    const looksLikeJob=isJobTitle(line);
+    const inExpSection=cur&&(cur.title.includes("EXPERIENCE")||cur.title.includes("EMPLOYMENT")||cur._isExp);
+    if(looksLikeJob&&!inExpSection){
+      if(cur)sections.push(cur);
+      cur={title:"PROFESSIONAL EXPERIENCE",items:[],_isExp:true};
+    }
     if(isH){if(cur)sections.push(cur);cur={title:line,items:[]};}
     else if(cur){
-      if(line.startsWith("\u2022")||line.startsWith("\u2013")||line.startsWith("-"))cur.items.push({type:"bullet",text:line.replace(/^[\u2022\u2013\-]\s*/,"")});
+      const isBullet=/^[•\u2022\u2013\-\*]\s/.test(line)||/^\s{2,}[A-Z]/.test(line);
+      if(isBullet)cur.items.push({type:"bullet",text:line.replace(/^[•\u2022\u2013\-\*\s]+/,"")});
       else cur.items.push({type:"text",text:line});
     }else{if(!cur)cur={title:"__hdr__",items:[]};cur.items.push({type:"text",text:line});}
   });
   if(cur)sections.push(cur);
-  const rest=sections.filter(s=>s.title!=="__hdr__");  function renderExp(items){
+  // If __hdr__ has content beyond just the name/tagline, treat it as Professional Summary
+  const hdrSec=sections.find(s=>s.title==="__hdr__");
+  const hdrItems=hdrSec?hdrSec.items:[];
+  // Items beyond name/tagline (short lines without contact info) become summary content
+  const summaryItems=hdrItems.filter(it=>{
+    const t=it.text;
+    return t.length>60||t.includes(":")||t.startsWith("•");
+  });
+  // Check if there's already a PROFESSIONAL SUMMARY section
+  const hasSummary=sections.some(s=>s.title.includes("SUMMARY")||s.title.includes("PROFILE")||s.title.includes("OBJECTIVE"));
+  const rest=[
+    ...(!hasSummary&&summaryItems.length?[{title:"PROFESSIONAL SUMMARY",items:summaryItems}]:[]),
+    ...sections.filter(s=>s.title!=="__hdr__"),
+  ];  function renderExp(items){
     const blocks=[];let block=null;
     const highlightMetrics=(text)=>text.replace(/(\$?\d+(?:\.\d+)?[MKk%+]?)/g,'<strong>$1</strong>');
     const isSubLine=(tx)=>/\d{4}/.test(tx)||tx.includes(" – ")||tx.includes(" - ")||tx.includes("Present")||tx.includes("present")||(tx.length<70&&block&&block.bullets.length===0&&block.left);
@@ -344,10 +385,15 @@ function buildPDFHTML(text,ci){
     ).join("")}</tbody></table>`;
   }
 
-  const GRID_KEYS=["EXPERTISE","SKILLS","CERTIF","AWARD","DEVELOPMENT","EDUCATION","LICENCE","LICENSE","VOLUNTEER","ADDITIONAL","QUALIFICATION","TRAINING","LANGUAGE"];
+  const GRID_KEYS=["EXPERTISE","SKILLS","CERTIF","AWARD","DEVELOPMENT","EDUCATION","LICENCE","LICENSE","VOLUNTEER","ADDITIONAL","QUALIFICATION","TRAINING","LANGUAGE","OPERATIONAL","TECHNICAL","AREA OF"];
   const sectionsHTML=rest.map(sec=>{
     const isGrid=GRID_KEYS.some(k=>sec.title.toUpperCase().includes(k));
-    const isExp=sec.title.includes("EXPERIENCE");
+    const isExp=sec.title.includes("EXPERIENCE")||sec.title.includes("EMPLOYMENT")||sec.title.includes("WORK HISTORY")||
+      // Auto-detect: section has items that look like job title lines (contains | or —)
+      (!GRID_KEYS.some(k=>sec.title.toUpperCase().includes(k))&&
+       !sec.title.includes("SUMMARY")&&!sec.title.includes("PROFILE")&&
+       sec.items.some(it=>it.type==="text"&&(it.text.includes(" | ")||it.text.includes(" — "))&&
+         /\d{4}/.test(it.text)));
     let bodyHTML="";
     if(isExp)bodyHTML=renderExp(sec.items);
     else if(isGrid)bodyHTML=renderGrid(sec.items,sec.title);
@@ -361,7 +407,12 @@ function buildPDFHTML(text,ci){
   // ── Semantic HTML for print-area (machine-readable for job boards) ──
   function buildSemanticHTML(){
     const semSections=rest.map(sec=>{
-      const isExp=sec.title.includes("EXPERIENCE");
+      const isExp=sec.title.includes("EXPERIENCE")||sec.title.includes("EMPLOYMENT")||sec.title.includes("WORK HISTORY")||
+      // Auto-detect: section has items that look like job title lines (contains | or —)
+      (!GRID_KEYS.some(k=>sec.title.toUpperCase().includes(k))&&
+       !sec.title.includes("SUMMARY")&&!sec.title.includes("PROFILE")&&
+       sec.items.some(it=>it.type==="text"&&(it.text.includes(" | ")||it.text.includes(" — "))&&
+         /\d{4}/.test(it.text)));
       const isGrid=GRID_KEYS.some(k=>sec.title.toUpperCase().includes(k));
       let body="";
       if(isExp){
