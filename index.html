@@ -832,8 +832,16 @@ ${S.raw.substring(0,3000)}`
           mkBtn("primary",S.load==="audit"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Analyzing…"));return w;})():"✦ Analyze resume",runAudit,{fontSize:"13px"}),
         ]),
 
-        // Textarea
-        div({style:{position:"relative"}},[
+        // Textarea — collapsed when PDF preview is active
+        S.resumeView==="preview"?div({style:{marginBottom:"8px"}},[
+          div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 12px",background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"8px",cursor:"pointer"},
+            onClick:()=>{S.resumeView="edit";rerender();}},[
+            span({style:{fontSize:"12px",color:T.muted}},["📝 Resume text — click to edit"]),
+            span({style:{fontSize:"11px",color:T.sub,fontFamily:"ui-monospace,monospace"}},[
+              (S.raw||"").split("\n").filter(Boolean).length+" lines"
+            ]),
+          ]),
+        ]):div({style:{position:"relative"}},[
           S.metricAlert?div({style:{background:"rgba(133,77,14,0.1)",border:"1px solid #854d0e",color:"#fbbf24",padding:"8px 12px",borderRadius:"8px",fontSize:"12px",marginBottom:"8px",fontWeight:"600"}},
             ["\u26a0\ufe0f Low Impact Score: Add numbers ($ or %) to prove your results."]):null,
           (()=>{
@@ -1440,6 +1448,7 @@ ${S.raw.substring(0,3000)}`
         ].filter(Boolean)),
         scoreBadge,
         statusSel,
+        app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",title:"View posting",style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0",textDecoration:"none",display:"flex",alignItems:"center"},onClick:e=>e.stopPropagation()},["↗"]):null,
         (()=>{const b=h("button",{style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0"},title:"Remove"});b.textContent="🗑";b.addEventListener("click",e=>{e.stopPropagation();if(!confirm("Remove "+app.title+"?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();});return b;})(),
       ].filter(Boolean));
       card.appendChild(row);
@@ -1637,6 +1646,7 @@ ${S.raw.substring(0,3000)}`
           div({style:{fontSize:"12px",color:T.sub}},[span({style:{fontWeight:"600",color:T.text}},[app.company]),app.location?" · "+app.location:"",app.appliedDate?" · "+app.appliedDate:""]),
         ]),
         statusSel,
+        app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",title:"View posting",style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0",textDecoration:"none",display:"flex",alignItems:"center"},onClick:e=>e.stopPropagation()},["↗"]):null,
         (()=>{const b=h("button",{style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0"},title:"Remove"});b.textContent="🗑";b.addEventListener("click",e=>{e.stopPropagation();if(!confirm("Remove "+app.title+"?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();});return b;})(),
       ]);
       card.appendChild(row);
