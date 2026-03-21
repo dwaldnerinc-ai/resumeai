@@ -1692,12 +1692,8 @@ ${S.raw.substring(0,3000)}`
               span({style:{fontSize:"12px",fontWeight:"700",color:T.text}},["Documents"]),
               app.savedDocsDate?span({style:{fontSize:"11px",color:T.muted}},[" — "+app.savedDocsDate]):null,
             ].filter(Boolean)),
-            mkBtn("ghost","Load into Apply →",()=>{
-              S.selectedJob=app;
-              S.posting=app.title+" at "+app.company+"\nLocation: "+app.location+"\nType: "+app.type+(app.salary?"\nSalary: "+app.salary:"")+"\n\n"+(app.notes||"");
-              if(app.savedResume){S.tailored=app.savedResume;lsSet("apply-tailored",app.savedResume);}
-              if(app.savedCover){S.cover=app.savedCover;lsSet("apply-cover",app.savedCover);}
-              S.coverJobId=app.id;S.coverApp=app;S.showCoverModal=true;rerender();
+            mkBtn("primary","✦ Generate cover letter",()=>{
+              S.coverJobId=app.id;S.coverApp=app;S.showCoverModal=true;S.coverLetter="";rerender();
             },{fontSize:"11px",padding:"5px 12px"}),
           ]),
           div({style:{display:"flex",gap:"8px",flexWrap:"wrap"}},[
@@ -1733,12 +1729,13 @@ ${S.raw.substring(0,3000)}`
           docSection,
           div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
             mkBtn("teal","Prep interview →",()=>{S.intJob=app.id;S.tab="interview";rerender();},{fontSize:"12px",padding:"6px 12px"}),
+            mkBtn("primary","✦ Cover letter",()=>{S.coverJobId=app.id;S.coverApp=app;S.showCoverModal=true;S.coverLetter="";rerender();},{fontSize:"12px",padding:"6px 12px"}),
             isStale?mkBtn("ghost","📧 Follow-up email",()=>{
               const template=generateFollowUp(app.title,app.company);
               S.followUpText=template;S.followUpJob=app.id;rerender();
             },{fontSize:"12px",padding:"6px 12px",borderColor:"#854d0e",color:"#fbbf24"}):null,
             mkBtn("ghost","Edit",()=>{S.fd={...app};S.editId=app.id;S.showForm=true;rerender();},{fontSize:"12px",padding:"6px 12px"}),
-            app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",style:{padding:"6px 12px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:T.ghost.text,textDecoration:"none",display:"inline-flex",alignItems:"center"}},["View ↗"]):null,
+            h("a",{href:app.url||"#",target:app.url?"_blank":"_self",rel:"noreferrer",title:app.url?"View posting":"No URL saved",style:{padding:"6px 12px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:app.url?T.ghost.text:T.muted,textDecoration:"none",display:"inline-flex",alignItems:"center",opacity:app.url?"1":"0.4",cursor:app.url?"pointer":"default"},onClick:e=>{if(!app.url)e.preventDefault();}},["View ↗"]),
             mkBtn("danger","Remove",()=>{if(!confirm("Remove?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();}),
           ].filter(Boolean)),
           // Follow-up email display
