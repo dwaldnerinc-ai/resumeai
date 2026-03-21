@@ -620,12 +620,12 @@ RE: [Job Title from posting] — [Company Name]
 Sincerely,
 [Applicant Name]
 
-CONTENT STRATEGY:
-• Paragraph 1 (The Hook): Connect the applicant's years of experience and industry background directly to the core challenge stated or implied in the job posting. One specific connection, no fluff.
-• Paragraph 2 (The Proof): Use 1-2 real metrics from the resume (e.g. cost savings, efficiency gains, team results) to prove readiness for this specific role. Quote exact figures — do not round up or invent.
-• Paragraph 3 (The Fit): Reference relevant certifications, methodologies, or technical expertise from the resume that match the job requirements.
-• Paragraph 4 (The Close): Professional call to action — suggest a conversation. Confident, not pleading.
+CONTENT STRATEGY — keep it tight, recruiters scan in 15 seconds:
+• Paragraph 1 (The Hook): One sentence connecting the applicant's background to the core challenge in the posting. No fluff.
+• Paragraph 2 (The Proof): 2-3 sentences max. One real metric from the resume tied to a specific requirement. Exact figure only — never invented.
+• Paragraph 3 (The Close): Two sentences. Why this role fits. Confident call to action — "I'd welcome a brief conversation."
 
+LENGTH: Under 180 words total. Short paragraphs. Easy to scan.
 OUTPUT: Plain text only. No markdown. No asterisks. Fill in real contact info from the resume header.`,
         `RESUME:\n${(S.raw||"").substring(0,2000)}\n\nJOB:\n${app.title} at ${app.company}\nLocation: ${app.location||""}\n${app.notes||app.posting||""}`
       );
@@ -663,12 +663,10 @@ OUTPUT: Plain text only. No markdown. No asterisks. Fill in real contact info fr
       div({style:{display:"flex",gap:"8px",flexWrap:"wrap"}},[
         mkBtn("primary",S.coverLetter?"↺ Regenerate":"✦ Generate",generateCover,{fontSize:"13px"}),
         S.coverLetter?mkBtn("ghost","Copy",()=>{navigator.clipboard.writeText(S.coverLetter).catch(()=>{});},{fontSize:"12px"}):null,
-        S.coverLetter?mkBtn("ghost","🖨 Print PDF",()=>{
+        S.coverLetter?mkBtn("primary","🖨 Save as PDF",()=>{
           const pa=document.getElementById("print-area");if(!pa)return;
           pa.innerHTML='<div style="font-family:Inter,sans-serif;padding:0.75in;font-size:11pt;line-height:1.8;color:#1a1a1a;white-space:pre-wrap">'+S.coverLetter.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")+'</div>';
-          pa.style.display="block";
-          window.print();
-          pa.style.display="none";pa.innerHTML="";
+          pa.style.display="block";window.print();pa.style.display="none";pa.innerHTML="";
         },{fontSize:"12px"}):null,
         S.coverLetter?mkBtn("ghost","🖨 Save as PDF",()=>{
           const pa=document.getElementById("print-area");if(!pa)return;
