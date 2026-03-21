@@ -578,8 +578,48 @@ function wireEditable(previewBox, getText, onSave){
 
   previewBox.addEventListener("keydown",function(ev){
     if(!editing)return;
-    if((ev.ctrlKey||ev.metaKey)&&ev.key==="s"){ev.preventDefault();saveBtn.click();}
-    if(ev.key==="Escape"){revertBtn.click();}
+    if((ev.ctrlKey||ev.metaKey)&&ev.key==="s"){ev.preventDefault();saveBtn.click();return;}
+    if(ev.key==="Escape"){revertBtn.click();return;}
+
+    var sel=window.getSelection();
+    if(!sel||!sel.rangeCount)return;
+    var range=sel.getRangeAt(0);
+    var node=range.startContainer;
+
+    // Find the nearest grid or bullet item parent
+    function closestItem(n){
+      while(n&&n!==previewBox){
+        if(n.classList&&(n.classList.contains("pdf-grid-flex-item")||n.classList.contains("pdf-bullet-text")||n.classList.contains("pdf-text-line")))return n;
+        n=n.parentNode;
+      }return null;
+    }
+
+    var item=closestItem(node);
+
+    // Prevent Enter from creating new divs — insert a space instead
+    if(ev.key==="Enter"){
+      ev.preventDefault();
+      document.execCommand("insertText",false," ");
+      return;
+    }
+
+    // Prevent Backspace/Delete from removing the entire item container
+    if((ev.key==="Backspace"||ev.key==="Delete")&&item){
+      var text=item.innerText||"";
+      var atStart=range.startOffset===0&&(node===item||node.parentNode===item);
+      var atEnd=(ev.key==="Delete")&&range.startOffset>=text.length-1;
+      // If item is empty and user presses backspace, prevent deleting the container
+      if(text.trim()===""){
+        ev.preventDefault();
+        item.innerHTML="\u200b"; // zero-width space to keep container alive
+        return;
+      }
+      // At start of item, don't let browser merge with previous item
+      if(atStart&&ev.key==="Backspace"){
+        ev.preventDefault();
+        return;
+      }
+    }
   });
 
   toolbar.appendChild(revertBtn);
