@@ -1029,11 +1029,11 @@ function wireEditable(previewBox, getText, onSave){
   function mkTBtn(label,bg,color,border){
     var b=document.createElement("button");
     b.textContent=label;
-    b.style.cssText="font-size:11px;padding:4px 11px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;background:"+bg+";color:"+color+";border:1px solid "+border;
+    b.style.cssText="font-size:12px;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;background:"+bg+";color:"+color+";border:1.5px solid "+border+";box-shadow:0 2px 8px rgba(37,99,235,0.25);letter-spacing:-0.01em;";
     return b;
   }
 
-  var editBtn=mkTBtn("✎ Edit","rgba(17,24,39,0.88)","#e5e7eb","#374151");
+  var editBtn=mkTBtn("✎ Edit PDF","#1e3a8a","#93c5fd","#2563eb");
   var saveBtn=mkTBtn("✓ Save","#052e16","#4ade80","#166534");
   var revertBtn=mkTBtn("↺ Revert","rgba(17,24,39,0.88)","#fca5a5","#374151");
   saveBtn.style.display="none"; revertBtn.style.display="none";
@@ -1677,10 +1677,26 @@ ${S.raw.substring(0,3000)}`
         ].filter(Boolean)),
 
         S.resumeView==="preview"&&S.raw.trim()?(()=>{
-          const pBox=div({style:{marginTop:"14px",border:"1px solid "+T.cardB,borderRadius:"10px",overflow:"hidden",position:"relative"}});
+          // Edit tip banner
+          const editTip=div({style:{
+            display:"flex",alignItems:"center",gap:"8px",
+            padding:"8px 14px",marginBottom:"8px",marginTop:"14px",
+            background:"rgba(37,99,235,0.08)",
+            border:"1px solid rgba(37,99,235,0.2)",
+            borderRadius:"8px",fontSize:"12px",color:"#93c5fd",fontWeight:"600",
+          }},[
+            span({style:{fontSize:"15px",animation:"apPulse 2s ease-in-out infinite"}},["✎"]),
+            span({},[" Your PDF is editable — click  "]),
+            span({style:{background:"#1e3a8a",color:"#93c5fd",border:"1.5px solid #2563eb",borderRadius:"6px",padding:"2px 8px",fontSize:"11px",fontWeight:"700"}},["✎ Edit PDF"]),
+            span({},[" in the top-right corner to make changes directly"]),
+          ]);
+          const pBox=div({style:{border:"1px solid "+T.cardB,borderRadius:"10px",overflow:"hidden",position:"relative"}});
           pBox.innerHTML=buildPDFHTML(S.raw,S.ci||{});
           wireEditable(pBox,()=>S.raw,v=>{S.raw=v;lsSet("resume-raw",v);});
-          return pBox;
+          const wrapper=div({style:{marginTop:"0"}});
+          wrapper.appendChild(editTip);
+          wrapper.appendChild(pBox);
+          return wrapper;
         })()
         :null,
       ].filter(Boolean)),
