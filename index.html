@@ -258,11 +258,6 @@ button:active{transform:scale(0.97)}
   height: 36px;
   background: rgba(255,255,255,0.08);
 }
-
-/* Hide old JS header — replaced by .ap-header */
-#app > div > div[style*="sticky"] {
-  display: none !important;
-}
 </style>
 </head>
 <body>
@@ -2220,7 +2215,7 @@ ${S.raw.substring(0,3000)}`
       ]),
       S.showApiKey?div({style:{display:"flex",alignItems:"center",gap:"6px"}},[
         (()=>{const inp=h("input",{style:{padding:"5px 10px",borderRadius:"8px",fontSize:"12px",width:"220px",border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#e8edf5"},placeholder:"sk-ant-api03-…",type:"password"});inp.value=S.apiKey;inp.addEventListener("input",e=>S.apiKey=e.target.value);inp.addEventListener("keydown",e=>{if(e.key==="Enter"){lsSet("api-key",S.apiKey.trim());S.showApiKey=false;rerender();}});setTimeout(()=>inp.focus(),50);return inp;})(),
-        h("button",{style:{padding:"5px 12px",borderRadius:"8px",fontSize:"12px",cursor:"pointer",border:"none",background:"#2563eb",color:"#fff",fontWeight:"600"},onClick:()=>{lsSet("api-key",S.apiKey.trim());S.showApiKey=false;rerender();}}),
+        h("button",{style:{padding:"5px 12px",borderRadius:"8px",fontSize:"12px",cursor:"pointer",border:"none",background:"#2563eb",color:"#fff",fontWeight:"600"},onClick:()=>{lsSet("api-key",S.apiKey.trim());S.showApiKey=false;rerender();}},["✓"]),
       ]):null,
       h("button",{style:{padding:"6px 14px",borderRadius:"20px",border:"1px solid rgba(255,255,255,0.1)",background:"transparent",color:"#8b95a8",fontSize:"12px",cursor:"pointer",display:"flex",alignItems:"center",gap:"5px"},onClick:()=>{S.dark=!S.dark;lsSet("app-dark",String(S.dark));rerender();}},[S.dark?"☀ Light":"☾ Dark"]),
     ].filter(Boolean));
@@ -2241,13 +2236,6 @@ ${S.raw.substring(0,3000)}`
 // ─────────────────────────────────────────────────────────
 // BOOT
 // ─────────────────────────────────────────────────────────
-// Move JS header controls into the new HTML header
-  const apHeaderActions = document.getElementById('ap-header-actions');
-  if(apHeaderActions) {
-    // Clone the right-side controls from the JS header into the HTML header
-    const jsHeader = document.querySelector('#app > div > div:first-child');
-  }
-
 if(document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', function() {
     loadAll();
