@@ -369,16 +369,25 @@ function getFormattedDate(){
 function parseResume(text){
   const lines=text.split("\n").map(l=>l.trim()).filter(Boolean);
   if(!lines.length)return null;
+
+  // Line 1: Name | Credentials
   const firstLine=lines.shift();
   const nameParts=firstLine.split("|").map(p=>p.trim());
-  const data={name:nameParts[0],credentials:nameParts.slice(1).join(" | "),sections:[]};
+  const data={name:nameParts[0],credentials:nameParts.slice(1).join(" | "),tagline:"",contact:"",sections:[]};
 
-  // Header: ALL CAPS, short, no pipe
+  // Line 2: Tagline if it looks like a role description (mixed case, no pipe, not ALL CAPS)
+  if(lines.length&&!lines[0].includes("|")&&lines[0]!==lines[0].toUpperCase()&&lines[0].length<100){
+    data.tagline=lines.shift();
+  }
+
+  // Line 3: Contact if it has email, phone, or pipe-separated location info
+  if(lines.length&&(lines[0].includes("@")||lines[0].includes("|")||/\(\d{3}\)/.test(lines[0])||/\d{3}[\-\.]\d{3}/.test(lines[0]))){
+    data.contact=lines.shift();
+  }
+
   const isHeader=l=>l.length<60&&l===l.toUpperCase()&&!l.includes("|")&&l.replace(/[\s&\/\-.,:()']/g,"").length>2;
-  // Job title: has pipe or em-dash, no year (year lines are location/date sub-lines)
   const isJobLine=l=>(l.includes(" | ")||l.includes(" \u2014 "))&&!/,\s*[A-Z]{2}/.test(l)&&!/\d{4}/.test(l)&&l.length<120;
   const isBullet=l=>/^[\s]*[•\-\*\u2013]/.test(l);
-
   let cur=null;
   for(const line of lines){
     if(isHeader(line)){
@@ -386,13 +395,9 @@ function parseResume(text){
       cur={title:line,items:[]};
     }else{
       if(!cur)cur={title:"PROFILE",items:[]};
-      if(isJobLine(line)){
-        cur.items.push({type:"job",text:line});
-      }else if(isBullet(line)){
-        cur.items.push({type:"bullet",text:line.replace(/^[•\-\*\u2013\s]+/,"")});
-      }else{
-        cur.items.push({type:"text",text:line});
-      }
+      if(isJobLine(line)){cur.items.push({type:"job",text:line});}
+      else if(isBullet(line)){cur.items.push({type:"bullet",text:line.replace(/^[•\-\*\u2013\s]+/,"")});}
+      else{cur.items.push({type:"text",text:line});}
     }
   }
   if(cur)data.sections.push(cur);
@@ -410,10 +415,14 @@ function renderHTML(data,ci){
   const contactLine=[ci.location,ci.phone,ci.email,ci.linkedin].filter(Boolean).map(escapeHTML).join(sep);
   const GRID_KEYS=["SKILL","CERTIF","TOOL","EXPERTISE","ADDITIONAL","QUALIFICATION","LANGUAGE","AWARD","TRAINING","AREA","TECHNICAL","OPERATIONAL","EDUCATION","LICENCE","LICENSE"];
 
+  const taglineText=data.tagline||(ci.tagline||"");
+  const contactText=data.contact||contactLine;
+
   let html='<div class="pdf-name">'+escapeHTML(data.name)+'</div>'
     +(data.credentials?'<div class="pdf-tagline">'+escapeHTML(data.credentials)+'</div>':"")
-    +(contactLine?'<div class="pdf-contact">'+contactLine+'</div>':"")
-    +((data.name||contactLine)?'<hr class="pdf-divider">':""
+    +(taglineText?'<div class="pdf-tagline" style="font-size:10pt;color:#2e6da4;font-weight:400;text-align:center">'+escapeHTML(taglineText)+'</div>':"")
+    +(contactText?'<div class="pdf-contact">'+contactText+'</div>':"")
+    +((data.name||contactText)?'<hr class="pdf-divider">':""
   );
 
   data.sections.forEach(function(sec){
