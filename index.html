@@ -105,7 +105,7 @@ const S={
   apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
   searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
   addedJobs:new Set(), aiSuggestions:[], aiSuggestionsError:"", recentlyAdded:[], addToast:"", pastePosting:"",
-  intJob:null, intRound:"prescreen", coverJobId:null, coverApp:null, showCoverModal:false, coverLetter:"", coverLoading:false, intQs:[], mockQ:"", mockA:"", mockFb:"", intLoad:false,
+  intJob:null, intRound:"prescreen", coverJobId:null, coverApp:null, showCoverModal:false, coverLetter:"", coverLoading:false, coverPreview:false,coverPreview:false, intQs:[], mockQ:"", mockA:"", mockFb:"", intLoad:false,
   urlImport:"", urlImportPaste:"", urlImportStatus:"", showUrlPaste:false,
 };
 
@@ -645,7 +645,7 @@ OUTPUT: Plain text only. No markdown. No asterisks. Fill in real contact info fr
           div({style:{fontSize:"15px",fontWeight:"700",color:T.text}},["Cover Letter"]),
           div({style:{fontSize:"12px",color:T.sub,marginTop:"2px"}},[app.title+" at "+app.company]),
         ]),
-        h("button",{style:{background:"transparent",border:"none",color:T.muted,fontSize:"20px",cursor:"pointer",lineHeight:"1"},onClick:()=>{S.showCoverModal=false;rerender();}},["×"]),
+        h("button",{style:{background:"transparent",border:"none",color:T.muted,fontSize:"20px",cursor:"pointer",lineHeight:"1"},onClick:()=>{S.showCoverModal=false;S.coverPreview=false;rerender();}},["×"]),
       ]),
 
       S.coverLetter?null:div({style:{fontSize:"12px",color:T.sub,lineHeight:"1.6"}},[
@@ -656,28 +656,28 @@ OUTPUT: Plain text only. No markdown. No asterisks. Fill in real contact info fr
         span({style:{display:"inline-block",width:"14px",height:"14px",border:"2px solid rgba(255,255,255,0.2)",borderTopColor:"#fff",borderRadius:"50%",animation:"spin .7s linear infinite"}}),
         "Generating cover letter…"
       ]):S.coverLetter?div({style:{flex:"1",overflowY:"auto"}},[
-        h("textarea",{style:{width:"100%",minHeight:"280px",background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"8px",color:T.text,padding:"12px 14px",fontSize:"12px",lineHeight:"1.8",resize:"vertical",boxSizing:"border-box",fontFamily:"inherit"},value:S.coverLetter,
-          onInput:e=>{S.coverLetter=e.target.value;}}),
+        // Toggle between edit and PDF preview
+        div({style:{display:"flex",gap:"8px",marginBottom:"10px",alignItems:"center"}},[
+          pillBtn("✎ Edit",!S.coverPreview,"#374151",()=>{S.coverPreview=false;rerender();},{padding:"4px 12px",borderRadius:"6px",fontSize:"12px"}),
+          pillBtn("📄 PDF Preview",!!S.coverPreview,"#2563eb",()=>{S.coverPreview=true;rerender();},{padding:"4px 12px",borderRadius:"6px",fontSize:"12px"}),
+        ]),
+        S.coverPreview
+          ? div({style:{background:"#fff",borderRadius:"8px",padding:"0.75in 0.75in",fontFamily:"Inter,sans-serif",fontSize:"11pt",lineHeight:"1.8",color:"#1a1a1a",whiteSpace:"pre-wrap",minHeight:"280px",border:"1px solid "+T.cardB}},
+              [S.coverLetter])
+          : h("textarea",{style:{width:"100%",minHeight:"280px",background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"8px",color:T.text,padding:"12px 14px",fontSize:"12px",lineHeight:"1.8",resize:"vertical",boxSizing:"border-box",fontFamily:"inherit"},value:S.coverLetter,
+              onInput:e=>{S.coverLetter=e.target.value;}}),
       ]):null,
 
       div({style:{display:"flex",gap:"8px",flexWrap:"wrap"}},[
         mkBtn("primary",S.coverLetter?"↺ Regenerate":"✦ Generate",generateCover,{fontSize:"13px"}),
-        S.coverLetter?mkBtn("ghost","Copy",()=>{navigator.clipboard.writeText(S.coverLetter).catch(()=>{});},{fontSize:"12px"}):null,
-        S.coverLetter?mkBtn("primary","🖨 Save as PDF",()=>{
-          const pa=document.getElementById("print-area");if(!pa)return;
-          pa.innerHTML='<div style="font-family:Inter,sans-serif;padding:0.75in;font-size:11pt;line-height:1.8;color:#1a1a1a;white-space:pre-wrap">'+S.coverLetter.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")+'</div>';
-          pa.style.display="block";window.print();pa.style.display="none";pa.innerHTML="";
+        S.coverLetter?mkBtn("ghost",S.copied==="cover"?"✓ Copied":"Copy",()=>{
+          navigator.clipboard.writeText(S.coverLetter).catch(()=>{});
+          S.copied="cover";setTimeout(()=>{S.copied="";rerender();},2000);rerender();
         },{fontSize:"12px"}):null,
         S.coverLetter?mkBtn("ghost","🖨 Save as PDF",()=>{
           const pa=document.getElementById("print-area");if(!pa)return;
-          const style=document.createElement("style");
-          style.textContent="@page{size:letter;margin:1in}@media print{body>*:not(#print-area){display:none!important}#print-area{display:block!important}}";
-          document.head.appendChild(style);
-          pa.innerHTML=`<div style="font-family:Inter,sans-serif;max-width:none;font-size:11pt;line-height:1.8;white-space:pre-wrap;color:#1a1a1a">${S.coverLetter.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>`;
-          pa.style.display="block";
-          window.print();
-          pa.style.display="none";pa.innerHTML="";
-          document.head.removeChild(style);
+          pa.innerHTML='<div style="font-family:Inter,sans-serif;padding:0.75in;max-width:none;font-size:11pt;line-height:1.8;white-space:pre-wrap;color:#1a1a1a">'+S.coverLetter.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</div>';
+          pa.style.display="block";window.print();pa.style.display="none";pa.innerHTML="";
         },{fontSize:"12px"}):null,
       ].filter(Boolean)),
     ]),
