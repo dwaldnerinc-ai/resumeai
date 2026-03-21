@@ -45,11 +45,14 @@ button:active{transform:scale(0.97)}
 .key-dot-missing{width:6px;height:6px;background:#fbbf24;border-radius:50%;flex-shrink:0}
 .no-print{display:block}
 @media print{
-  @page{size:letter;margin:0.5in}
+  @page{size:letter;margin:0.5in;margin-top:0.5in;margin-bottom:0.5in}
+  @page:first{margin-top:0.5in}
   body{background:white!important;color:black!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   body>*:not(#print-area),.no-print,button,#app{display:none!important}
   #print-area{display:block!important;position:relative;width:100%!important;margin:0!important;padding:0!important}
   .pdf-wrap{padding:0;box-shadow:none}
+  /* Hide browser-generated header and footer (URL, title, date, page number) */
+  html{-webkit-print-color-adjust:exact}
 }
 .app-stale{border:1.5px solid #854d0e!important;background:rgba(133,77,14,0.1)!important;position:relative}
 .app-stale::after{content:"⚠ Follow up?";position:absolute;top:-10px;right:10px;background:#854d0e;color:white;font-size:10px;padding:2px 6px;border-radius:4px;font-family:inherit}
@@ -482,9 +485,6 @@ function renderHTML(data,ci){
     html+='</div>';
   });
 
-  const footer=ci.footer||"Infrastructure Leadership Portfolio";
-  html+='<div style="margin-top:32px;border-top:0.5px solid #eee;padding-top:8px;text-align:right;font-size:7.5pt;color:#aaa;font-style:italic;letter-spacing:0.02em">'+getFormattedDate()+' | '+escapeHTML(footer)+'</div>';
-
   return'<div class="pdf-wrap">'+html+'</div>';
 }
 
@@ -857,9 +857,16 @@ ${S.raw.substring(0,3000)}`
             if(!pa)return;
             pa.innerHTML=buildPDFHTML(S.raw,S.ci||{});
             pa.style.display="block";
+            // Brief delay to ensure content is painted before dialog opens
+            const style=document.createElement('style');
+            style.id='print-hide-chrome';
+            style.textContent='@page{margin:0.5in;size:letter}@media print{head,#app,nav,header,footer{display:none!important}}';
+            document.head.appendChild(style);
             window.print();
             pa.style.display="none";
             pa.innerHTML="";
+            const s=document.getElementById('print-hide-chrome');
+            if(s)s.remove();
           },{fontSize:"12px",padding:"6px 14px"}):null,
         ].filter(Boolean)),
 
