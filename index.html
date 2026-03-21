@@ -598,23 +598,35 @@ function renderCoverModal(T,card_s,mkBtn,div,span,h){
     S.coverLoading=true;rerender();
     try{
       const r=await callAI(
-        `ROLE: Professional cover letter writer. You are writing on behalf of the candidate using ONLY the information provided in their resume.
+        `You are an expert Executive Career Advisor writing a high-impact professional cover letter using ONLY the two inputs provided: the resume and the job posting.
 
-STRICT ANTI-HALLUCINATION RULES (highest priority):
-1. ONLY use facts, numbers, and achievements that appear verbatim in the resume below. Do not invent, estimate, or extrapolate any figures.
-2. Do NOT inflate scale — if the resume says $1.5M, write $1.5M. Never upgrade it to "billions" or "hundreds of millions."
-3. Do NOT invent job titles, company names, industries, or responsibilities not present in the resume.
-4. If the resume lacks a specific metric for a requirement in the posting, describe the experience in plain terms — do not fill the gap with a made-up number.
+STRICT CONSTRAINTS:
+1. NO HALLUCINATIONS: Use ONLY facts, metrics, roles, and companies found in the resume. Do not invent numbers, degrees, project names, or responsibilities not listed.
+2. NO AI BUZZWORDS: Avoid "passionate", "innovative", "transformative", "spearheaded", "synergy", "leverage", "dynamic". Use direct, senior leadership language.
+3. HUMAN TONE: Write as a confident peer speaking to another senior professional.
 
-TONE: Peer-to-peer, confident, direct. No "I am writing to apply." No "Dear Sir/Madam." No begging. No hollow phrases like "passionate about excellence."
+FORMAT — formal 2026 business letter:
+[Applicant Name]
+[Phone] | [Email] | [Location]
 
-STRUCTURE:
-1. HOOK: One sentence referencing a real challenge from the job posting.
-2. PROOF: Connect one REAL metric from the resume directly to a posting requirement. Quote the exact figure from the resume.
-3. FIT: One or two sentences on why this role fits the candidate's actual background.
-4. CLOSE: Confident ask — "When is a good time to discuss..." 
+[Today's Date]
 
-RULES: Under 280 words. Plain text only. No markdown.`,
+Dear Hiring Team,
+
+RE: [Job Title from posting] — [Company Name]
+
+[3-4 concise paragraphs]
+
+Sincerely,
+[Applicant Name]
+
+CONTENT STRATEGY:
+• Paragraph 1 (The Hook): Connect the applicant's years of experience and industry background directly to the core challenge stated or implied in the job posting. One specific connection, no fluff.
+• Paragraph 2 (The Proof): Use 1-2 real metrics from the resume (e.g. cost savings, efficiency gains, team results) to prove readiness for this specific role. Quote exact figures — do not round up or invent.
+• Paragraph 3 (The Fit): Reference relevant certifications, methodologies, or technical expertise from the resume that match the job requirements.
+• Paragraph 4 (The Close): Professional call to action — suggest a conversation. Confident, not pleading.
+
+OUTPUT: Plain text only. No markdown. No asterisks. Fill in real contact info from the resume header.`,
         `RESUME:\n${(S.raw||"").substring(0,2000)}\n\nJOB:\n${app.title} at ${app.company}\nLocation: ${app.location||""}\n${app.notes||app.posting||""}`
       );
       S.coverLetter=r.trim();
@@ -651,10 +663,23 @@ RULES: Under 280 words. Plain text only. No markdown.`,
       div({style:{display:"flex",gap:"8px",flexWrap:"wrap"}},[
         mkBtn("primary",S.coverLetter?"↺ Regenerate":"✦ Generate",generateCover,{fontSize:"13px"}),
         S.coverLetter?mkBtn("ghost","Copy",()=>{navigator.clipboard.writeText(S.coverLetter).catch(()=>{});},{fontSize:"12px"}):null,
-        S.coverLetter?mkBtn("ghost","🖨 Print",()=>{
+        S.coverLetter?mkBtn("ghost","🖨 Print PDF",()=>{
           const pa=document.getElementById("print-area");if(!pa)return;
-          pa.innerHTML=`<div style="font-family:Inter,sans-serif;padding:48px;max-width:700px;margin:0 auto;font-size:11pt;line-height:1.8;white-space:pre-wrap">${S.coverLetter.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>`;
-          pa.style.display="block";window.print();pa.style.display="none";pa.innerHTML="";
+          pa.innerHTML='<div style="font-family:Inter,sans-serif;padding:0.75in;font-size:11pt;line-height:1.8;color:#1a1a1a;white-space:pre-wrap">'+S.coverLetter.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")+'</div>';
+          pa.style.display="block";
+          window.print();
+          pa.style.display="none";pa.innerHTML="";
+        },{fontSize:"12px"}):null,
+        S.coverLetter?mkBtn("ghost","🖨 Save as PDF",()=>{
+          const pa=document.getElementById("print-area");if(!pa)return;
+          const style=document.createElement("style");
+          style.textContent="@page{size:letter;margin:1in}@media print{body>*:not(#print-area){display:none!important}#print-area{display:block!important}}";
+          document.head.appendChild(style);
+          pa.innerHTML=`<div style="font-family:Inter,sans-serif;max-width:none;font-size:11pt;line-height:1.8;white-space:pre-wrap;color:#1a1a1a">${S.coverLetter.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>`;
+          pa.style.display="block";
+          window.print();
+          pa.style.display="none";pa.innerHTML="";
+          document.head.removeChild(style);
         },{fontSize:"12px"}):null,
       ].filter(Boolean)),
     ]),
@@ -1457,7 +1482,7 @@ ${S.raw.substring(0,3000)}`
         ].filter(Boolean)),
         scoreBadge,
         statusSel,
-        app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",title:"View posting",style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0",textDecoration:"none",display:"flex",alignItems:"center"},onClick:e=>e.stopPropagation()},["↗"]):null,
+        h("a",{href:app.url||"#",target:app.url?"_blank":"_self",rel:"noreferrer",title:app.url?"View posting":"No URL saved",style:{background:"transparent",border:"none",cursor:app.url?"pointer":"default",padding:"4px 6px",borderRadius:"6px",color:app.url?T.sub:T.muted,fontSize:"13px",flexShrink:"0",textDecoration:"none",display:"flex",alignItems:"center",opacity:app.url?"1":"0.35"},onClick:e=>{e.stopPropagation();if(!app.url)e.preventDefault();}},["↗"]),
         (()=>{const b=h("button",{style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0"},title:"Remove"});b.textContent="🗑";b.addEventListener("click",e=>{e.stopPropagation();if(!confirm("Remove "+app.title+"?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();});return b;})(),
       ].filter(Boolean));
       card.appendChild(row);
@@ -1655,7 +1680,7 @@ ${S.raw.substring(0,3000)}`
           div({style:{fontSize:"12px",color:T.sub}},[span({style:{fontWeight:"600",color:T.text}},[app.company]),app.location?" · "+app.location:"",app.appliedDate?" · "+app.appliedDate:""]),
         ]),
         statusSel,
-        app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",title:"View posting",style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0",textDecoration:"none",display:"flex",alignItems:"center"},onClick:e=>e.stopPropagation()},["↗"]):null,
+        h("a",{href:app.url||"#",target:app.url?"_blank":"_self",rel:"noreferrer",title:app.url?"View posting":"No URL saved",style:{background:"transparent",border:"none",cursor:app.url?"pointer":"default",padding:"4px 6px",borderRadius:"6px",color:app.url?T.sub:T.muted,fontSize:"13px",flexShrink:"0",textDecoration:"none",display:"flex",alignItems:"center",opacity:app.url?"1":"0.35"},onClick:e=>{e.stopPropagation();if(!app.url)e.preventDefault();}},["↗"]),
         (()=>{const b=h("button",{style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0"},title:"Remove"});b.textContent="🗑";b.addEventListener("click",e=>{e.stopPropagation();if(!confirm("Remove "+app.title+"?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();});return b;})(),
       ]);
       card.appendChild(row);
