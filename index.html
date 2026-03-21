@@ -14,28 +14,6 @@ html,body{min-height:100vh;font-family:'Inter',system-ui,sans-serif}
 textarea:focus,input:focus,select:focus{outline:none;border-color:#3b82f6!important;box-shadow:0 0 0 3px rgba(59,130,246,0.12)!important}
 button:active{transform:scale(0.97)}
 .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;flex-shrink:0}
-
-/* ── PDF RESUME STYLES ── */
-.pdf-wrap{background:#fff;color:#1a1a1a;font-family:'Inter',system-ui,sans-serif;font-size:10pt;font-weight:400;padding:24px 36px;max-width:800px;margin:0 auto;line-height:1.5}
-.pdf-wrap *{color:inherit}
-.pdf-name{font-size:20pt;font-weight:700;color:#0d2b4e;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:3px}
-.pdf-tagline{font-size:10.5pt;color:#2e6da4;font-weight:600;text-align:center;margin-bottom:6px}
-.pdf-contact{font-size:9pt;color:#555;font-weight:400;display:flex;justify-content:center;flex-wrap:wrap;gap:4px 10px;margin-bottom:4px}
-.pdf-divider{border:none;border-top:2px solid #0d2b4e;margin:10px 0 12px}
-.pdf-sec-title{font-size:9.5pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.08em;border-bottom:1.5px solid #0d2b4e;padding-bottom:3px;margin-top:12px;margin-bottom:7px;text-align:center}
-.pdf-exp-block{margin-bottom:10px;padding-bottom:8px;font-weight:400}
-.pdf-exp-block:last-child{margin-bottom:0;padding-bottom:0}
-.pdf-exp-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 12px;margin-bottom:3px}
-.pdf-exp-left{font-size:10.5pt;font-weight:700;color:#0d2b4e;flex:1 1 auto;text-align:left}
-.pdf-exp-right{font-size:10pt;color:#2e6da4;font-weight:600;flex-shrink:0;white-space:nowrap}
-.pdf-bullet{display:flex;gap:6px;margin-bottom:1px;font-size:9.5pt}
-.pdf-bullet-dot{color:#2e6da4;flex-shrink:0;font-weight:400}
-.pdf-bullet-text{color:#333;line-height:1.4;font-weight:400}
-.pdf-text-line{font-size:9.5pt;margin-bottom:2px;color:#333;line-height:1.4;font-weight:400}
-.pdf-bullet-text strong,.pdf-text-line strong{font-weight:700;color:#1e40af}
-.pdf-grid-flex{display:flex;flex-wrap:wrap;justify-content:center;gap:1px 0;width:100%;margin-top:2px}
-.pdf-grid-flex-item{flex:0 0 50%;text-align:center;font-size:9pt;color:#222;font-weight:400;padding:1px 8px;box-sizing:border-box;line-height:1.3}
-}
 .score-card{background:#1e2937;border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid #374151}
 .buzzword-tag{background:#450a0a;color:#f87171;padding:2px 8px;border-radius:4px;font-size:11px;margin-right:4px;display:inline-block;margin-bottom:4px}
 .btn-key-active{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s ease;background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.3);color:#4ade80;font-family:inherit}
@@ -43,23 +21,28 @@ button:active{transform:scale(0.97)}
 .btn-key-missing{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;background:rgba(133,77,14,0.1);border:1px solid rgba(133,77,14,0.4);color:#fbbf24;font-family:inherit}
 .key-dot{width:6px;height:6px;background:#4ade80;border-radius:50%;box-shadow:0 0 6px #4ade80;flex-shrink:0}
 .key-dot-missing{width:6px;height:6px;background:#fbbf24;border-radius:50%;flex-shrink:0}
-.no-print{display:block}
-@media print{
-  @page{size:letter;margin:0.5in;margin-top:0.5in;margin-bottom:0.5in}
-  @page:first{margin-top:0.5in}
-  body{background:white!important;color:black!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  body>*:not(#print-area),.no-print,button,#app{display:none!important}
-  #print-area{display:block!important;position:relative;width:100%!important;margin:0!important;padding:0!important}
-  .pdf-wrap{padding:0;box-shadow:none}
-  /* Hide browser-generated header and footer (URL, title, date, page number) */
-  html{-webkit-print-color-adjust:exact}
-}
 .app-stale{border:1.5px solid #854d0e!important;background:rgba(133,77,14,0.1)!important;position:relative}
 .app-stale::after{content:"⚠ Follow up?";position:absolute;top:-10px;right:10px;background:#854d0e;color:white;font-size:10px;padding:2px 6px;border-radius:4px;font-family:inherit}
-.pdf-bullet-text strong,.pdf-text-line strong{font-weight:700;color:#1e40af;background:rgba(30,64,175,0.03);padding:0 1px;border-radius:2px}
-.pdf-sec-title{font-size:10pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.08em;border-bottom:1.5px solid #0d2b4e;padding-bottom:3px;margin-top:12px;margin-bottom:7px;text-align:center}
 .no-print{display:block}
-/* ── PDF Style Toggles ── */
+.pdf-wrap{background:#fff;color:#1a1a1a;font-family:'Inter',system-ui,sans-serif;font-size:10pt;font-weight:400;padding:24px 36px;max-width:800px;margin:0 auto;line-height:1.5}
+.pdf-wrap *{color:inherit}
+.pdf-name{font-size:20pt;font-weight:700;color:#0d2b4e;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:3px}
+.pdf-tagline{font-size:10.5pt;color:#2e6da4;font-weight:600;text-align:center;margin-bottom:6px}
+.pdf-contact{font-size:9pt;color:#555;font-weight:400;display:flex;justify-content:center;flex-wrap:wrap;gap:4px 10px;margin-bottom:4px}
+.pdf-divider{border:none;border-top:2px solid #0d2b4e;margin:10px 0 12px}
+.pdf-sec-title{font-size:10pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.08em;border-bottom:1.5px solid #0d2b4e;padding-bottom:3px;margin-top:12px;margin-bottom:7px;text-align:center}
+.pdf-exp-block{margin-bottom:10px;padding-bottom:8px;font-weight:400}
+.pdf-exp-block:last-child{margin-bottom:0;padding-bottom:0}
+.pdf-exp-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 12px;margin-bottom:3px}
+.pdf-exp-left{font-size:10.5pt;font-weight:700;color:#0d2b4e;flex:1 1 auto}
+.pdf-exp-right{font-size:9pt;color:#2e6da4;font-weight:600;flex-shrink:0;white-space:nowrap}
+.pdf-bullet{display:flex;gap:6px;margin-bottom:1px;font-size:9.5pt}
+.pdf-bullet-dot{color:#2e6da4;flex-shrink:0;font-weight:400}
+.pdf-bullet-text{color:#333;line-height:1.4;font-weight:400}
+.pdf-text-line{font-size:9.5pt;margin-bottom:2px;color:#333;line-height:1.4;font-weight:400}
+.pdf-bullet-text strong,.pdf-text-line strong{font-weight:700;color:#1e40af}
+.pdf-grid-flex{display:flex;flex-wrap:wrap;justify-content:center;gap:3px 0;width:100%;margin-top:2px}
+.pdf-grid-flex-item{flex:0 0 50%;text-align:center;font-size:9pt;color:#222;font-weight:400;padding:2px 8px;box-sizing:border-box}
 .pdf-compact .pdf-wrap{font-size:9.5pt;padding:24px 32px}
 .pdf-compact .pdf-exp-block{margin-bottom:10px;padding-bottom:8px}
 .pdf-compact .pdf-sec-title{margin-top:12px;margin-bottom:6px}
@@ -70,10 +53,16 @@ button:active{transform:scale(0.97)}
 .pdf-classic .pdf-wrap{font-family:Georgia,serif}
 .pdf-classic .pdf-name{font-family:Georgia,serif}
 .pdf-classic .pdf-sec-title{border-bottom:1px solid #999;letter-spacing:.05em}
+@media print{
+  @page{size:letter;margin:0.5in}
+  body{background:white!important;color:black!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;margin:1.6cm}
+  body>*:not(#print-area),.no-print,button,#app{display:none!important}
+  #print-area{display:block!important;position:static;margin:0!important;padding:0!important;width:100%!important}
+  .pdf-wrap{padding:0;max-width:none;box-shadow:none}
+}
 </style>
 </head>
-<body style="background: rgb(13, 17, 23); color: rgb(232, 237, 245);">
-<div id="print-area" style="display:none"></div>
+<body>
 <div id="app"></div>
 <script>
 // ─────────────────────────────────────────────────────────
@@ -97,7 +86,7 @@ const SEED_APPS=[];
 // STATE
 // ─────────────────────────────────────────────────────────
 const S={
-  dark:true, tab:"resume",
+  dark:true, tab:"start",showHero:true,showAdvanced:false,onboardingStep:0,showCoverModal:false,coverApp:null,coverLoading:false,savedCover:"",coverPreview:false,
   raw:"", 
   ci:{name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""},
   showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, tipsOpen:false,followUpText:"",followUpJob:null,toneCheck:null,metricAlert:false,pdfStyle:"default",resumeView:"edit",auditResult:null,auditError:"",structure:{hasContact:false,hasSummary:false,hasMetrics:false,hasPMP:false},
@@ -105,7 +94,7 @@ const S={
   apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
   searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
   addedJobs:new Set(), aiSuggestions:[], aiSuggestionsError:"", recentlyAdded:[], addToast:"", pastePosting:"",
-  intJob:null, intRound:"prescreen", coverJobId:null, coverApp:null, showCoverModal:false, coverLetter:"", coverLoading:false, coverPreview:false,coverPreview:false, intQs:[], mockQ:"", mockA:"", mockFb:"", intLoad:false,
+  intJob:null, intRound:"prescreen", intQs:[], mockQ:"", mockA:"", mockFb:"", intLoad:false,
   urlImport:"", urlImportPaste:"", urlImportStatus:"", showUrlPaste:false,
 };
 
@@ -133,6 +122,9 @@ function loadAll(){
   const dark=lsGet("app-dark"); if(dark!==null)S.dark=(dark==="true");
   const posting=lsGet("apply-posting",""); S.posting=posting;
   S.apiKey=lsGet("api-key","")||"";
+    S.savedCover=lsGet("saved-cover","")||"";
+    const heroD=lsGet("hero-dismissed",""); if(heroD)S.showHero=false;
+    const os=lsGet("onboarding-step","0"); S.onboardingStep=parseInt(os)||0;
   S.storageReady=true;
 }
 
@@ -213,7 +205,7 @@ async function callAI(sys,usr){
   const r=await fetch("https://api.anthropic.com/v1/messages",{
     method:"POST",
     headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:4000,system:sys,messages:[{role:"user",content:usr}]})
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:4000,system:sys,messages:[{role:"user",content:usr}]})
   });
   const d=await r.json();
   if(d.error)throw new Error(d.error.message||"API error");
@@ -373,25 +365,16 @@ function getFormattedDate(){
 function parseResume(text){
   const lines=text.split("\n").map(l=>l.trim()).filter(Boolean);
   if(!lines.length)return null;
-
-  // Line 1: Name | Credentials
   const firstLine=lines.shift();
   const nameParts=firstLine.split("|").map(p=>p.trim());
-  const data={name:nameParts[0],credentials:nameParts.slice(1).join(" | "),tagline:"",contact:"",sections:[]};
+  const data={name:nameParts[0],credentials:nameParts.slice(1).join(" | "),sections:[]};
 
-  // Line 2: Tagline if it looks like a role description (mixed case, no pipe, not ALL CAPS)
-  if(lines.length&&!lines[0].includes("|")&&lines[0]!==lines[0].toUpperCase()&&lines[0].length<100){
-    data.tagline=lines.shift();
-  }
-
-  // Line 3: Contact if it has email, phone, or pipe-separated location info
-  if(lines.length&&(lines[0].includes("@")||lines[0].includes("|")||/\(\d{3}\)/.test(lines[0])||/\d{3}[\-\.]\d{3}/.test(lines[0]))){
-    data.contact=lines.shift();
-  }
-
+  // Header: ALL CAPS, short, no pipe
   const isHeader=l=>l.length<60&&l===l.toUpperCase()&&!l.includes("|")&&l.replace(/[\s&\/\-.,:()']/g,"").length>2;
-  const isJobLine=l=>(l.includes(" | ")||l.includes(" \u2014 "))&&/^[A-Z]/.test(l)&&!l.startsWith("http")&&l.length<150;
-  const isBullet=l=>/^[\s]*[•\-\*\u2013]/.test(l)||/^\s{2,}\S/.test(l);
+  // Job title: has pipe or em-dash, no year (year lines are location/date sub-lines)
+  const isJobLine=l=>(l.includes(" | ")||l.includes(" \u2014 "))&&!/,\s*[A-Z]{2}/.test(l)&&!/\d{4}/.test(l)&&l.length<120;
+  const isBullet=l=>/^[\s]*[•\-\*\u2013]/.test(l);
+
   let cur=null;
   for(const line of lines){
     if(isHeader(line)){
@@ -399,9 +382,13 @@ function parseResume(text){
       cur={title:line,items:[]};
     }else{
       if(!cur)cur={title:"PROFILE",items:[]};
-      if(isJobLine(line)){cur.items.push({type:"job",text:line});}
-      else if(isBullet(line)){cur.items.push({type:"bullet",text:line.replace(/^[•\-\*\u2013\s]+/,"")});}
-      else{cur.items.push({type:"text",text:line});}
+      if(isJobLine(line)){
+        cur.items.push({type:"job",text:line});
+      }else if(isBullet(line)){
+        cur.items.push({type:"bullet",text:line.replace(/^[•\-\*\u2013\s]+/,"")});
+      }else{
+        cur.items.push({type:"text",text:line});
+      }
     }
   }
   if(cur)data.sections.push(cur);
@@ -417,16 +404,12 @@ function renderHTML(data,ci){
   ci=ci||{};
   const sep='<span style="color:#ccc"> | </span>';
   const contactLine=[ci.location,ci.phone,ci.email,ci.linkedin].filter(Boolean).map(escapeHTML).join(sep);
-  const GRID_KEYS=["SKILL","CERTIF","TOOL","EXPERTISE","ADDITIONAL","QUALIFICATION","LANGUAGE","AWARD","TRAINING","AREA","TECHNICAL","OPERATIONAL","EDUCATION","LICENCE","LICENSE"];
-
-  const taglineText=data.tagline||(ci.tagline||"");
-  const contactText=data.contact||contactLine;
+  const GRID_KEYS=["SKILL","CERTIF","TOOL","EXPERTISE","ADDITIONAL","QUALIFICATION","LANGUAGE","AWARD","TRAINING","AREA","TECHNICAL","OPERATIONAL"];
 
   let html='<div class="pdf-name">'+escapeHTML(data.name)+'</div>'
     +(data.credentials?'<div class="pdf-tagline">'+escapeHTML(data.credentials)+'</div>':"")
-    +(taglineText?'<div class="pdf-tagline" style="font-size:10pt;color:#2e6da4;font-weight:400;text-align:center">'+escapeHTML(taglineText)+'</div>':"")
-    +(contactText?'<div class="pdf-contact">'+contactText+'</div>':"")
-    +((data.name||contactText)?'<hr class="pdf-divider">':""
+    +(contactLine?'<div class="pdf-contact">'+contactLine+'</div>':"")
+    +((data.name||contactLine)?'<hr class="pdf-divider">':""
   );
 
   data.sections.forEach(function(sec){
@@ -451,17 +434,9 @@ function renderHTML(data,ci){
           if(dm){right=dm[1].trim();left=left.slice(0,dm.index).replace(/[|\u2013\u2014\-]\s*$/,"").trim();}
           bl={left:left,right:right,sub:"",bullets:[]};
         }else if(bl){
-          if(it.type==="text"&&/,\s*[A-Z]{2}/.test(it.text)&&!bl._locDone){
-            var locText=it.text;
-            var locDm=locText.match(/\|?\s*(\d{4}\s*[-\u2013\u2014]\s*(?:\d{4}|Present))\s*$/i);
-            if(locDm){if(!bl.right)bl.right=locDm[1].trim();locText=locText.slice(0,locDm.index).replace(/[|\u2013\u2014\-]\s*$/,"").trim();}
-            if(locText)bl.left=bl.left+" | "+locText;
-            bl._locDone=true;
-          }else if(it.type==="bullet"){
-            bl.bullets.push(hlMetrics(escapeHTML(it.text)));
-          }else{
-            bl.bullets.push(hlMetrics(escapeHTML(it.text)));
-          }
+          if(it.type==="text"&&/,\s*[A-Z]{2}/.test(it.text)&&!bl.sub){bl.sub=it.text;}
+          else if(it.type==="bullet"){bl.bullets.push(hlMetrics(escapeHTML(it.text)));}
+          else{bl.bullets.push(hlMetrics(escapeHTML(it.text)));}
         }else if(it.type==="bullet"){
           html+='<div class="pdf-bullet"><span class="pdf-bullet-dot">\u25aa</span><span class="pdf-bullet-text">'+hlMetrics(escapeHTML(it.text))+'</span></div>';
         }else{
@@ -476,7 +451,8 @@ function renderHTML(data,ci){
           html+='<div class="pdf-exp-block"'+(last?' style="margin-bottom:0;padding-bottom:0"':"")+'>'+
             '<div class="pdf-exp-header"><span class="pdf-exp-left">'+escapeHTML(b.left)+'</span>'+
             (b.right?'<span class="pdf-exp-right">'+escapeHTML(b.right)+'</span>':"")+
-            '</div>'
+            '</div>'+
+            (b.sub?'<div class="pdf-text-line" style="color:#555;font-size:9pt">'+escapeHTML(b.sub)+'</div>':"")
             +b.bullets.map(function(bl){return'<div class="pdf-bullet"><span class="pdf-bullet-dot">\u25aa</span><span class="pdf-bullet-text">'+bl+'</span></div>';}).join("")
             +'</div>';
         });
@@ -484,6 +460,9 @@ function renderHTML(data,ci){
     }
     html+='</div>';
   });
+
+  const footer=ci.footer||"Infrastructure Leadership Portfolio";
+  html+='<div style="margin-top:32px;border-top:0.5px solid #eee;padding-top:8px;text-align:right;font-size:7.5pt;color:#aaa;font-style:italic;letter-spacing:0.02em">'+getFormattedDate()+' | '+escapeHTML(footer)+'</div>';
 
   return'<div class="pdf-wrap">'+html+'</div>';
 }
@@ -588,8 +567,9 @@ function wireEditable(previewBox, getText, onSave){
   previewBox.appendChild(toolbar);
 }
 
-// Cover letter modal — renders over the tracker when showCoverModal is true
-function renderCoverModal(T,card_s,mkBtn,pillBtn,div,span,h){
+// ─────────────────────────────────────────────────────────
+// Cover letter modal \u2014 renders over the tracker when showCoverModal is true
+function renderCoverModal(T,card_s,mkBtn,div,span,h){
   if(!S.showCoverModal||!S.coverApp)return null;
   const app=S.coverApp;
 
@@ -598,36 +578,21 @@ function renderCoverModal(T,card_s,mkBtn,pillBtn,div,span,h){
     S.coverLoading=true;rerender();
     try{
       const r=await callAI(
-        `You are an expert Executive Career Advisor writing a high-impact professional cover letter using ONLY the two inputs provided: the resume and the job posting.
-
-STRICT CONSTRAINTS:
-1. NO HALLUCINATIONS: Use ONLY facts, metrics, roles, and companies found in the resume. Do not invent numbers, degrees, project names, or responsibilities not listed.
-2. NO AI BUZZWORDS: Avoid "passionate", "innovative", "transformative", "spearheaded", "synergy", "leverage", "dynamic". Use direct, senior leadership language.
-3. HUMAN TONE: Write as a confident peer speaking to another senior professional.
-
-FORMAT — formal 2026 business letter:
-[Applicant Name]
-[Phone] | [Email] | [Location]
-
-[Today's Date]
-
-Dear Hiring Team,
-
-RE: [Job Title from posting] — [Company Name]
-
-[3-4 concise paragraphs]
-
-Sincerely,
-[Applicant Name]
-
-CONTENT STRATEGY — keep it tight, recruiters scan in 15 seconds:
-• Paragraph 1 (The Hook): One sentence connecting the applicant's background to the core challenge in the posting. No fluff.
-• Paragraph 2 (The Proof): 2-3 sentences max. One real metric from the resume tied to a specific requirement. Exact figure only — never invented.
-• Paragraph 3 (The Close): Two sentences. Why this role fits. Confident call to action — "I'd welcome a brief conversation."
-
-LENGTH: Under 180 words total. Short paragraphs. Easy to scan.
-OUTPUT: Plain text only. No markdown. No asterisks. Fill in real contact info from the resume header.`,
-        `RESUME:\n${(S.raw||"").substring(0,2000)}\n\nJOB:\n${app.title} at ${app.company}\nLocation: ${app.location||""}\n${app.notes||app.posting||""}`
+        `ROLE: High-level Executive Consultant writing a cover letter on behalf of a Senior Leader.
+TONE: Peer-to-peer, confident, solution-oriented. No "I am writing to apply." No "Dear Sir/Madam." No begging.
+STRUCTURE:
+1. THE HOOK: Open with a business challenge the company faces (infer from the job posting). One sentence.
+2. THE PROOF: Connect one specific metric from the resume ($, %, milestone) directly to a requirement in the posting.
+3. THE FIT: Briefly state why this role is a natural next step given the candidate's background.
+4. THE CLOSE: A confident peer-level ask \u2014 "When is a good time to discuss..." Not "I look forward to hearing from you."
+RULES: Under 300 words. Only use facts from the resume. No invented experience. Plain text output only.`,
+        `RESUME:\
+${(S.raw||"").substring(0,2000)}\
+\
+JOB:\
+${app.title} at ${app.company}\
+Location: ${app.location||""}\
+${app.notes||app.posting||""}`
       );
       S.coverLetter=r.trim();
       if(app.id){
@@ -645,7 +610,7 @@ OUTPUT: Plain text only. No markdown. No asterisks. Fill in real contact info fr
           div({style:{fontSize:"15px",fontWeight:"700",color:T.text}},["Cover Letter"]),
           div({style:{fontSize:"12px",color:T.sub,marginTop:"2px"}},[app.title+" at "+app.company]),
         ]),
-        h("button",{style:{background:"transparent",border:"none",color:T.muted,fontSize:"20px",cursor:"pointer",lineHeight:"1"},onClick:()=>{S.showCoverModal=false;S.coverPreview=false;rerender();}},["×"]),
+        h("button",{style:{background:"transparent",border:"none",color:T.muted,fontSize:"20px",cursor:"pointer",lineHeight:"1"},onClick:()=>{S.showCoverModal=false;rerender();}},["\u00d7"]),
       ]),
 
       S.coverLetter?null:div({style:{fontSize:"12px",color:T.sub,lineHeight:"1.6"}},[
@@ -654,29 +619,18 @@ OUTPUT: Plain text only. No markdown. No asterisks. Fill in real contact info fr
 
       S.coverLoading?div({style:{display:"flex",alignItems:"center",gap:"8px",color:T.muted,fontSize:"13px"}},[
         span({style:{display:"inline-block",width:"14px",height:"14px",border:"2px solid rgba(255,255,255,0.2)",borderTopColor:"#fff",borderRadius:"50%",animation:"spin .7s linear infinite"}}),
-        "Generating cover letter…"
+        "Generating cover letter\u2026"
       ]):S.coverLetter?div({style:{flex:"1",overflowY:"auto"}},[
-        // Toggle between edit and PDF preview
-        div({style:{display:"flex",gap:"8px",marginBottom:"10px",alignItems:"center"}},[
-          pillBtn("✎ Edit",!S.coverPreview,"#374151",()=>{S.coverPreview=false;rerender();},{padding:"4px 12px",borderRadius:"6px",fontSize:"12px"}),
-          pillBtn("📄 PDF Preview",!!S.coverPreview,"#2563eb",()=>{S.coverPreview=true;rerender();},{padding:"4px 12px",borderRadius:"6px",fontSize:"12px"}),
-        ]),
-        S.coverPreview
-          ? div({style:{background:"#fff",borderRadius:"8px",padding:"0.75in 0.75in",fontFamily:"Inter,sans-serif",fontSize:"11pt",lineHeight:"1.8",color:"#1a1a1a",whiteSpace:"pre-wrap",minHeight:"280px",border:"1px solid "+T.cardB}},
-              [S.coverLetter])
-          : h("textarea",{style:{width:"100%",minHeight:"280px",background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"8px",color:T.text,padding:"12px 14px",fontSize:"12px",lineHeight:"1.8",resize:"vertical",boxSizing:"border-box",fontFamily:"inherit"},value:S.coverLetter,
-              onInput:e=>{S.coverLetter=e.target.value;}}),
+        h("textarea",{style:{width:"100%",minHeight:"280px",background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"8px",color:T.text,padding:"12px 14px",fontSize:"12px",lineHeight:"1.8",resize:"vertical",boxSizing:"border-box",fontFamily:"inherit"},value:S.coverLetter,
+          onInput:e=>{S.coverLetter=e.target.value;}}),
       ]):null,
 
       div({style:{display:"flex",gap:"8px",flexWrap:"wrap"}},[
-        mkBtn("primary",S.coverLetter?"↺ Regenerate":"✦ Generate",generateCover,{fontSize:"13px"}),
-        S.coverLetter?mkBtn("ghost",S.copied==="cover"?"✓ Copied":"Copy",()=>{
-          navigator.clipboard.writeText(S.coverLetter).catch(()=>{});
-          S.copied="cover";setTimeout(()=>{S.copied="";rerender();},2000);rerender();
-        },{fontSize:"12px"}):null,
-        S.coverLetter?mkBtn("ghost","🖨 Print / Save PDF",()=>{
+        mkBtn("primary",S.coverLetter?"\u21ba Regenerate":"\u2726 Generate",generateCover,{fontSize:"13px"}),
+        S.coverLetter?mkBtn("ghost","Copy",()=>{navigator.clipboard.writeText(S.coverLetter).catch(()=>{});},{fontSize:"12px"}):null,
+        S.coverLetter?mkBtn("ghost","\ud83d\udda8 Print",()=>{
           const pa=document.getElementById("print-area");if(!pa)return;
-          pa.innerHTML='<div style="font-family:Inter,sans-serif;padding:0.75in;max-width:none;font-size:11pt;line-height:1.8;white-space:pre-wrap;color:#1a1a1a">'+S.coverLetter.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</div>';
+          pa.innerHTML=`<div style="font-family:Inter,sans-serif;padding:48px;max-width:700px;margin:0 auto;font-size:11pt;line-height:1.8;white-space:pre-wrap">${S.coverLetter.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>`;
           pa.style.display="block";window.print();pa.style.display="none";pa.innerHTML="";
         },{fontSize:"12px"}):null,
       ].filter(Boolean)),
@@ -684,7 +638,82 @@ OUTPUT: Plain text only. No markdown. No asterisks. Fill in real contact info fr
   ]);
 }
 
-// ─────────────────────────────────────────────────────────
+
+// ── HERO SECTION ──────────────────────────────────────────
+function renderHero(T,mkBtn){
+  if(!S.showHero)return null;
+  return div({style:{
+    background:S.dark?"linear-gradient(135deg,#0d1117 0%,#161c27 100%)":"linear-gradient(135deg,#f0f4ff 0%,#e8f0fe 100%)",
+    borderBottom:"1px solid "+T.hBorder,
+    padding:"48px 24px 40px",
+    textAlign:"center",
+    position:"relative",
+  }},[
+    h("button",{style:{position:"absolute",top:"16px",right:"20px",background:"transparent",border:"none",color:T.muted,fontSize:"20px",cursor:"pointer",lineHeight:"1"},
+      onClick:()=>{S.showHero=false;lsSet("hero-dismissed","1");rerender();}},["×"]),
+    div({style:{display:"inline-flex",alignItems:"center",gap:"6px",background:S.dark?"rgba(37,99,235,0.15)":"rgba(37,99,235,0.08)",border:"1px solid rgba(37,99,235,0.3)",borderRadius:"20px",padding:"4px 14px",fontSize:"11px",fontWeight:"700",color:"#60a5fa",marginBottom:"20px",letterSpacing:"0.06em"}},["✦ POWERED BY CLAUDE AI"]),
+    h("h1",{style:{fontSize:"30px",fontWeight:"800",color:T.text,letterSpacing:"-0.02em",lineHeight:"1.2",maxWidth:"560px",margin:"0 auto 16px"}},[
+      "Land more interviews ",h("span",{style:{color:"#3b82f6"}},["with less effort"]),
+    ]),
+    div({style:{display:"flex",flexDirection:"column",gap:"8px",alignItems:"center",margin:"16px 0 28px"}},[
+      ...["Track all your job applications in one place",
+          "Improve your resume with instant AI feedback",
+          "Generate tailored cover letters in seconds",
+          "Stay organised and follow up at the right time",
+      ].map(text=>div({style:{display:"flex",alignItems:"center",gap:"8px",fontSize:"14px",color:T.sub}},[
+        span({style:{color:"#3b82f6",fontWeight:"700",fontSize:"16px"}},["✓"]),text,
+      ])),
+    ]),
+    div({style:{display:"flex",gap:"10px",justifyContent:"center",flexWrap:"wrap"}},[
+      h("button",{style:{padding:"13px 32px",borderRadius:"10px",background:"#2563eb",color:"#fff",fontSize:"15px",fontWeight:"700",border:"none",cursor:"pointer",boxShadow:"0 4px 20px rgba(37,99,235,0.4)"},
+        onClick:()=>{S.tab="start";S.showHero=false;lsSet("hero-dismissed","1");rerender();}},["Get Started →"]),
+      h("button",{style:{padding:"13px 24px",borderRadius:"10px",background:"transparent",color:T.sub,fontSize:"14px",fontWeight:"600",border:"1px solid "+T.cardB,cursor:"pointer"},
+        onClick:()=>{S.showHero=false;lsSet("hero-dismissed","1");rerender();}},["I'll explore on my own"]),
+    ]),
+  ]);
+}
+
+// ── START HERE TAB ────────────────────────────────────────
+function renderStartHere(T,card_s,mkBtn,div,span,h){
+  const steps=[
+    {n:1,title:"Paste your resume",desc:"Add your resume text so the AI can analyze it and personalise everything for you.",action:"Open Resume tab",tab:"resume",done:S.raw.trim().length>100},
+    {n:2,title:"Get instant AI feedback",desc:"See your Impact Score, structure check, and quick wins to strengthen your resume.",action:"Analyze my resume",tab:"resume",done:!!S.auditResult},
+    {n:3,title:"Start tracking applications",desc:"Add jobs you're interested in. Track status, set reminders, generate cover letters.",action:"Go to Apply & Track",tab:"tracker",done:(S.apps||[]).some(a=>a.status!=="saved")},
+    {n:4,title:"Prepare for interviews",desc:"Generate practice questions for any job and get AI feedback on your answers.",action:"Go to Interview Prep",tab:"interview",done:(S.intQs||[]).length>0},
+  ];
+  const currentStep=steps.findIndex(s=>!s.done);
+  const allDone=currentStep===-1;
+  return div({style:{maxWidth:"580px",margin:"0 auto"}},[
+    div({style:{...card_s,textAlign:"center",marginBottom:"20px",background:allDone?"rgba(22,163,74,0.05)":S.dark?"rgba(37,99,235,0.05)":"rgba(37,99,235,0.03)",border:"1px solid "+(allDone?"#166534":"#1e40af")}},[
+      div({style:{fontSize:"28px",marginBottom:"8px"}},[allDone?"🎉":"🚀"]),
+      div({style:{fontSize:"18px",fontWeight:"800",color:T.text,marginBottom:"6px"}},[allDone?"You're all set!":"Let's get you set up"]),
+      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.6"}},[allDone?"Your profile is complete. Use the tabs above to keep going.":"Follow these 4 steps to get the most out of ResumeAI."]),
+      allDone?div({style:{marginTop:"14px",display:"flex",gap:"8px",justifyContent:"center",flexWrap:"wrap"}},[
+        mkBtn("primary","Go to My Resume",()=>{S.tab="resume";rerender();},{fontSize:"13px"}),
+        mkBtn("ghost","Go to Tracker",()=>{S.tab="tracker";rerender();},{fontSize:"13px"}),
+      ]):null,
+    ].filter(Boolean)),
+    ...steps.map((step,i)=>{
+      const isActive=i===currentStep;
+      const isDone=step.done;
+      const isLocked=!isDone&&i>currentStep&&currentStep!==-1;
+      return div({style:{...card_s,marginBottom:"10px",border:"1px solid "+(isDone?"#166534":isActive?T.active.border:T.cardB),background:isDone?"rgba(22,163,74,0.04)":isActive?T.active.bg:T.card,opacity:isLocked?"0.45":"1",transition:"all 0.2s"}},[
+        div({style:{display:"flex",alignItems:"flex-start",gap:"14px"}},[
+          div({style:{width:"36px",height:"36px",borderRadius:"50%",flexShrink:"0",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:"800",fontSize:"14px",background:isDone?"#16a34a":isActive?"#2563eb":T.inBg,color:isDone||isActive?"#fff":T.muted,border:"2px solid "+(isDone?"#16a34a":isActive?"#2563eb":T.cardB)}},[isDone?"✓":String(step.n)]),
+          div({style:{flex:"1"}},[
+            div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"4px"}},[
+              div({style:{fontSize:"14px",fontWeight:"700",color:isDone?T.muted:T.text}},[step.title]),
+              isDone?span({style:{fontSize:"11px",color:"#4ade80",fontWeight:"700"}},["Done ✓"]):null,
+            ].filter(Boolean)),
+            div({style:{fontSize:"12px",color:T.sub,lineHeight:"1.6",marginBottom:isActive?"12px":"0"}},[step.desc]),
+            isActive?mkBtn("primary",step.action+" →",()=>{S.onboardingStep=Math.max(S.onboardingStep,step.n);lsSet("onboarding-step",String(S.onboardingStep));S.tab=step.tab;rerender();},{fontSize:"13px"}):null,
+          ].filter(Boolean)),
+        ]),
+      ]);
+    }),
+  ]);
+}
+
 // RENDER ENGINE
 // ─────────────────────────────────────────────────────────
 let renderTimeout=null;
@@ -755,7 +784,7 @@ function _render(){
   }
 
   // ── HEADER ──
-  const TABS=[["resume","1","My Resume"],["search","2","Find Jobs"],["board","3","Job Board"],["tracker","4","Apply & Track"],["interview","5","Interview Prep"]];
+  const TABS=[["start","🚀","Start Here"],["resume","1","My Resume"],["search","2","Find Jobs"],["board","3","Job Board"],["tracker","4","Apply & Track"],["interview","5","Interview Prep"]];
 
   const hasKey=!!S.apiKey;
   const header=div({style:{background:T.hBg,borderBottom:`1px solid ${T.hBorder}`,padding:"0 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:"0",zIndex:"10",minHeight:"54px",flexWrap:"wrap",gap:"8px",paddingTop:"8px",paddingBottom:"8px"}},[
@@ -780,7 +809,7 @@ function _render(){
         ]):null,
       ].filter(Boolean)),
       h("button",{style:{padding:"5px 13px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:T.card,color:T.sub,fontSize:"12px",cursor:"pointer",display:"flex",alignItems:"center",gap:"5px"},onClick:()=>{S.dark=!S.dark;lsSet("app-dark",String(S.dark));rerender();}},[S.dark?"☀ Light":"☾ Dark"]),
-      h("button",{style:{padding:"5px 10px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:"transparent",color:T.muted,fontSize:"11px",cursor:"pointer"},onClick:()=>{if(!confirm("Clear all saved data and start fresh?"))return;["tracker-apps-v2","resume-raw","resume-ci","api-key","setup-dismissed"].forEach(lsDel);S.raw="";S.ci={name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""};S.apps=[...SEED_APPS];S.resumeView="edit";S.auditResult=null;S.toneCheck=null;S.coverLetter="";lsSet("tracker-apps-v2",JSON.stringify(SEED_APPS));rerender();}},["Reset"]),
+      h("button",{style:{padding:"5px 10px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:"transparent",color:T.muted,fontSize:"11px",cursor:"pointer"},onClick:()=>{if(!confirm("Clear all saved data and start fresh?"))return;["tracker-apps-v2","resume-raw","resume-polished","resume-ci","resume-tone","apply-posting","apply-tailored","apply-cover"].forEach(lsDel);S.raw="";S.ci={name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""};S.tone="natural";S.posting="";S.tailored="";S.cover="";S.apps=[...SEED_APPS];S.resumeView="edit";lsSet("tracker-apps-v2",JSON.stringify(SEED_APPS));rerender();}},["Reset"]),
     ]),
   ]);
 
@@ -810,7 +839,9 @@ function _render(){
   let content=div();
 
   // ── TAB 1: MY RESUME ──
-  if(S.tab==="resume"){
+  if(S.tab==="start"){
+    content=renderStartHere(T,card_s,mkBtn,div,span,h);
+  } else if(S.tab==="resume"){
 
     async function runAudit(){
       if(!S.raw.trim()||S.load==="audit")return;
@@ -864,16 +895,8 @@ ${S.raw.substring(0,3000)}`
           mkBtn("primary",S.load==="audit"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Analyzing…"));return w;})():"✦ Analyze resume",runAudit,{fontSize:"13px"}),
         ]),
 
-        // Textarea — collapsed when PDF preview is active
-        S.resumeView==="preview"?div({style:{marginBottom:"8px"}},[
-          div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 12px",background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"8px",cursor:"pointer"},
-            onClick:()=>{S.resumeView="edit";rerender();}},[
-            span({style:{fontSize:"12px",color:T.muted}},["📝 Resume text — click to edit"]),
-            span({style:{fontSize:"11px",color:T.sub,fontFamily:"ui-monospace,monospace"}},[
-              (S.raw||"").split("\n").filter(Boolean).length+" lines"
-            ]),
-          ]),
-        ]):div({style:{position:"relative"}},[
+        // Textarea
+        div({style:{position:"relative"}},[
           S.metricAlert?div({style:{background:"rgba(133,77,14,0.1)",border:"1px solid #854d0e",color:"#fbbf24",padding:"8px 12px",borderRadius:"8px",fontSize:"12px",marginBottom:"8px",fontWeight:"600"}},
             ["\u26a0\ufe0f Low Impact Score: Add numbers ($ or %) to prove your results."]):null,
           (()=>{
@@ -891,26 +914,15 @@ ${S.raw.substring(0,3000)}`
 
         // PDF preview toggle
         div({style:{marginTop:"12px",display:"flex",gap:"8px",alignItems:"center",justifyContent:"flex-end"}},[
-          S.raw.trim()?mkBtn("ghost",S.copied==="resume"?"✓ Copied":"Copy text",()=>{
-              navigator.clipboard.writeText(S.raw).catch(()=>{});
-              S.copied="resume";setTimeout(()=>{S.copied="";rerender();},2000);rerender();
-            },{fontSize:"12px",padding:"6px 12px"}):null,
           pillBtn("📄 PDF Preview",S.resumeView==="preview","#2563eb",()=>{S.resumeView=S.resumeView==="preview"?"edit":"preview";rerender();},{padding:"6px 14px",borderRadius:"7px",fontSize:"12px"}),
           S.resumeView==="preview"?mkBtn("ghost","🖨 Print / Save PDF",()=>{
             const pa=document.getElementById("print-area");
             if(!pa)return;
             pa.innerHTML=buildPDFHTML(S.raw,S.ci||{});
             pa.style.display="block";
-            // Brief delay to ensure content is painted before dialog opens
-            const style=document.createElement('style');
-            style.id='print-hide-chrome';
-            style.textContent='@page{margin:0.5in;size:letter}@media print{head,#app,nav,header,footer{display:none!important}}';
-            document.head.appendChild(style);
             window.print();
             pa.style.display="none";
             pa.innerHTML="";
-            const s=document.getElementById('print-hide-chrome');
-            if(s)s.remove();
           },{fontSize:"12px",padding:"6px 14px"}):null,
         ].filter(Boolean)),
 
@@ -950,43 +962,56 @@ ${S.raw.substring(0,3000)}`
       })():null,
 
       // Live metrics row
-      S.raw.trim()?div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"14px",marginBottom:"16px"}},[
+      S.raw.trim()?div({style:{marginBottom:"14px"}},[
+          h("button",{
+            style:{display:"flex",alignItems:"center",justifyContent:"space-between",
+              background:"transparent",border:"1px solid "+T.cardB,borderRadius:"8px",
+              padding:"8px 14px",fontSize:"12px",fontWeight:"600",color:T.sub,
+              cursor:"pointer",width:"100%"},
+            onClick:()=>{S.showAdvanced=!S.showAdvanced;rerender();}
+          },[
+            span({style:{display:"flex",alignItems:"center",gap:"8px"}},[
+              "Analysis & ATS Check",
+              S.showAdvanced?null:span({style:{fontSize:"10px",background:"rgba(37,99,235,0.15)",color:"#60a5fa",padding:"1px 7px",borderRadius:"10px",fontWeight:"700"}},["SCORE: "+score+"%"]),
+            ].filter(Boolean)),
+            span({style:{fontSize:"11px"}},[S.showAdvanced?"▲ Hide":"▼ Show"]),
+          ]),
+          S.showAdvanced?div({style:{marginTop:"10px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}},[
 
-        // Impact score card
-        div({className:"score-card"},[
-          div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},[
-            span({style:{fontWeight:"700",color:"#93c5fd",fontSize:"12px"}},["\uD83D\uDCCA Impact Score"]),
-            span({style:{fontSize:"20px",fontWeight:"800",color:scoreCol}},[score+"%"]),
-          ]),
-          div({style:{height:"5px",background:"#111827",borderRadius:"3px",marginBottom:"8px"}},[
-            div({style:{height:"100%",width:score+"%",background:scoreBarCol,borderRadius:"3px"}}),
-          ]),
-          score<75?div({style:{fontSize:"11px",color:"#9ca3af"}},["Add $ amounts, percentages, and timeframes to boost your score."]):
-          div({style:{fontSize:"11px",color:"#4ade80"}},["\u2713 Good metric density"]),
-          div({style:{marginTop:"8px",display:"flex",gap:"6px",flexWrap:"wrap"}},[
-            mkBtn("ghost","Audit tone",()=>{S.toneCheck=auditTone(S.raw||"");rerender();},{fontSize:"10px",padding:"3px 8px"}),
-          ]),
-          S.toneCheck!==null?div({style:{marginTop:"8px",borderTop:"1px solid #374151",paddingTop:"8px"}},[
-            S.toneCheck.length?div({},[
-              div({style:{fontSize:"10px",fontWeight:"700",color:"#fbbf24",marginBottom:"4px"}},["Buzzwords found:"]),
-              ...S.toneCheck.map(b=>span({className:"buzzword-tag",style:{marginBottom:"3px",display:"inline-block"}},[b.word+" \u2192 "+b.hint])),
-            ]):div({style:{fontSize:"11px",color:"#4ade80"}},["\u2713 No buzzwords"]),
+            div({className:"score-card",style:{marginBottom:"0"}},[
+              div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},[
+                span({style:{fontWeight:"700",color:"#93c5fd",fontSize:"12px"}},["Impact Score"]),
+                span({style:{fontSize:"20px",fontWeight:"800",color:scoreCol}},[score+"%"]),
+              ]),
+              div({style:{height:"5px",background:"#111827",borderRadius:"3px",marginBottom:"8px"}},[
+                div({style:{height:"100%",width:score+"%",background:scoreBarCol,borderRadius:"3px"}}),
+              ]),
+              score<75?div({style:{fontSize:"11px",color:"#9ca3af"}},["Add $ amounts, percentages, and timeframes to boost your score."]):
+              div({style:{fontSize:"11px",color:"#4ade80"}},["✓ Good metric density"]),
+              div({style:{marginTop:"8px",display:"flex",gap:"6px",flexWrap:"wrap"}},[
+                mkBtn("ghost","Audit tone",()=>{S.toneCheck=auditTone(S.raw||"");rerender();},{fontSize:"10px",padding:"3px 8px"}),
+              ]),
+              S.toneCheck!==null?div({style:{marginTop:"8px",borderTop:"1px solid #374151",paddingTop:"8px"}},[
+                S.toneCheck.length?div({},[
+                  div({style:{fontSize:"10px",fontWeight:"700",color:"#fbbf24",marginBottom:"4px"}},["Buzzwords found:"]),
+                  ...S.toneCheck.map(b=>span({className:"buzzword-tag",style:{marginBottom:"3px",display:"inline-block"}},[b.word+" → "+b.hint])),
+                ]):div({style:{fontSize:"11px",color:"#4ade80"}},["✓ No buzzwords"]),
+              ]):null,
+            ].filter(Boolean)),
+
+            div({className:"score-card",style:{marginBottom:"0"}},[
+              div({style:{display:"flex",justifyContent:"space-between",marginBottom:"10px"}},[
+                span({style:{fontWeight:"700",color:"#93c5fd",fontSize:"12px"}},["✅ Structure"]),
+                span({style:{fontSize:"11px",color:T.muted}},[(checks.filter(c=>c[0]).length)+"/"+checks.length]),
+              ]),
+              ...checks.map(([ok,label])=>div({style:{display:"flex",alignItems:"center",gap:"8px",fontSize:"12px",color:ok?T.text:T.muted,marginBottom:"6px"}},[
+                div({style:{width:"14px",height:"14px",borderRadius:"3px",border:`1.5px solid ${ok?"#16a34a":T.cardB}`,background:ok?"#052e16":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"9px",color:"#4ade80",flexShrink:"0"}},[ok?"✓":""]),
+                label,
+              ])),
+            ]),
+
           ]):null,
-        ].filter(Boolean)),
-
-        // Structure check card
-        div({className:"score-card"},[
-          div({style:{display:"flex",justifyContent:"space-between",marginBottom:"10px"}},[
-            span({style:{fontWeight:"700",color:"#93c5fd",fontSize:"12px"}},["\u2705 Structure"]),
-            span({style:{fontSize:"11px",color:T.muted}},[(checks.filter(c=>c[0]).length)+"/"+checks.length]),
-          ]),
-          ...checks.map(([ok,label])=>div({style:{display:"flex",alignItems:"center",gap:"8px",fontSize:"12px",color:ok?T.text:T.muted,marginBottom:"6px"}},[
-            div({style:{width:"14px",height:"14px",borderRadius:"3px",border:`1.5px solid ${ok?"#16a34a":T.cardB}`,background:ok?"#052e16":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"9px",color:"#4ade80",flexShrink:"0"}},[ok?"\u2713":""]),
-            label,
-          ])),
-        ]),
-
-      ]):null,
+        ]):null,
 
       // AI Audit results
       auditR?div({style:card_s},[
@@ -1347,7 +1372,7 @@ ${S.raw.substring(0,3000)}`
 
     const step3Card=div({style:{...card_s,borderLeft:"3px solid #7c3aed",opacity:kw?"1":"0.55"}},[
       div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"14px"}},[
-        stepHeader("3","#7c3aed","AI job leads","AI-generated leads based on your keywords — scored against your resume (not a live job board)"),
+        stepHeader("3","#7c3aed","AI job leads","Real companies hiring for your role — scored against your resume"),
         div({style:{fontSize:"11px",color:T.muted,background:T.inBg,border:"1px solid "+T.inB,borderRadius:"6px",padding:"3px 8px",flexShrink:"0"}},["✨ Uses API"]),
       ]),
       aiBody,
@@ -1480,7 +1505,6 @@ ${S.raw.substring(0,3000)}`
         ].filter(Boolean)),
         scoreBadge,
         statusSel,
-        h("a",{href:app.url||"#",target:app.url?"_blank":"_self",rel:"noreferrer",title:app.url?"View posting":"No URL saved",style:{background:"transparent",border:"none",cursor:app.url?"pointer":"default",padding:"4px 6px",borderRadius:"6px",color:app.url?T.sub:T.muted,fontSize:"13px",flexShrink:"0",textDecoration:"none",display:"flex",alignItems:"center",opacity:app.url?"1":"0.35"},onClick:e=>{e.stopPropagation();if(!app.url)e.preventDefault();}},["↗"]),
         (()=>{const b=h("button",{style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0"},title:"Remove"});b.textContent="🗑";b.addEventListener("click",e=>{e.stopPropagation();if(!confirm("Remove "+app.title+"?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();});return b;})(),
       ].filter(Boolean));
       card.appendChild(row);
@@ -1489,9 +1513,7 @@ ${S.raw.substring(0,3000)}`
         const actions=div({style:{marginTop:"12px",paddingTop:"12px",borderTop:`1px solid ${T.div}`}},[
           app.notes?h("p",{style:{fontSize:"12px",color:T.sub,lineHeight:"1.7",marginBottom:"12px"}},[app.notes]):null,
           div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
-            mkBtn("primary",hasDocs?"↺ Re-generate cover letter":"✦ Generate cover letter",()=>{
-              S.coverJobId=app.id;S.coverApp=app;S.showCoverModal=true;rerender();
-            },{fontSize:"12px",padding:"6px 14px"}),
+            mkBtn("primary","✨ Cover letter",()=>{S.showCoverModal=true;S.coverApp=app;rerender();},{fontSize:"12px",padding:"6px 14px"}),
             app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",style:{padding:"6px 14px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:T.ghost.text,textDecoration:"none",display:"inline-flex",alignItems:"center"}},["View posting ↗"]):null,
             mkBtn("danger","Remove",async()=>{if(!confirm("Remove?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();}),
           ].filter(Boolean)),
@@ -1678,7 +1700,6 @@ ${S.raw.substring(0,3000)}`
           div({style:{fontSize:"12px",color:T.sub}},[span({style:{fontWeight:"600",color:T.text}},[app.company]),app.location?" · "+app.location:"",app.appliedDate?" · "+app.appliedDate:""]),
         ]),
         statusSel,
-        h("a",{href:app.url||"#",target:app.url?"_blank":"_self",rel:"noreferrer",title:app.url?"View posting":"No URL saved",style:{background:"transparent",border:"none",cursor:app.url?"pointer":"default",padding:"4px 6px",borderRadius:"6px",color:app.url?T.sub:T.muted,fontSize:"13px",flexShrink:"0",textDecoration:"none",display:"flex",alignItems:"center",opacity:app.url?"1":"0.35"},onClick:e=>{e.stopPropagation();if(!app.url)e.preventDefault();}},["↗"]),
         (()=>{const b=h("button",{style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0"},title:"Remove"});b.textContent="🗑";b.addEventListener("click",e=>{e.stopPropagation();if(!confirm("Remove "+app.title+"?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();});return b;})(),
       ]);
       card.appendChild(row);
@@ -1690,24 +1711,14 @@ ${S.raw.substring(0,3000)}`
               span({style:{fontSize:"12px",fontWeight:"700",color:T.text}},["Documents"]),
               app.savedDocsDate?span({style:{fontSize:"11px",color:T.muted}},[" — "+app.savedDocsDate]):null,
             ].filter(Boolean)),
-            mkBtn("primary","✦ Generate cover letter",()=>{
-              S.coverJobId=app.id;S.coverApp=app;S.showCoverModal=true;S.coverLetter="";rerender();
-            },{fontSize:"11px",padding:"5px 12px"}),
+            mkBtn("primary","✨ Cover letter",()=>{S.showCoverModal=true;S.coverApp=app;rerender();},{fontSize:"11px",padding:"5px 12px"}),
           ]),
           div({style:{display:"flex",gap:"8px",flexWrap:"wrap"}},[
             app.savedResume?div({style:{flex:"1",minWidth:"160px",background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"10px 12px"}},[
               div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"5px"}},["Tailored Resume"]),
               div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",maxHeight:"44px",overflow:"hidden"}},[app.savedResume.substring(0,130)+"…"]),
               div({style:{display:"flex",gap:"5px",marginTop:"7px",flexWrap:"wrap"}},[
-                mkBtn("ghost","View PDF",()=>{
-                    const pa=document.getElementById("print-area");
-                    if(!pa)return;
-                    pa.innerHTML=buildPDFHTML(app.savedResume,S.ci||{});
-                    pa.style.display="block";
-                    window.print();
-                    pa.style.display="none";
-                    pa.innerHTML="";
-                  },{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","View PDF",()=>{const pa=document.getElementById("print-area");pa.style.display="block";alert("PDF export removed in this version. Copy the text instead.");pa.style.display="none";},{fontSize:"11px",padding:"3px 8px"}),
                 mkBtn("ghost","Copy",()=>navigator.clipboard.writeText(app.savedResume).catch(()=>{}),{fontSize:"11px",padding:"3px 8px"}),
                 mkBtn("ghost","⬇ .txt",()=>{const a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(app.savedResume);a.download=app.company.replace(/[\s]+/g,"_")+"_resume.txt";a.click();},{fontSize:"11px",padding:"3px 8px"}),
               ]),
@@ -1726,14 +1737,14 @@ ${S.raw.substring(0,3000)}`
           app.notes?h("p",{style:{fontSize:"12px",color:T.sub,lineHeight:"1.7",marginBottom:"10px"}},[app.notes]):null,
           docSection,
           div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
+            mkBtn("primary","✨ Cover letter",()=>{S.showCoverModal=true;S.coverApp=app;rerender();}),
             mkBtn("teal","Prep interview →",()=>{S.intJob=app.id;S.tab="interview";rerender();},{fontSize:"12px",padding:"6px 12px"}),
-            mkBtn("primary","✦ Cover letter",()=>{S.coverJobId=app.id;S.coverApp=app;S.showCoverModal=true;S.coverLetter="";rerender();},{fontSize:"12px",padding:"6px 12px"}),
             isStale?mkBtn("ghost","📧 Follow-up email",()=>{
               const template=generateFollowUp(app.title,app.company);
               S.followUpText=template;S.followUpJob=app.id;rerender();
             },{fontSize:"12px",padding:"6px 12px",borderColor:"#854d0e",color:"#fbbf24"}):null,
             mkBtn("ghost","Edit",()=>{S.fd={...app};S.editId=app.id;S.showForm=true;rerender();},{fontSize:"12px",padding:"6px 12px"}),
-            h("a",{href:app.url||"#",target:app.url?"_blank":"_self",rel:"noreferrer",title:app.url?"View posting":"No URL saved",style:{padding:"6px 12px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:app.url?T.ghost.text:T.muted,textDecoration:"none",display:"inline-flex",alignItems:"center",opacity:app.url?"1":"0.4",cursor:app.url?"pointer":"default"},onClick:e=>{if(!app.url)e.preventDefault();}},["View ↗"]),
+            app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",style:{padding:"6px 12px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:T.ghost.text,textDecoration:"none",display:"inline-flex",alignItems:"center"}},["View ↗"]):null,
             mkBtn("danger","Remove",()=>{if(!confirm("Remove?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();}),
           ].filter(Boolean)),
           // Follow-up email display
@@ -1895,8 +1906,8 @@ ${S.raw.substring(0,3000)}`
   const setupModal=showSetup?div({style:{position:"fixed",inset:"0",background:"rgba(0,0,0,0.75)",zIndex:"200",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}},[
     div({style:{background:S.dark?"#161c27":"#fff",borderRadius:"16px",padding:"32px",maxWidth:"460px",width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,0.5)"}},[
       div({style:{fontSize:"26px",marginBottom:"10px"}},["🚀"]),
-      div({style:{fontSize:"18px",fontWeight:"700",color:T.text,marginBottom:"8px"}},["Welcome to ResumeAI 👋"]),
-      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.7",marginBottom:"18px"}},["Analyze your resume, find jobs, generate cover letters, and prep for interviews — powered by Claude AI. Your data stays in your browser. Add your Anthropic API key to get started."]),
+      div({style:{fontSize:"18px",fontWeight:"700",color:T.text,marginBottom:"8px"}},["Welcome to ResumeAI"]),
+      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.7",marginBottom:"18px"}},["AI-powered resume polishing, job tailoring, and interview prep — all running locally on your device. To enable the AI you need a free Anthropic API key."]),
       div({style:{background:S.dark?"#0d1117":"#f4f6fa",border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"18px"}},[
         div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:"10px"}},["One-time setup"]),
         ...[["1","Visit console.anthropic.com/settings/keys"],["2","Click Create Key and copy it"],["3","Paste it below and click Save"]].map(([n,txt])=>
@@ -1944,7 +1955,8 @@ ${S.raw.substring(0,3000)}`
   ]):null;
 
   const coverModal=renderCoverModal(T,card_s,mkBtn,pillBtn,div,span,h);
-    const root=div({style:{minHeight:"100vh",background:T.appBg,color:T.text,fontFamily:"'Inter',system-ui,sans-serif"}},[header,noKeyBanner,main,setupModal,coverModal].filter(Boolean));
+  const heroSection=renderHero(T,mkBtn);
+  const root=div({style:{minHeight:"100vh",background:T.appBg,color:T.text,fontFamily:"'Inter',system-ui,sans-serif"}},[header,noKeyBanner,heroSection,main,setupModal,coverModal].filter(Boolean));
 
   app.innerHTML="";
   app.appendChild(root);
