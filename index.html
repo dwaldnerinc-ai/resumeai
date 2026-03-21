@@ -258,6 +258,235 @@ button:active{transform:scale(0.97)}
   height: 36px;
   background: rgba(255,255,255,0.08);
 }
+
+/* ── USER-SPECIFIED STYLES ── */
+.hero {
+  text-align: center;
+  padding: 80px 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.hero h1 { font-size: 42px; font-weight: 700; margin-bottom: 16px; }
+.hero p { font-size: 18px; color: #94a3b8; margin-bottom: 30px; }
+.primary {
+  background: #22c55e;
+  padding: 14px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+.primary:hover { background: #16a34a; transform: translateY(-1px); }
+.secondary {
+  margin-left: 10px;
+  opacity: 0.8;
+  padding: 14px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #e8edf5;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.secondary:hover { opacity: 1; background: rgba(255,255,255,0.06); }
+.card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+/* ── FEATURES SECTION ── */
+.ap-features {
+  background: #080c15;
+  padding: 64px 32px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.ap-features-grid {
+  max-width: 860px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+@media (max-width: 640px) {
+  .ap-features-grid { grid-template-columns: 1fr; }
+}
+.ap-feature {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 24px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.ap-feature:hover {
+  border-color: rgba(37,99,235,0.4);
+  background: rgba(37,99,235,0.05);
+}
+.ap-feature-icon {
+  font-size: 26px;
+  margin-bottom: 12px;
+  display: block;
+}
+.ap-feature h3 {
+  font-family: 'Sora', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #f0f4ff;
+  margin-bottom: 8px;
+}
+.ap-feature p {
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* ── CTA SECTION ── */
+.ap-cta {
+  background: linear-gradient(135deg, #0f172a 0%, #0c1a0c 100%);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 72px 32px;
+  text-align: center;
+}
+.ap-cta h2 {
+  font-family: 'Sora', sans-serif;
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 800;
+  color: #f0f4ff;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.ap-cta p {
+  font-size: 15px;
+  color: #4b5563;
+  margin-bottom: 28px;
+}
+
+/* ── FEEDBACK TOASTS ── */
+.ap-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background: #1e293b;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f0f4ff;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  z-index: 999;
+  white-space: nowrap;
+  animation: apToastIn 0.25s ease;
+}
+@keyframes apToastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.ap-toast.success { border-color: rgba(34,197,94,0.4); color: #4ade80; }
+.ap-toast.info    { border-color: rgba(37,99,235,0.4); color: #93c5fd; }
+
+/* ── RESUME TAB REFACTOR ── */
+.ap-resume-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.ap-resume-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #f0f4ff;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.ap-resume-subtitle {
+  font-size: 13px;
+  color: #4b5563;
+}
+.ap-resume-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ap-more-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.ap-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 9px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #8b95a8;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ap-more-btn:hover { background: rgba(255,255,255,0.05); color: #e8edf5; }
+.ap-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #1e293b;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 6px;
+  min-width: 160px;
+  z-index: 50;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.ap-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  color: #8b95a8;
+  cursor: pointer;
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  transition: all 0.1s;
+  font-family: inherit;
+}
+.ap-dropdown-item:hover { background: rgba(255,255,255,0.06); color: #e8edf5; }
+
+/* ── LOADING STATE ── */
+.ap-loading-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  background: rgba(37,99,235,0.08);
+  border: 1px solid rgba(37,99,235,0.2);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #93c5fd;
+  margin-top: 14px;
+  animation: apFadePulse 1.5s ease-in-out infinite;
+}
+@keyframes apFadePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
 </style>
 </head>
 <body>
@@ -303,6 +532,34 @@ button:active{transform:scale(0.97)}
       </div>
     </div>
   </div>
+</section>
+
+<section class="ap-features">
+  <div class="ap-features-grid">
+    <div class="ap-feature">
+      <span class="ap-feature-icon">📋</span>
+      <h3>Track everything</h3>
+      <p>Never lose track of your applications again. See every status at a glance.</p>
+    </div>
+    <div class="ap-feature">
+      <span class="ap-feature-icon">⚡</span>
+      <h3>Improve instantly</h3>
+      <p>Get AI feedback on your resume in seconds. Impact score, gaps, and quick wins.</p>
+    </div>
+    <div class="ap-feature">
+      <span class="ap-feature-icon">🎯</span>
+      <h3>Stay organised</h3>
+      <p>Follow up at the right time, generate cover letters, and prep for interviews.</p>
+    </div>
+  </div>
+</section>
+
+<section class="ap-cta">
+  <h2>Start applying smarter today</h2>
+  <p>No account needed. Your data stays in your browser.</p>
+  <button class="primary" onclick="document.getElementById('app').scrollIntoView({behavior:'smooth'});if(window.S){S.tab='start';rerender();}">
+    Get Started →
+  </button>
 </section>
 
 <div id="app"></div>
@@ -1107,7 +1364,7 @@ ${S.raw.substring(0,3000)}`
         );
         S.auditResult=JSON.parse(r.replace(/\`\`\`json|\`\`\`/g,"").trim());
       }catch(e){S.auditError=e.message||"Analysis failed.";}
-      S.load="";rerender();
+      S.load="";showToast("Resume improved ✅","success");rerender();
     }
 
     // Impact score live
@@ -1127,14 +1384,53 @@ ${S.raw.substring(0,3000)}`
     const auditR=S.auditResult;
 
     content=div({},[
-      // Header card
+      // Header card — refactored
       div({style:{...card_s,marginBottom:"16px"}},[
-        div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"14px",flexWrap:"wrap",gap:"10px"}},[
+        // Title row
+        div({className:"ap-resume-header"},[
           div({},[
-            div({style:{fontSize:"15px",fontWeight:"700",color:T.text}},["My Resume"]),
-            div({style:{fontSize:"13px",color:T.sub,marginTop:"2px"}},["Paste your resume — get an instant rating, gap analysis, and quick wins."]),
+            div({className:"ap-resume-title"},["Improve Your Resume"]),
+            div({className:"ap-resume-subtitle"},["Paste your resume below — get instant AI feedback, impact score, and quick wins."]),
           ]),
-          mkBtn("primary",S.load==="audit"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Analyzing…"));return w;})():"✦ Analyze resume",runAudit,{fontSize:"13px"}),
+          // Action group: big green Improve button + More Actions dropdown
+          div({className:"ap-resume-actions"},[
+            // Primary: Improve Resume
+            S.load==="polish"||S.load==="audit"
+              ?(()=>{const w=h("button",{className:"primary",style:{display:"flex",alignItems:"center",gap:"8px",opacity:"0.7",cursor:"not-allowed"}});w.appendChild(spinEl());w.appendChild(document.createTextNode(S.load==="polish"?"Improving…":"Analyzing…"));return w;})()
+              :h("button",{className:"primary",onClick:()=>{if(S.raw.trim())doPolish();}},["✦ Improve Resume"]),
+            // More Actions dropdown
+            (()=>{
+              const menuOpen=S.moreMenuOpen||false;
+              const wrap=div({className:"ap-more-dropdown"});
+              const btn=h("button",{className:"ap-more-btn",onClick:(e)=>{e.stopPropagation();S.moreMenuOpen=!S.moreMenuOpen;rerender();}},["More actions ▾"]);
+              wrap.appendChild(btn);
+              if(menuOpen){
+                const menu=div({className:"ap-dropdown-menu"});
+                const items=[
+                  ["🎯","ATS Check",()=>{
+                    S.moreMenuOpen=false;
+                    S.showAdvanced=true;
+                    rerender();
+                    setTimeout(()=>document.querySelector('.ap-more-dropdown')?.closest('#app')?.scrollIntoView({block:'nearest'}),50);
+                  }],
+                  ["🎭","Tone Analysis",()=>{S.moreMenuOpen=false;S.toneCheck=auditTone(S.raw||"");rerender();}],
+                  ["📋","Copy resume",()=>{S.moreMenuOpen=false;navigator.clipboard.writeText(S.raw||"").catch(()=>{});showToast("Copied to clipboard 📋","info");rerender();}],
+                  ["📄","PDF Preview",()=>{S.moreMenuOpen=false;S.resumeView=S.resumeView==="preview"?"edit":"preview";rerender();}],
+                ];
+                items.forEach(([icon,label,fn])=>{
+                  const item=h("button",{className:"ap-dropdown-item",onClick:fn},[icon+" "+label]);
+                  menu.appendChild(item);
+                });
+                // Close on outside click
+                setTimeout(()=>{
+                  const close=()=>{S.moreMenuOpen=false;rerender();document.removeEventListener('click',close);};
+                  document.addEventListener('click',close,{once:true});
+                },10);
+                wrap.appendChild(menu);
+              }
+              return wrap;
+            })(),
+          ]),
         ]),
 
         // Textarea
