@@ -390,8 +390,8 @@ function parseResume(text){
   }
 
   const isHeader=l=>l.length<60&&l===l.toUpperCase()&&!l.includes("|")&&l.replace(/[\s&\/\-.,:()']/g,"").length>2;
-  const isJobLine=l=>(l.includes(" | ")||l.includes(" \u2014 "))&&!/,\s*[A-Z]{2}/.test(l)&&!/\d{4}/.test(l)&&l.length<120;
-  const isBullet=l=>/^[\s]*[•\-\*\u2013]/.test(l);
+  const isJobLine=l=>(l.includes(" | ")||l.includes(" \u2014 "))&&/^[A-Z]/.test(l)&&!l.startsWith("http")&&l.length<150;
+  const isBullet=l=>/^[\s]*[•\-\*\u2013]/.test(l)||/^\s{2,}\S/.test(l);
   let cur=null;
   for(const line of lines){
     if(isHeader(line)){
@@ -452,15 +452,16 @@ function renderHTML(data,ci){
           bl={left:left,right:right,sub:"",bullets:[]};
         }else if(bl){
           if(it.type==="text"&&/,\s*[A-Z]{2}/.test(it.text)&&!bl._locDone){
-          // Extract date from location line before folding
-          var locText=it.text;
-          var locDm=locText.match(/\|?\s*(\d{4}\s*[-\u2013\u2014]\s*(?:\d{4}|Present))\s*$/i);
-          if(locDm){if(!bl.right)bl.right=locDm[1].trim();locText=locText.slice(0,locDm.index).replace(/[|\u2013\u2014\-]\s*$/,"").trim();}
-          if(locText)bl.left=bl.left+" | "+locText;
-          bl._locDone=true;
-        }
-          else if(it.type==="bullet"){bl.bullets.push(hlMetrics(escapeHTML(it.text)));}
-          else{bl.bullets.push(hlMetrics(escapeHTML(it.text)));}
+            var locText=it.text;
+            var locDm=locText.match(/\|?\s*(\d{4}\s*[-\u2013\u2014]\s*(?:\d{4}|Present))\s*$/i);
+            if(locDm){if(!bl.right)bl.right=locDm[1].trim();locText=locText.slice(0,locDm.index).replace(/[|\u2013\u2014\-]\s*$/,"").trim();}
+            if(locText)bl.left=bl.left+" | "+locText;
+            bl._locDone=true;
+          }else if(it.type==="bullet"){
+            bl.bullets.push(hlMetrics(escapeHTML(it.text)));
+          }else{
+            bl.bullets.push(hlMetrics(escapeHTML(it.text)));
+          }
         }else if(it.type==="bullet"){
           html+='<div class="pdf-bullet"><span class="pdf-bullet-dot">\u25aa</span><span class="pdf-bullet-text">'+hlMetrics(escapeHTML(it.text))+'</span></div>';
         }else{
@@ -475,8 +476,7 @@ function renderHTML(data,ci){
           html+='<div class="pdf-exp-block"'+(last?' style="margin-bottom:0;padding-bottom:0"':"")+'>'+
             '<div class="pdf-exp-header"><span class="pdf-exp-left">'+escapeHTML(b.left)+'</span>'+
             (b.right?'<span class="pdf-exp-right">'+escapeHTML(b.right)+'</span>':"")+
-            '</div>'+
-            ""
+            '</div>'
             +b.bullets.map(function(bl){return'<div class="pdf-bullet"><span class="pdf-bullet-dot">\u25aa</span><span class="pdf-bullet-text">'+bl+'</span></div>';}).join("")
             +'</div>';
         });
