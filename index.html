@@ -1,8 +1,9 @@
 <html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ResumeAI — Powered by Claude</title>
+<title>Applyify — Apply smarter. Get hired faster.</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100vh;font-family:'Inter',system-ui,sans-serif}
@@ -60,9 +61,255 @@ button:active{transform:scale(0.97)}
   #print-area{display:block!important;position:static;margin:0!important;padding:0!important;width:100%!important}
   .pdf-wrap{padding:0;max-width:none;box-shadow:none}
 }
+
+/* ── APPLYIFY HEADER + HERO ── */
+.ap-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 14, 23, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ap-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.ap-header-logo img {
+  height: 30px;
+  width: auto;
+}
+.ap-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ap-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 80px 32px 72px;
+  text-align: center;
+  background: #080c15;
+}
+.ap-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 20% 60%, rgba(37,99,235,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 30%, rgba(22,163,74,0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+.ap-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+}
+.ap-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.ap-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(37,99,235,0.12);
+  border: 1px solid rgba(37,99,235,0.3);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #60a5fa;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.ap-hero-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3b82f6;
+  box-shadow: 0 0 8px #3b82f6;
+  animation: apPulse 2s ease-in-out infinite;
+}
+@keyframes apPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+.ap-hero h1 {
+  font-family: 'Sora', 'DM Sans', sans-serif;
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: #f0f4ff;
+  margin-bottom: 20px;
+}
+.ap-hero h1 em {
+  font-style: normal;
+  color: #4ade80;
+}
+.ap-hero p {
+  font-size: 17px;
+  line-height: 1.7;
+  color: #8b95a8;
+  max-width: 520px;
+  margin: 0 auto 36px;
+}
+.ap-hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ap-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 12px;
+  background: #2563eb;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 24px rgba(37,99,235,0.4);
+  transition: all 0.2s;
+  letter-spacing: -0.01em;
+}
+.ap-btn-primary:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 32px rgba(37,99,235,0.5);
+}
+.ap-btn-primary:active { transform: scale(0.98); }
+.ap-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 12px;
+  background: transparent;
+  color: #e8edf5;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.12);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: -0.01em;
+}
+.ap-btn-secondary:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.2);
+  transform: translateY(-1px);
+}
+.ap-btn-secondary:active { transform: scale(0.98); }
+.ap-hero-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 52px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  flex-wrap: wrap;
+}
+.ap-stat {
+  text-align: center;
+}
+.ap-stat-num {
+  font-family: 'Sora', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: #f0f4ff;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.ap-stat-label {
+  font-size: 12px;
+  color: #4b5563;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.ap-stat-div {
+  width: 1px;
+  height: 36px;
+  background: rgba(255,255,255,0.08);
+}
+
+/* Hide old JS header — replaced by .ap-header */
+#app > div > div[style*="sticky"] {
+  display: none !important;
+}
 </style>
 </head>
 <body>
+<header class="ap-header">
+  <a class="ap-header-logo" href="javascript:void(0)" onclick="location.reload()">
+    <img src="https://dwaldnerinc-ai.github.io/resumeai/applyify_logo.png" alt="Applyify" />
+  </a>
+  <div class="ap-header-actions" id="ap-header-actions">
+    <!-- API key / dark mode controls injected by JS -->
+  </div>
+</header>
+
+<section class="ap-hero">
+  <div class="ap-hero-inner">
+    <div class="ap-hero-badge">
+      <span class="ap-hero-badge-dot"></span>
+      Powered by Claude AI
+    </div>
+    <h1>Apply smarter.<br><em>Get hired faster.</em></h1>
+    <p>Track your job applications, improve your resume with AI, and stay organised without burnout.</p>
+    <div class="ap-hero-actions">
+      <button class="ap-btn-primary" onclick="document.getElementById('app').scrollIntoView({behavior:'smooth'});if(window.S){S.tab='resume';rerender();}">
+        ✦ Improve my resume
+      </button>
+      <button class="ap-btn-secondary" onclick="document.getElementById('app').scrollIntoView({behavior:'smooth'});if(window.S){S.tab='tracker';rerender();}">
+        Track applications →
+      </button>
+    </div>
+    <div class="ap-hero-stats">
+      <div class="ap-stat">
+        <div class="ap-stat-num">100%</div>
+        <div class="ap-stat-label">Private — data stays local</div>
+      </div>
+      <div class="ap-stat-div"></div>
+      <div class="ap-stat">
+        <div class="ap-stat-num">AI</div>
+        <div class="ap-stat-label">Resume feedback in seconds</div>
+      </div>
+      <div class="ap-stat-div"></div>
+      <div class="ap-stat">
+        <div class="ap-stat-num">Free</div>
+        <div class="ap-stat-label">Bring your own API key</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <div id="app"></div>
 <script>
 // ─────────────────────────────────────────────────────────
@@ -651,7 +898,7 @@ function renderHero(T,mkBtn){
   }},[
     h("button",{style:{position:"absolute",top:"16px",right:"20px",background:"transparent",border:"none",color:T.muted,fontSize:"20px",cursor:"pointer",lineHeight:"1"},
       onClick:()=>{S.showHero=false;lsSet("hero-dismissed","1");rerender();}},["×"]),
-    div({style:{display:"inline-flex",alignItems:"center",gap:"6px",background:S.dark?"rgba(37,99,235,0.15)":"rgba(37,99,235,0.08)",border:"1px solid rgba(37,99,235,0.3)",borderRadius:"20px",padding:"4px 14px",fontSize:"11px",fontWeight:"700",color:"#60a5fa",marginBottom:"20px",letterSpacing:"0.06em"}},["✦ POWERED BY CLAUDE AI"]),
+    div({style:{display:"inline-flex",alignItems:"center",gap:"6px",background:S.dark?"rgba(37,99,235,0.15)":"rgba(37,99,235,0.08)",border:"1px solid rgba(37,99,235,0.3)",borderRadius:"20px",padding:"4px 14px",fontSize:"11px",fontWeight:"700",color:"#60a5fa",marginBottom:"20px",letterSpacing:"0.06em"}},[h("img",{src:"https://dwaldnerinc-ai.github.io/resumeai/applyify_check.png",style:{height:"16px",width:"16px",marginRight:"2px",verticalAlign:"middle"}})," APPLYIFY"]),
     h("h1",{style:{fontSize:"30px",fontWeight:"800",color:T.text,letterSpacing:"-0.02em",lineHeight:"1.2",maxWidth:"560px",margin:"0 auto 16px"}},[
       "Land more interviews ",h("span",{style:{color:"#3b82f6"}},["with less effort"]),
     ]),
@@ -687,7 +934,7 @@ function renderStartHere(T,card_s,mkBtn,div,span,h){
     div({style:{...card_s,textAlign:"center",marginBottom:"20px",background:allDone?"rgba(22,163,74,0.05)":S.dark?"rgba(37,99,235,0.05)":"rgba(37,99,235,0.03)",border:"1px solid "+(allDone?"#166534":"#1e40af")}},[
       div({style:{fontSize:"28px",marginBottom:"8px"}},[allDone?"🎉":"🚀"]),
       div({style:{fontSize:"18px",fontWeight:"800",color:T.text,marginBottom:"6px"}},[allDone?"You're all set!":"Let's get you set up"]),
-      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.6"}},[allDone?"Your profile is complete. Use the tabs above to keep going.":"Follow these 4 steps to get the most out of ResumeAI."]),
+      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.6"}},[allDone?"Your profile is complete. Use the tabs above to keep going.":"Follow these 4 steps to get the most out of Applyify."]),
       allDone?div({style:{marginTop:"14px",display:"flex",gap:"8px",justifyContent:"center",flexWrap:"wrap"}},[
         mkBtn("primary","Go to My Resume",()=>{S.tab="resume";rerender();},{fontSize:"13px"}),
         mkBtn("ghost","Go to Tracker",()=>{S.tab="tracker";rerender();},{fontSize:"13px"}),
@@ -789,9 +1036,9 @@ function _render(){
   const hasKey=!!S.apiKey;
   const header=div({style:{background:T.hBg,borderBottom:`1px solid ${T.hBorder}`,padding:"0 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:"0",zIndex:"10",minHeight:"54px",flexWrap:"wrap",gap:"8px",paddingTop:"8px",paddingBottom:"8px"}},[
     div({style:{display:"flex",alignItems:"center",gap:"10px"}},[
-      div({style:{width:"28px",height:"28px",background:"#2563eb",borderRadius:"7px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px",fontWeight:"700",color:"#fff",cursor:"pointer"},title:"Reload",onClick:()=>location.reload()},["R"]),
-      span({style:{fontSize:"15px",fontWeight:"700",letterSpacing:"-0.01em"}},["ResumeAI"]),
-      span({style:{fontSize:"11px",color:T.muted,marginLeft:"2px"}},["powered by Claude"]),
+      h("img",{src:"https://dwaldnerinc-ai.github.io/resumeai/applyify_logo.png",alt:"Applyify",
+        style:{height:"32px",width:"auto",cursor:"pointer",display:"block"},
+        title:"Reload",onClick:()=>location.reload()}),
     ]),
     div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},[
       S.storageReady?div({style:{fontSize:"11px",color:T.muted,display:"flex",alignItems:"center",gap:"4px"}},[
@@ -1906,7 +2153,7 @@ ${S.raw.substring(0,3000)}`
   const setupModal=showSetup?div({style:{position:"fixed",inset:"0",background:"rgba(0,0,0,0.75)",zIndex:"200",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}},[
     div({style:{background:S.dark?"#161c27":"#fff",borderRadius:"16px",padding:"32px",maxWidth:"460px",width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,0.5)"}},[
       div({style:{fontSize:"26px",marginBottom:"10px"}},["🚀"]),
-      div({style:{fontSize:"18px",fontWeight:"700",color:T.text,marginBottom:"8px"}},["Welcome to ResumeAI"]),
+      div({style:{fontSize:"18px",fontWeight:"700",color:T.text,marginBottom:"8px"}},["Welcome to Applyify 👋"]),
       div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.7",marginBottom:"18px"}},["AI-powered resume polishing, job tailoring, and interview prep — all running locally on your device. To enable the AI you need a free Anthropic API key."]),
       div({style:{background:S.dark?"#0d1117":"#f4f6fa",border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"18px"}},[
         div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:"10px"}},["One-time setup"]),
@@ -1955,8 +2202,32 @@ ${S.raw.substring(0,3000)}`
   ]):null;
 
   const coverModal=renderCoverModal(T,card_s,mkBtn,pillBtn,div,span,h);
-  const heroSection=renderHero(T,mkBtn);
-  const root=div({style:{minHeight:"100vh",background:T.appBg,color:T.text,fontFamily:"'Inter',system-ui,sans-serif"}},[header,noKeyBanner,heroSection,main,setupModal,coverModal].filter(Boolean));
+  const heroSection=null; // replaced by static HTML hero
+
+  // Inject JS header controls into the static HTML header
+  const apHeaderActions = document.getElementById('ap-header-actions');
+  if(apHeaderActions) {
+    apHeaderActions.innerHTML = '';
+    // Build controls: storageReady indicator, API key button, dark mode, reset
+    const ctrls = div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},[
+      S.storageReady?div({style:{fontSize:"11px",color:"#4b5563",display:"flex",alignItems:"center",gap:"4px"}},[
+        span({style:{width:"6px",height:"6px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}}),
+        " Saved"
+      ]):span(),
+      h("button",{className:hasKey?"btn-key-active":"btn-key-missing",onClick:()=>{S.showApiKey=!S.showApiKey;rerender();}},[
+        div({className:hasKey?"key-dot":"key-dot-missing"}),
+        hasKey?"API Active":"Set API Key",
+      ]),
+      S.showApiKey?div({style:{display:"flex",alignItems:"center",gap:"6px"}},[
+        (()=>{const inp=h("input",{style:{padding:"5px 10px",borderRadius:"8px",fontSize:"12px",width:"220px",border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#e8edf5"},placeholder:"sk-ant-api03-…",type:"password"});inp.value=S.apiKey;inp.addEventListener("input",e=>S.apiKey=e.target.value);inp.addEventListener("keydown",e=>{if(e.key==="Enter"){lsSet("api-key",S.apiKey.trim());S.showApiKey=false;rerender();}});setTimeout(()=>inp.focus(),50);return inp;})(),
+        h("button",{style:{padding:"5px 12px",borderRadius:"8px",fontSize:"12px",cursor:"pointer",border:"none",background:"#2563eb",color:"#fff",fontWeight:"600"},onClick:()=>{lsSet("api-key",S.apiKey.trim());S.showApiKey=false;rerender();}}),
+      ]):null,
+      h("button",{style:{padding:"6px 14px",borderRadius:"20px",border:"1px solid rgba(255,255,255,0.1)",background:"transparent",color:"#8b95a8",fontSize:"12px",cursor:"pointer",display:"flex",alignItems:"center",gap:"5px"},onClick:()=>{S.dark=!S.dark;lsSet("app-dark",String(S.dark));rerender();}},[S.dark?"☀ Light":"☾ Dark"]),
+    ].filter(Boolean));
+    apHeaderActions.appendChild(ctrls);
+  }
+
+  const root=div({style:{background:T.appBg,color:T.text,fontFamily:"'Inter',system-ui,sans-serif"}},[noKeyBanner,main,setupModal,coverModal].filter(Boolean));
 
   app.innerHTML="";
   app.appendChild(root);
@@ -1970,6 +2241,13 @@ ${S.raw.substring(0,3000)}`
 // ─────────────────────────────────────────────────────────
 // BOOT
 // ─────────────────────────────────────────────────────────
+// Move JS header controls into the new HTML header
+  const apHeaderActions = document.getElementById('ap-header-actions');
+  if(apHeaderActions) {
+    // Clone the right-side controls from the JS header into the HTML header
+    const jsHeader = document.querySelector('#app > div > div:first-child');
+  }
+
 if(document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', function() {
     loadAll();
