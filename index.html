@@ -598,14 +598,23 @@ function renderCoverModal(T,card_s,mkBtn,div,span,h){
     S.coverLoading=true;rerender();
     try{
       const r=await callAI(
-        `ROLE: High-level Executive Consultant writing a cover letter on behalf of a Senior Leader.
-TONE: Peer-to-peer, confident, solution-oriented. No "I am writing to apply." No "Dear Sir/Madam." No begging.
+        `ROLE: Professional cover letter writer. You are writing on behalf of the candidate using ONLY the information provided in their resume.
+
+STRICT ANTI-HALLUCINATION RULES (highest priority):
+1. ONLY use facts, numbers, and achievements that appear verbatim in the resume below. Do not invent, estimate, or extrapolate any figures.
+2. Do NOT inflate scale — if the resume says $1.5M, write $1.5M. Never upgrade it to "billions" or "hundreds of millions."
+3. Do NOT invent job titles, company names, industries, or responsibilities not present in the resume.
+4. If the resume lacks a specific metric for a requirement in the posting, describe the experience in plain terms — do not fill the gap with a made-up number.
+
+TONE: Peer-to-peer, confident, direct. No "I am writing to apply." No "Dear Sir/Madam." No begging. No hollow phrases like "passionate about excellence."
+
 STRUCTURE:
-1. THE HOOK: Open with a business challenge the company faces (infer from the job posting). One sentence.
-2. THE PROOF: Connect one specific metric from the resume ($, %, milestone) directly to a requirement in the posting.
-3. THE FIT: Briefly state why this role is a natural next step given the candidate's background.
-4. THE CLOSE: A confident peer-level ask — "When is a good time to discuss..." Not "I look forward to hearing from you."
-RULES: Under 300 words. Only use facts from the resume. No invented experience. Plain text output only.`,
+1. HOOK: One sentence referencing a real challenge from the job posting.
+2. PROOF: Connect one REAL metric from the resume directly to a posting requirement. Quote the exact figure from the resume.
+3. FIT: One or two sentences on why this role fits the candidate's actual background.
+4. CLOSE: Confident ask — "When is a good time to discuss..." 
+
+RULES: Under 280 words. Plain text only. No markdown.`,
         `RESUME:\n${(S.raw||"").substring(0,2000)}\n\nJOB:\n${app.title} at ${app.company}\nLocation: ${app.location||""}\n${app.notes||app.posting||""}`
       );
       S.coverLetter=r.trim();
