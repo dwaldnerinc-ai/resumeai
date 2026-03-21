@@ -102,7 +102,7 @@ const S={
   apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
   searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
   addedJobs:new Set(), aiSuggestions:[], aiSuggestionsError:"", recentlyAdded:[], addToast:"", pastePosting:"",
-  intJob:null, intRound:"prescreen", intQs:[], mockQ:"", mockA:"", mockFb:"", intLoad:false,
+  intJob:null, intRound:"prescreen", coverJobId:null, coverApp:null, showCoverModal:false, coverLetter:"", coverLoading:false, intQs:[], mockQ:"", mockA:"", mockFb:"", intLoad:false,
   urlImport:"", urlImportPaste:"", urlImportStatus:"", showUrlPaste:false,
 };
 
@@ -448,7 +448,14 @@ function renderHTML(data,ci){
           if(dm){right=dm[1].trim();left=left.slice(0,dm.index).replace(/[|\u2013\u2014\-]\s*$/,"").trim();}
           bl={left:left,right:right,sub:"",bullets:[]};
         }else if(bl){
-          if(it.type==="text"&&/,\s*[A-Z]{2}/.test(it.text)&&!bl.sub){bl.left=bl.left+" | "+it.text;}
+          if(it.type==="text"&&/,\s*[A-Z]{2}/.test(it.text)&&!bl._locDone){
+          // Extract date from location line before folding
+          var locText=it.text;
+          var locDm=locText.match(/\|?\s*(\d{4}\s*[-\u2013\u2014]\s*(?:\d{4}|Present))\s*$/i);
+          if(locDm){if(!bl.right)bl.right=locDm[1].trim();locText=locText.slice(0,locDm.index).replace(/[|\u2013\u2014\-]\s*$/,"").trim();}
+          if(locText)bl.left=bl.left+" | "+locText;
+          bl._locDone=true;
+        }
           else if(it.type==="bullet"){bl.bullets.push(hlMetrics(escapeHTML(it.text)));}
           else{bl.bullets.push(hlMetrics(escapeHTML(it.text)));}
         }else if(it.type==="bullet"){
@@ -579,6 +586,70 @@ function wireEditable(previewBox, getText, onSave){
   toolbar.appendChild(saveBtn);
   toolbar.appendChild(editBtn);
   previewBox.appendChild(toolbar);
+}
+
+// Cover letter modal — renders over the tracker when showCoverModal is true
+function renderCoverModal(T,card_s,mkBtn,div,span,h){
+  if(!S.showCoverModal||!S.coverApp)return null;
+  const app=S.coverApp;
+
+  async function generateCover(){
+    if(S.coverLoading)return;
+    S.coverLoading=true;rerender();
+    try{
+      const r=await callAI(
+        `ROLE: High-level Executive Consultant writing a cover letter on behalf of a Senior Leader.
+TONE: Peer-to-peer, confident, solution-oriented. No "I am writing to apply." No "Dear Sir/Madam." No begging.
+STRUCTURE:
+1. THE HOOK: Open with a business challenge the company faces (infer from the job posting). One sentence.
+2. THE PROOF: Connect one specific metric from the resume ($, %, milestone) directly to a requirement in the posting.
+3. THE FIT: Briefly state why this role is a natural next step given the candidate's background.
+4. THE CLOSE: A confident peer-level ask — "When is a good time to discuss..." Not "I look forward to hearing from you."
+RULES: Under 300 words. Only use facts from the resume. No invented experience. Plain text output only.`,
+        `RESUME:\n${(S.raw||"").substring(0,2000)}\n\nJOB:\n${app.title} at ${app.company}\nLocation: ${app.location||""}\n${app.notes||app.posting||""}`
+      );
+      S.coverLetter=r.trim();
+      if(app.id){
+        const idx=S.apps.findIndex(a=>a.id===app.id);
+        if(idx!==-1){S.apps[idx].savedCover=r.trim();lsSet("tracker-apps-v2",JSON.stringify(S.apps));}
+      }
+    }catch(e){S.coverLetter="Error: "+e.message;}
+    S.coverLoading=false;rerender();
+  }
+
+  return div({style:{position:"fixed",inset:"0",background:"rgba(0,0,0,0.75)",zIndex:"200",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}},[
+    div({style:{background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"16px",padding:"28px",maxWidth:"620px",width:"100%",maxHeight:"85vh",display:"flex",flexDirection:"column",gap:"14px",boxShadow:"0 24px 80px rgba(0,0,0,0.5)"}},[
+      div({style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},[
+        div({},[
+          div({style:{fontSize:"15px",fontWeight:"700",color:T.text}},["Cover Letter"]),
+          div({style:{fontSize:"12px",color:T.sub,marginTop:"2px"}},[app.title+" at "+app.company]),
+        ]),
+        h("button",{style:{background:"transparent",border:"none",color:T.muted,fontSize:"20px",cursor:"pointer",lineHeight:"1"},onClick:()=>{S.showCoverModal=false;rerender();}},["×"]),
+      ]),
+
+      S.coverLetter?null:div({style:{fontSize:"12px",color:T.sub,lineHeight:"1.6"}},[
+        "Generates an executive peer-to-peer cover letter using your resume and this job's details. Under 300 words, no fluff."
+      ]),
+
+      S.coverLoading?div({style:{display:"flex",alignItems:"center",gap:"8px",color:T.muted,fontSize:"13px"}},[
+        span({style:{display:"inline-block",width:"14px",height:"14px",border:"2px solid rgba(255,255,255,0.2)",borderTopColor:"#fff",borderRadius:"50%",animation:"spin .7s linear infinite"}}),
+        "Generating cover letter…"
+      ]):S.coverLetter?div({style:{flex:"1",overflowY:"auto"}},[
+        h("textarea",{style:{width:"100%",minHeight:"280px",background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"8px",color:T.text,padding:"12px 14px",fontSize:"12px",lineHeight:"1.8",resize:"vertical",boxSizing:"border-box",fontFamily:"inherit"},value:S.coverLetter,
+          onInput:e=>{S.coverLetter=e.target.value;}}),
+      ]):null,
+
+      div({style:{display:"flex",gap:"8px",flexWrap:"wrap"}},[
+        mkBtn("primary",S.coverLetter?"↺ Regenerate":"✦ Generate",generateCover,{fontSize:"13px"}),
+        S.coverLetter?mkBtn("ghost","Copy",()=>{navigator.clipboard.writeText(S.coverLetter).catch(()=>{});},{fontSize:"12px"}):null,
+        S.coverLetter?mkBtn("ghost","🖨 Print",()=>{
+          const pa=document.getElementById("print-area");if(!pa)return;
+          pa.innerHTML=`<div style="font-family:Inter,sans-serif;padding:48px;max-width:700px;margin:0 auto;font-size:11pt;line-height:1.8;white-space:pre-wrap">${S.coverLetter.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>`;
+          pa.style.display="block";window.print();pa.style.display="none";pa.innerHTML="";
+        },{fontSize:"12px"}):null,
+      ].filter(Boolean)),
+    ]),
+  ]);
 }
 
 // ─────────────────────────────────────────────────────────
@@ -1225,7 +1296,7 @@ ${S.raw.substring(0,3000)}`
 
     const step3Card=div({style:{...card_s,borderLeft:"3px solid #7c3aed",opacity:kw?"1":"0.55"}},[
       div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"14px"}},[
-        stepHeader("3","#7c3aed","AI job leads","Real companies hiring for your role — scored against your resume"),
+        stepHeader("3","#7c3aed","AI job leads","AI-generated leads based on your keywords — scored against your resume (not a live job board)"),
         div({style:{fontSize:"11px",color:T.muted,background:T.inBg,border:"1px solid "+T.inB,borderRadius:"6px",padding:"3px 8px",flexShrink:"0"}},["✨ Uses API"]),
       ]),
       aiBody,
@@ -1367,9 +1438,7 @@ ${S.raw.substring(0,3000)}`
           app.notes?h("p",{style:{fontSize:"12px",color:T.sub,lineHeight:"1.7",marginBottom:"12px"}},[app.notes]):null,
           div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
             mkBtn("primary",hasDocs?"↺ Re-generate →":"✦ Generate application →",()=>{
-              S.selectedJob=app;
-              S.posting=app.title+" at "+app.company+"\nLocation: "+app.location+"\nType: "+app.type+(app.salary?"\nSalary: "+app.salary:"")+"\n\n"+(app.notes||"");
-              S.tailored="";S.cover="";S.tab="apply";rerender();
+              S.coverJobId=app.id;S.coverApp=app;S.showCoverModal=true;rerender();
             },{fontSize:"12px",padding:"6px 14px"}),
             app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",style:{padding:"6px 14px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:T.ghost.text,textDecoration:"none",display:"inline-flex",alignItems:"center"}},["View posting ↗"]):null,
             mkBtn("danger","Remove",async()=>{if(!confirm("Remove?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();}),
@@ -1573,7 +1642,7 @@ ${S.raw.substring(0,3000)}`
               S.posting=app.title+" at "+app.company+"\nLocation: "+app.location+"\nType: "+app.type+(app.salary?"\nSalary: "+app.salary:"")+"\n\n"+(app.notes||"");
               if(app.savedResume){S.tailored=app.savedResume;lsSet("apply-tailored",app.savedResume);}
               if(app.savedCover){S.cover=app.savedCover;lsSet("apply-cover",app.savedCover);}
-              S.applyOut=app.savedResume?"resumepdf":"cover";S.tab="apply";rerender();
+              S.coverJobId=app.id;S.coverApp=app;S.showCoverModal=true;rerender();
             },{fontSize:"11px",padding:"5px 12px"}),
           ]),
           div({style:{display:"flex",gap:"8px",flexWrap:"wrap"}},[
@@ -1581,7 +1650,15 @@ ${S.raw.substring(0,3000)}`
               div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"5px"}},["Tailored Resume"]),
               div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",maxHeight:"44px",overflow:"hidden"}},[app.savedResume.substring(0,130)+"…"]),
               div({style:{display:"flex",gap:"5px",marginTop:"7px",flexWrap:"wrap"}},[
-                mkBtn("ghost","View PDF",()=>{const pa=document.getElementById("print-area");pa.style.display="block";alert("PDF export removed in this version. Copy the text instead.");pa.style.display="none";},{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","View PDF",()=>{
+                    const pa=document.getElementById("print-area");
+                    if(!pa)return;
+                    pa.innerHTML=buildPDFHTML(app.savedResume,S.ci||{});
+                    pa.style.display="block";
+                    window.print();
+                    pa.style.display="none";
+                    pa.innerHTML="";
+                  },{fontSize:"11px",padding:"3px 8px"}),
                 mkBtn("ghost","Copy",()=>navigator.clipboard.writeText(app.savedResume).catch(()=>{}),{fontSize:"11px",padding:"3px 8px"}),
                 mkBtn("ghost","⬇ .txt",()=>{const a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(app.savedResume);a.download=app.company.replace(/[\s]+/g,"_")+"_resume.txt";a.click();},{fontSize:"11px",padding:"3px 8px"}),
               ]),
@@ -1816,7 +1893,8 @@ ${S.raw.substring(0,3000)}`
     h("a",{href:"https://console.anthropic.com/settings/keys",target:"_blank",style:{fontSize:"12px",color:T.warn.text}},["console.anthropic.com"]),
   ]):null;
 
-  const root=div({style:{minHeight:"100vh",background:T.appBg,color:T.text,fontFamily:"'Inter',system-ui,sans-serif"}},[header,noKeyBanner,main,setupModal]);
+  const coverModal=renderCoverModal(T,card_s,mkBtn,div,span,h);
+    const root=div({style:{minHeight:"100vh",background:T.appBg,color:T.text,fontFamily:"'Inter',system-ui,sans-serif"}},[header,noKeyBanner,main,setupModal,coverModal].filter(Boolean));
 
   app.innerHTML="";
   app.appendChild(root);
