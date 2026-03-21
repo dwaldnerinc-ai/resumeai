@@ -1,235 +1,1853 @@
-// =============================
-// RESUME PDF GENERATOR ENGINE
-// =============================
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ResumeAI — Powered by Claude</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&amp;display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100vh;font-family:'Inter',system-ui,sans-serif}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fadein{animation:fadein .18s ease}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:#374151;border-radius:3px}
+textarea:focus,input:focus,select:focus{outline:none;border-color:#3b82f6!important;box-shadow:0 0 0 3px rgba(59,130,246,0.12)!important}
+button:active{transform:scale(0.97)}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;flex-shrink:0}
 
-// --- 1. Safe Escape Function ---
-function escapeHTML(s) {
-  return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+/* ── PDF RESUME STYLES ── */
+.pdf-wrap{background:#fff;color:#1a1a1a;font-family:'Inter',system-ui,sans-serif;font-size:10pt;font-weight:400;padding:24px 36px;max-width:800px;margin:0 auto;line-height:1.5}
+.pdf-wrap *{color:inherit}
+.pdf-name{font-size:20pt;font-weight:700;color:#0d2b4e;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:3px}
+.pdf-tagline{font-size:10.5pt;color:#2e6da4;font-weight:600;text-align:center;margin-bottom:6px}
+.pdf-contact{font-size:9pt;color:#555;font-weight:400;display:flex;justify-content:center;flex-wrap:wrap;gap:4px 10px;margin-bottom:4px}
+.pdf-divider{border:none;border-top:2px solid #0d2b4e;margin:10px 0 12px}
+.pdf-sec-title{font-size:9.5pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.08em;border-bottom:1.5px solid #0d2b4e;padding-bottom:3px;margin-top:12px;margin-bottom:7px;text-align:center}
+.pdf-exp-block{margin-bottom:10px;padding-bottom:8px;font-weight:400}
+.pdf-exp-block:last-child{margin-bottom:0;padding-bottom:0}
+.pdf-exp-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 12px;margin-bottom:3px}
+.pdf-exp-left{font-size:10.5pt;font-weight:700;color:#0d2b4e;flex:1 1 auto;text-align:center}
+.pdf-exp-right{font-size:9pt;color:#2e6da4;font-weight:600;flex-shrink:0;white-space:nowrap}
+.pdf-bullet{display:flex;gap:6px;margin-bottom:1px;font-size:9.5pt}
+.pdf-bullet-dot{color:#2e6da4;flex-shrink:0;font-weight:400}
+.pdf-bullet-text{color:#333;line-height:1.4;font-weight:400}
+.pdf-text-line{font-size:9.5pt;margin-bottom:2px;color:#333;line-height:1.4;font-weight:400}
+.pdf-bullet-text strong,.pdf-text-line strong{font-weight:700;color:#1e40af}
+.pdf-grid-flex{display:flex;flex-wrap:wrap;justify-content:center;gap:3px 0;width:100%;margin-top:2px}
+.pdf-grid-flex-item{flex:0 0 50%;text-align:center;font-size:9pt;color:#222;font-weight:400;padding:2px 8px;box-sizing:border-box}
+}
+.score-card{background:#1e2937;border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid #374151}
+.buzzword-tag{background:#450a0a;color:#f87171;padding:2px 8px;border-radius:4px;font-size:11px;margin-right:4px;display:inline-block;margin-bottom:4px}
+.btn-key-active{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s ease;background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.3);color:#4ade80;font-family:inherit}
+.btn-key-active:hover{background:rgba(22,163,74,0.2);border-color:#4ade80;box-shadow:0 0 12px rgba(74,222,128,0.1)}
+.btn-key-missing{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;background:rgba(133,77,14,0.1);border:1px solid rgba(133,77,14,0.4);color:#fbbf24;font-family:inherit}
+.key-dot{width:6px;height:6px;background:#4ade80;border-radius:50%;box-shadow:0 0 6px #4ade80;flex-shrink:0}
+.key-dot-missing{width:6px;height:6px;background:#fbbf24;border-radius:50%;flex-shrink:0}
+.no-print{display:block}
+@media print{
+  @page{size:letter;margin:0.5in}
+  body{background:white!important;color:black!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  body>*:not(#print-area),.no-print,button,#app{display:none!important}
+  #print-area{display:block!important;position:relative;width:100%!important;margin:0!important;padding:0!important}
+  .pdf-wrap{padding:0;box-shadow:none}
+}
+.app-stale{border:1.5px solid #854d0e!important;background:rgba(133,77,14,0.1)!important;position:relative}
+.app-stale::after{content:"⚠ Follow up?";position:absolute;top:-10px;right:10px;background:#854d0e;color:white;font-size:10px;padding:2px 6px;border-radius:4px;font-family:inherit}
+.pdf-bullet-text strong,.pdf-text-line strong{font-weight:700;color:#1e40af;background:rgba(30,64,175,0.03);padding:0 1px;border-radius:2px}
+.pdf-sec-title{font-size:10pt;font-weight:700;color:#0d2b4e;text-transform:uppercase;letter-spacing:.08em;border-bottom:1.5px solid #0d2b4e;padding-bottom:3px;margin-top:12px;margin-bottom:7px;text-align:center}
+.no-print{display:block}
+/* ── PDF Style Toggles ── */
+.pdf-compact .pdf-wrap{font-size:9.5pt;padding:24px 32px}
+.pdf-compact .pdf-exp-block{margin-bottom:10px;padding-bottom:8px}
+.pdf-compact .pdf-sec-title{margin-top:12px;margin-bottom:6px}
+.pdf-modern .pdf-name{font-family:"Inter",system-ui,sans-serif;color:#334155}
+.pdf-modern .pdf-sec-title{color:#475569;border-bottom-color:#94a3b8}
+.pdf-modern .pdf-exp-left{color:#334155}
+.pdf-modern .pdf-exp-right{color:#64748b}
+.pdf-classic .pdf-wrap{font-family:Georgia,serif}
+.pdf-classic .pdf-name{font-family:Georgia,serif}
+.pdf-classic .pdf-sec-title{border-bottom:1px solid #999;letter-spacing:.05em}
+</style>
+</head>
+<body style="background: rgb(13, 17, 23); color: rgb(232, 237, 245);">
+<div id="app"></div>
+<script>
+// ─────────────────────────────────────────────────────────
+// DATA & CONSTANTS
+// ─────────────────────────────────────────────────────────
+const STATUSES=[
+  {key:"saved",    label:"Saved",    color:"#6b7280",bgd:"#1f2937",bgl:"#f3f4f6"},
+  {key:"applied",  label:"Applied",  color:"#2563eb",bgd:"#0c1e3e",bgl:"#dbeafe"},
+  {key:"interview",label:"Interview",color:"#d97706",bgd:"#1c1200",bgl:"#fef3c7"},
+  {key:"offer",    label:"Offer",    color:"#16a34a",bgd:"#052e16",bgl:"#dcfce7"},
+  {key:"rejected", label:"Rejected", color:"#dc2626",bgd:"#3b1212",bgl:"#fee2e2"},
+  {key:"withdrawn",label:"Withdrawn",color:"#7c3aed",bgd:"#1e1040",bgl:"#ede9fe"},
+];
+const smeta=k=>STATUSES.find(s=>s.key===k)||STATUSES[0];
+
+const SEED_APPS=[];
+
+
+
+// ─────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────
+const S={
+  dark:true, tab:"resume",
+  raw:"", 
+  ci:{name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""},
+  showCi:false, load:"", copied:"", refineText:"", polishError:"", apiKey:"", apiKeyError:false, showApiKey:false, tipsOpen:false,followUpText:"",followUpJob:null,toneCheck:null,metricAlert:false,pdfStyle:"default",resumeView:"edit",auditResult:null,auditError:"",structure:{hasContact:false,hasSummary:false,hasMetrics:false,hasPMP:false},
+  
+  apps:[], storageReady:false, showForm:false, editId:null, fd:{}, filterSt:"all", expandedApp:null,
+  searchResults:[], searchDone:false, searchKw:"", searchLoc:"Vancouver, BC", searchType:[],
+  addedJobs:new Set(), aiSuggestions:[], aiSuggestionsError:"", recentlyAdded:[], addToast:"", pastePosting:"",
+  intJob:null, intRound:"prescreen", intQs:[], mockQ:"", mockA:"", mockFb:"", intLoad:false,
+  urlImport:"", urlImportPaste:"", urlImportStatus:"", showUrlPaste:false,
+};
+
+// ─────────────────────────────────────────────────────────
+// PERSISTENCE (localStorage)
+// ─────────────────────────────────────────────────────────
+function lsGet(k,fallback=null){try{const v=localStorage.getItem(k);return v!==null?v:fallback;}catch{return fallback;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch{}}
+function lsDel(k){try{localStorage.removeItem(k);}catch{}}
+
+let _saveTimer={};
+function debounceSave(key,val,delay=800){
+  clearTimeout(_saveTimer[key]);
+  _saveTimer[key]=setTimeout(()=>lsSet(key,val),delay);
 }
 
-// --- 2. Date Formatter ---
-function getFormattedDate() {
-  const d = new Date();
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  return `Last Updated: ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+function loadAll(){
+  const apps=lsGet("tracker-apps-v2");
+  S.apps=apps?JSON.parse(apps):[];
+  if(!apps)lsSet("tracker-apps-v2",JSON.stringify([]));
+
+  const raw=lsGet("resume-raw",""); S.raw=raw;
+  const ci=lsGet("resume-ci"); if(ci)S.ci=JSON.parse(ci);
+  const tone=lsGet("resume-tone"); if(tone)S.tone=tone;
+  const dark=lsGet("app-dark"); if(dark!==null)S.dark=(dark==="true");
+  const posting=lsGet("apply-posting",""); S.posting=posting;
+  S.apiKey=lsGet("api-key","")||"";
+  S.storageReady=true;
 }
 
-// --- 3. Parser ---
-function parseResume(text) {
-  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-  if (!lines.length) return null;
-
-  const firstLine = lines.shift();
-  const nameParts = firstLine.split("|").map(p => p.trim());
-
-  const data = {
-    name: nameParts[0],
-    credentials: nameParts.slice(1).join(" | "),
-    sections: []
+// ─────────────────────────────────────────────────────────
+// THEME
+// ─────────────────────────────────────────────────────────
+function t(){
+  const d=S.dark;
+  return d?{
+    appBg:"#0d1117",hBg:"#161c27",hBorder:"#21293a",
+    card:"#161c27",cardB:"#21293a",inBg:"#0d1117",inB:"#21293a",
+    text:"#e8edf5",sub:"#8b95a8",muted:"#4b5563",
+    active:{bg:"#0c1e3e",border:"#1e40af",text:"#93c5fd"},
+    done:{bg:"#052e16",border:"#166534",text:"#4ade80"},
+    idle:{bg:"#161c27",border:"#21293a",text:"#4b5563"},
+    outBg:"#0d1117",outB:"#21293a",
+    ghost:{bg:"#1f2937",border:"#374151",text:"#d1d5db"},
+    danger:{bg:"#3b1212",border:"#7f1d1d",text:"#f87171"},
+    warn:{bg:"#1c1200",border:"#854d0e",text:"#fbbf24"},
+    tag:{bg:"#0c1e3e",text:"#93c5fd",border:"#1e40af"},
+    div:"#21293a",cmpB:"#1e3a5f",cmpL:"#93c5fd",
+  }:{
+    appBg:"#f4f6fa",hBg:"#fff",hBorder:"#e2e6ee",
+    card:"#fff",cardB:"#e2e6ee",inBg:"#f8f9fc",inB:"#d1d9e6",
+    text:"#111827",sub:"#6b7280",muted:"#9ca3af",
+    active:{bg:"#eff6ff",border:"#93c5fd",text:"#1d4ed8"},
+    done:{bg:"#f0fdf4",border:"#86efac",text:"#15803d"},
+    idle:{bg:"#f9fafb",border:"#e5e7eb",text:"#6b7280"},
+    outBg:"#f8f9fc",outB:"#e2e6ee",
+    ghost:{bg:"#f3f4f6",border:"#d1d9e6",text:"#374151"},
+    danger:{bg:"#fee2e2",border:"#fca5a5",text:"#dc2626"},
+    warn:{bg:"#fffbeb",border:"#fcd34d",text:"#92400e"},
+    tag:{bg:"#eff6ff",text:"#1d4ed8",border:"#bfdbfe"},
+    div:"#e2e6ee",cmpB:"#bfdbfe",cmpL:"#2563eb",
   };
+}
 
-  const isHeader = l => l.length < 60 && !l.includes("|") && l.split(" ").length <= 5;
-  const isJobTitle = l => (l.includes(" | ") || l.includes(" — ")) && /\d{4}/.test(l);
-  const isBullet = l => /^[\s]*[•\-\*\u2013]/.test(l);
+// ─────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────
+function h(tag,attrs={},children=[]){
+  const el=document.createElement(tag);
+  for(const[k,v]of Object.entries(attrs)){
+    if(k==="style"&&typeof v==="object")Object.assign(el.style,v);
+    else if(k.startsWith("on"))el.addEventListener(k.slice(2).toLowerCase(),v);
+    else if(k==="className")el.className=v;
+    else if(k==="htmlFor")el.htmlFor=v;
+    else if(k==="disabled")el.disabled=v;
+    else if(k==="value"&&(tag==="input"||tag==="textarea"||tag==="select"))el.value=v;
+    else if(k==="placeholder")el.placeholder=v;
+    else if(k==="type")el.type=v;
+    else if(k==="href"){el.href=v;}
+    else if(k==="target")el.target=v;
+    else if(k==="rel")el.rel=v;
+    else el.setAttribute(k,v);
+  }
+  for(const c of children){
+    if(c===null||c===undefined)continue;
+    if(typeof c==="string"||typeof c==="number")el.appendChild(document.createTextNode(String(c)));
+    else el.appendChild(c);
+  }
+  return el;
+}
+function div(attrs={},children=[])     {return h("div",attrs,children);}
+function span(attrs={},children=[])    {return h("span",attrs,children);}
+function btn(label,style_obj={},onclick=()=>{}){
+  const b=h("button",{style:{cursor:"pointer",...style_obj},onClick:onclick});
+  if(typeof label==="string")b.textContent=label;
+  else if(label instanceof Element)b.appendChild(label);
+  return b;
+}
+function txt(content,style_obj={}){return span({style:style_obj},[content]);}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 
-  let current = null;
+async function callAI(sys,usr){
+  const key=(S.apiKey||lsGet("api-key","")).trim();
+  if(!key){S.apiKeyError=true;rerender();throw new Error("No API key — click the key button to add one.");}
+  const r=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:4000,system:sys,messages:[{role:"user",content:usr}]})
+  });
+  const d=await r.json();
+  if(d.error)throw new Error(d.error.message||"API error");
+  return d.content?.map(b=>b.text||"").join("")||"";
+}
 
-  for (const line of lines) {
-    if (isHeader(line)) {
-      if (current) data.sections.push(current);
-      current = { title: line, items: [] };
-    } else {
-      if (!current) current = { title: "PROFILE", items: [] };
+function spinEl(){
+  return span({className:"spin"});
+}
 
-      if (isJobTitle(line)) {
-        current.items.push({ type: "job", text: line });
-      } else if (isBullet(line)) {
-        current.items.push({ type: "bullet", text: line.replace(/^[•\-\*\u2013\s]+/, "") });
-      } else {
-        current.items.push({ type: "text", text: line });
+function isDone(s){
+  return {resume:!!S.raw,search:S.searchDone,board:S.apps.length>0,tracker:S.apps.some(a=>a.status!=="saved"),interview:S.intQs.length>0}[s]||false;
+}
+
+function calculateImpactScore(text){
+  if(!text)return 0;
+  const metrics=text.match(/(\$\d+(?:\.\d+)?[MKkBb]?|\d+(?:\.\d+)?%|\d+\+\s*(?:years?|yrs?))/gi)||[];
+  const metricScore=Math.min(metrics.length*10,50);
+  const strongVerbs=["built","saved","reduced","delivered","captured","managed","cut","led","directed","achieved","launched","mentored","optimized"];
+  const weakVerbs=["assisted","helped","responsible","spearheaded","leveraged","utilized"];
+  let verbScore=0;
+  strongVerbs.forEach(v=>{if(text.toLowerCase().includes(v))verbScore+=7;});
+  weakVerbs.forEach(v=>{if(text.toLowerCase().includes(v))verbScore-=5;});
+  return Math.max(0,Math.min(metricScore+verbScore+20,100));
+}
+
+function calculateMatch(resumeText,jobPosting){
+  if(!resumeText||!jobPosting)return 0;
+  const critical=["pmp","telecom","infrastructure","budget","vendor","stakeholder","agile","project management","program management"];
+  const secondary=["fiber","copper","procurement","compliance","lean","six sigma","risk","ms project","scrum","itil","change management"];
+  const resume=resumeText.toLowerCase();
+  const post=jobPosting.toLowerCase();
+  let score=50;
+  critical.forEach(w=>{
+    if(post.includes(w)&&resume.includes(w))score+=7;
+    else if(post.includes(w)&&!resume.includes(w))score-=5;
+  });
+  secondary.forEach(w=>{
+    if(post.includes(w)&&resume.includes(w))score+=3;
+  });
+  return Math.max(0,Math.min(100,score));
+}
+
+function calculateJobMatch(resumeText,jobPosting){
+  if(!resumeText||!jobPosting)return 0;
+  const keywords=["pmp","agile","scrum","budget","telecom","infrastructure","procurement","stakeholder","risk","compliance","lean","six sigma","fiber","copper","project management","program management","change management","vendor","contract","schedule","scope","quality","safety","reporting","forecasting","itil","resource","waterfall"];
+  const postingLower=jobPosting.toLowerCase();
+  const resumeLower=resumeText.toLowerCase();
+  let matchCount=0,totalFound=0;
+  keywords.forEach(word=>{
+    if(postingLower.includes(word)){
+      totalFound++;
+      if(resumeLower.includes(word))matchCount++;
+    }
+  });
+  if(totalFound===0)return 70;
+  return Math.round((matchCount/totalFound)*100);
+}
+
+function runPreFlightAudit(){
+  const text=S.raw.toLowerCase();
+  S.structure={
+    hasContact:!!(S.ci&&S.ci.email&&S.ci.name),
+    hasMetrics:(S.raw.match(/[\d\$%]+/g)||[]).length>3,
+    hasPMP:/pmp|project management professional|pmi/i.test(text),
+    hasLocation:/vancouver|bc|lower mainland|alberta|ontario|toronto|calgary/i.test(text),
+  };
+}
+
+function injectKeywords(){
+  if(!S.raw.trim())return;
+  var text=S.raw;
+  if(!/pmp|pmi/i.test(text)){
+    var firstNL=text.indexOf("\n");
+    var firstL=firstNL===-1?text:text.substring(0,firstNL);
+    var rest=firstNL===-1?"":text.substring(firstNL);
+    text=(firstL.trim()+" | PMP")+rest;
+  }
+  if(!/vancouver|bc|lower mainland/i.test(text)){
+    var em=text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+    if(em)text=text.replace(em[0],em[0]+" | Vancouver, BC");
+  }
+  if((text.match(/[\d$%]+/g)||[]).length<2){
+    text+="\n\nCORE ACCOMPLISHMENT: Led high-priority infrastructure project delivering 15% efficiency gains and $500K in cost avoidance.";
+  }
+  S.raw=text;
+  lsSet("resume-raw",text);
+  S.copyToast="Keywords injected!";
+  setTimeout(function(){S.copyToast="";rerender();},2000);
+  rerender();
+}
+
+function auditTone(text){
+  if(!text)return[];
+  const buzzwords=[
+    {word:"spearheaded",hint:"Use 'Led'"},
+    {word:"leveraged",hint:"Use 'Used'"},
+    {word:"utilized",hint:"Use 'Used'"},
+    {word:"orchestrated",hint:"Use 'Managed'"},
+    {word:"championed",hint:"Use 'Drove'"},
+    {word:"passionate",hint:"Show, don't tell"},
+    {word:"synergy",hint:"Delete"},
+    {word:"holistic",hint:"Use 'thorough'"},
+    {word:"transformative",hint:"Be specific"},
+    {word:"robust",hint:"Use 'strong'"},
+    {word:"innovative",hint:"Show via results"},
+    {word:"dynamic",hint:"Use 'adaptable'"},
+    {word:"results-driven",hint:"Show via results"},
+    {word:"deep dive",hint:"Use 'review'"},
+    {word:"pragmatic",hint:"Be specific — say what you actually did"},
+  ];
+  return buzzwords.filter(b=>text.toLowerCase().indexOf(b.word)!==-1);
+}
+
+function runToneCheck(text){
+  return auditTone(text||"").map(b=>({bad:b.word,good:b.hint}));
+}
+
+function updateMetricWarning(text){
+  const val=text||"";
+  const metricCount=(val.match(/[\d$%]+/g)||[]).length;
+  const wordCount=val.split(/\s+/).filter(Boolean).length;
+  const shouldWarn=wordCount>50&&metricCount===0;
+  S.metricAlert=shouldWarn;
+  const el=document.getElementById("metric-alert");
+  if(el){
+    el.style.display=shouldWarn?"block":"none";
+    el.style.background="rgba(133,77,14,0.1)";
+    el.style.border="1px solid #854d0e";
+    el.style.borderRadius="8px";
+    el.style.padding="8px 12px";
+  }
+  return !shouldWarn;
+}
+
+function generateFollowUp(jobTitle,company){
+  const templates=[
+    "Hi [Hiring Manager Name],\n\nI'm following up on my application for the "+jobTitle+" role at "+company+". Given my 17+ years in infrastructure and program delivery — including $1.5M in captured savings at TELUS — I'm confident I can bring that same operational discipline to your team.\n\nI'm still very interested and would welcome a conversation about next steps.\n\nBest,\n[Your Name]",
+    "Hi [Hiring Manager Name],\n\nI wanted to keep my application for the "+jobTitle+" position at "+company+" top of mind. Since applying, I've been thinking about how my experience in high-pressure decision-making and contract compliance could support your current roadmap.\n\nDo you have an update on the interview timeline?\n\nRegards,\n[Your Name]",
+  ];
+  return templates[Math.floor(Math.random()*templates.length)];
+}
+
+
+// ── RESUME PDF ENGINE ──────────────────────────────────────
+
+function escapeHTML(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+function getFormattedDate(){
+  const d=new Date();
+  const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return"Last Updated: "+months[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear();
+}
+
+function parseResume(text){
+  const lines=text.split("\n").map(l=>l.trim()).filter(Boolean);
+  if(!lines.length)return null;
+  const firstLine=lines.shift();
+  const nameParts=firstLine.split("|").map(p=>p.trim());
+  const data={name:nameParts[0],credentials:nameParts.slice(1).join(" | "),sections:[]};
+
+  // Header: ALL CAPS, short, no pipe
+  const isHeader=l=>l.length<60&&l===l.toUpperCase()&&!l.includes("|")&&l.replace(/[\s&\/\-.,:()']/g,"").length>2;
+  // Job title: has pipe or em-dash, no year (year lines are location/date sub-lines)
+  const isJobLine=l=>(l.includes(" | ")||l.includes(" \u2014 "))&&!/,\s*[A-Z]{2}/.test(l)&&!/\d{4}/.test(l)&&l.length<120;
+  const isBullet=l=>/^[\s]*[•\-\*\u2013]/.test(l);
+
+  let cur=null;
+  for(const line of lines){
+    if(isHeader(line)){
+      if(cur)data.sections.push(cur);
+      cur={title:line,items:[]};
+    }else{
+      if(!cur)cur={title:"PROFILE",items:[]};
+      if(isJobLine(line)){
+        cur.items.push({type:"job",text:line});
+      }else if(isBullet(line)){
+        cur.items.push({type:"bullet",text:line.replace(/^[•\-\*\u2013\s]+/,"")});
+      }else{
+        cur.items.push({type:"text",text:line});
       }
     }
   }
-
-  if (current) data.sections.push(current);
-
+  if(cur)data.sections.push(cur);
   return data;
 }
 
-// --- 4. HTML Renderer ---
-function renderHTML(data, ci = {}, theme = "modern") {
-  if (!data) return "";
+function hlMetrics(t){
+  return t.replace(/(\$\d+(?:\.\d+)?[MKkBb]?|\d+(?:\.\d+)?%|\d+\+\s*(?:years?|yrs?))/gi,"<strong>$1</strong>");
+}
 
-  const sep = '<span style="color:#ccc"> | </span>';
-  const contactLine = [ci.location, ci.phone, ci.email, ci.linkedin]
-    .filter(Boolean)
-    .map(escapeHTML)
-    .join(sep);
+function renderHTML(data,ci){
+  if(!data)return"";
+  ci=ci||{};
+  const sep='<span style="color:#ccc"> | </span>';
+  const contactLine=[ci.location,ci.phone,ci.email,ci.linkedin].filter(Boolean).map(escapeHTML).join(sep);
+  const GRID_KEYS=["SKILL","CERTIF","TOOL","EXPERTISE","ADDITIONAL","QUALIFICATION","LANGUAGE","AWARD","TRAINING","AREA","TECHNICAL","OPERATIONAL","EDUCATION","LICENCE","LICENSE"];
 
-  let html = `
-    <div class="pdf-name">${escapeHTML(data.name)}</div>
-    ${data.credentials ? `<div class="pdf-tagline">${escapeHTML(data.credentials)}</div>` : ""}
-    ${contactLine ? `<div class="pdf-contact">${contactLine}</div>` : ""}
-    <hr class="pdf-divider">
-  `;
+  let html='<div class="pdf-name">'+escapeHTML(data.name)+'</div>'
+    +(data.credentials?'<div class="pdf-tagline">'+escapeHTML(data.credentials)+'</div>':"")
+    +(contactLine?'<div class="pdf-contact">'+contactLine+'</div>':"")
+    +((data.name||contactLine)?'<hr class="pdf-divider">':""
+  );
 
-  data.sections.forEach(section => {
-    html += `<div class="pdf-section">`;
-    html += `<div class="pdf-section-title">${escapeHTML(section.title)}</div>`;
+  data.sections.forEach(function(sec){
+    if(!sec.items.length)return;
+    const isGrid=GRID_KEYS.some(function(k){return sec.title.toUpperCase().indexOf(k)!==-1;});
+    const isSumm=sec.title.indexOf("SUMMARY")!==-1||sec.title.indexOf("PROFILE")!==-1;
+    html+='<div style="margin-bottom:8px"><div class="pdf-sec-title">'+escapeHTML(sec.title)+'</div>';
 
-    let inList = false;
+    if(isGrid){
+      html+='<div class="pdf-grid-flex">';
+      sec.items.forEach(function(it){html+='<div class="pdf-grid-flex-item">'+escapeHTML(it.text)+'</div>';});
+      html+='</div>';
+    }else{
+      // Group job items into blocks with their bullets
+      var blocks=[],bl=null;
+      sec.items.forEach(function(it){
+        if(it.type==="job"){
+          if(bl)blocks.push(bl);
+          // Extract date from end
+          var left=it.text,right="";
+          var dm=left.match(/\|?\s*(\d{4}\s*[-\u2013\u2014]\s*(?:\d{4}|Present))/i);
+          if(dm){right=dm[1].trim();left=left.slice(0,dm.index).replace(/[|\u2013\u2014\-]\s*$/,"").trim();}
+          bl={left:left,right:right,sub:"",bullets:[]};
+        }else if(bl){
+          if(it.type==="text"&&/,\s*[A-Z]{2}/.test(it.text)&&!bl.sub){bl.sub=it.text;}
+          else if(it.type==="bullet"){bl.bullets.push(hlMetrics(escapeHTML(it.text)));}
+          else{bl.bullets.push(hlMetrics(escapeHTML(it.text)));}
+        }else if(it.type==="bullet"){
+          html+='<div class="pdf-bullet"><span class="pdf-bullet-dot">\u25aa</span><span class="pdf-bullet-text">'+hlMetrics(escapeHTML(it.text))+'</span></div>';
+        }else{
+          html+='<div class="pdf-text-line"'+(isSumm?' style="text-align:center"':"")+'>'+hlMetrics(escapeHTML(it.text))+'</div>';
+        }
+      });
+      if(bl)blocks.push(bl);
 
-    section.items.forEach(item => {
-      if (item.type === "job") {
-        if (inList) { html += "</ul>"; inList = false; }
-        html += `<div class="pdf-job">${escapeHTML(item.text)}</div>`;
+      if(blocks.length){
+        blocks.forEach(function(b,i){
+          var last=i===blocks.length-1;
+          html+='<div class="pdf-exp-block"'+(last?' style="margin-bottom:0;padding-bottom:0"':"")+'>'+
+            '<div class="pdf-exp-header"><span class="pdf-exp-left">'+escapeHTML(b.left)+'</span>'+
+            (b.right?'<span class="pdf-exp-right">'+escapeHTML(b.right)+'</span>':"")+
+            '</div>'+
+            (b.sub?'<div class="pdf-text-line" style="color:#555;font-size:9pt">'+escapeHTML(b.sub)+'</div>':"")
+            +b.bullets.map(function(bl){return'<div class="pdf-bullet"><span class="pdf-bullet-dot">\u25aa</span><span class="pdf-bullet-text">'+bl+'</span></div>';}).join("")
+            +'</div>';
+        });
       }
-      else if (item.type === "bullet") {
-        if (!inList) { html += "<ul class='pdf-list'>"; inList = true; }
-        html += `<li>${escapeHTML(item.text)}</li>`;
-      }
-      else {
-        if (inList) { html += "</ul>"; inList = false; }
-        html += `<div class="pdf-text">${escapeHTML(item.text)}</div>`;
-      }
+    }
+    html+='</div>';
+  });
+
+  const footer=ci.footer||"Infrastructure Leadership Portfolio";
+  html+='<div style="margin-top:32px;border-top:0.5px solid #eee;padding-top:8px;text-align:right;font-size:7.5pt;color:#aaa;font-style:italic;letter-spacing:0.02em">'+getFormattedDate()+' | '+escapeHTML(footer)+'</div>';
+
+  return'<div class="pdf-wrap">'+html+'</div>';
+}
+
+// Step 2: Wrapper — keeps existing call sites working
+// Old code calls: buildPDFHTML(text, ci) and expects a string
+// New engine returns an object — wrapper extracts .html
+function buildPDFHTML(text,ci,theme){
+  var parsed=parseResume(text||"");
+  var html=renderHTML(parsed,ci||{});
+  return html; // returns string, backward compatible
+}
+
+
+
+
+
+// ─────────────────────────────────────────────────────────
+// EDITABLE PDF
+// ─────────────────────────────────────────────────────────
+function wireEditable(previewBox, getText, onSave){
+  var editing=false, undoStack=[];
+
+  function extractText(){
+    var lines=[];
+    previewBox.querySelectorAll(".pdf-sec-title,.pdf-exp-left,.pdf-exp-right,.pdf-bullet-text,.pdf-text-line,.pdf-name,.pdf-tagline").forEach(function(el){
+      var tx=el.innerText.trim();
+      if(!tx)return;
+      if(el.classList.contains("pdf-sec-title"))lines.push("\n"+tx.toUpperCase());
+      else if(el.classList.contains("pdf-bullet-text"))lines.push("• "+tx);
+      else lines.push(tx);
     });
+    return lines.join("\n").trim();
+  }
 
-    if (inList) html += "</ul>";
+  var toolbar=document.createElement("div");
+  toolbar.style.cssText="position:absolute;top:10px;right:10px;display:flex;gap:6px;align-items:center;z-index:10";
 
-    html += `</div>`;
+  function mkTBtn(label,bg,color,border){
+    var b=document.createElement("button");
+    b.textContent=label;
+    b.style.cssText="font-size:11px;padding:4px 11px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;background:"+bg+";color:"+color+";border:1px solid "+border;
+    return b;
+  }
+
+  var editBtn=mkTBtn("✎ Edit","rgba(17,24,39,0.88)","#e5e7eb","#374151");
+  var saveBtn=mkTBtn("✓ Save","#052e16","#4ade80","#166534");
+  var revertBtn=mkTBtn("↺ Revert","rgba(17,24,39,0.88)","#fca5a5","#374151");
+  saveBtn.style.display="none"; revertBtn.style.display="none";
+
+  function startEdit(){
+    var wrap=previewBox.querySelector(".pdf-wrap");
+    if(!wrap)return;
+    undoStack.push(getText());
+    editing=true;
+    wrap.contentEditable="true";
+    wrap.spellcheck=true;
+    wrap.style.outline="2px solid rgba(37,99,235,0.4)";
+    wrap.style.borderRadius="4px";
+    wrap.style.caretColor="#2563eb";
+    editBtn.style.display="none";
+    saveBtn.style.display="";
+    revertBtn.style.display="";
+    setTimeout(function(){wrap.focus();},50);
+  }
+
+  function stopEdit(){
+    var wrap=previewBox.querySelector(".pdf-wrap");
+    if(!wrap)return;
+    editing=false;
+    wrap.contentEditable="false";
+    wrap.style.outline="none";
+    wrap.style.caretColor="";
+    editBtn.style.display="";
+    saveBtn.style.display="none";
+    revertBtn.style.display="none";
+  }
+
+  editBtn.addEventListener("click",function(){startEdit();});
+
+  saveBtn.addEventListener("click",function(){
+    var newText=extractText();
+    if(newText&&newText!==getText())onSave(newText);
+    stopEdit();
   });
 
-  const footerText = ci.footer || "Professional Portfolio";
-
-  html += `
-    <div class="pdf-footer">
-      ${getFormattedDate()} | ${escapeHTML(footerText)}
-    </div>
-  `;
-
-  return `<div class="pdf-wrap theme-${theme}">${html}</div>`;
-}
-
-// --- 5. Main Builder ---
-function buildPDFHTML(text, ci = {}, theme = "modern") {
-  const parsed = parseResume(text);
-  return {
-    html: renderHTML(parsed, ci, theme),
-    data: parsed
-  };
-}
-
-// --- 6. Minimal Styles (can expand themes) ---
-const styles = `
-.pdf-wrap { font-family: Arial; color:#222; }
-.pdf-name { font-size: 20pt; font-weight: bold; }
-.pdf-tagline { font-size: 10pt; margin-bottom: 4px; }
-.pdf-contact { font-size: 9pt; color:#555; }
-.pdf-divider { margin: 10px 0; }
-.pdf-section { margin-top: 12px; }
-.pdf-section-title { font-weight: bold; font-size: 11pt; margin-bottom: 4px; }
-.pdf-job { font-weight: bold; margin-top: 6px; }
-.pdf-text { font-size: 9pt; margin: 2px 0; }
-.pdf-list { margin: 4px 0 8px 16px; }
-.pdf-footer { margin-top: 20px; font-size: 7pt; color:#aaa; text-align:right; }
-`;
-
-// --- 7. Example Usage ---
-/*
-const result = buildPDFHTML(inputText, {
-  location: "Vancouver, BC",
-  phone: "123-456-7890",
-  email: "test@email.com",
-  linkedin: "linkedin.com/in/test",
-  footer: "Infrastructure Leadership Portfolio"
-});
-
-document.body.innerHTML = `<style>${styles}</style>` + result.html;
-*/
-
-
-// =============================
-// SIMPLE WEB APP UI (DROP-IN)
-// =============================
-
-function mountApp(containerId = "app") {
-  const container = document.getElementById(containerId);
-
-  container.innerHTML = `
-    <style>${styles}
-      .app-wrap { display:flex; gap:20px; padding:20px; }
-      .app-left, .app-right { flex:1; }
-      textarea { width:100%; height:400px; padding:10px; font-family:monospace; }
-      button { padding:10px 16px; margin-top:10px; cursor:pointer; }
-      .toolbar { margin-bottom:10px; }
-    </style>
-
-    <div class="app-wrap">
-      <div class="app-left">
-        <div class="toolbar">
-          <button onclick="generateResume()">Generate</button>
-          <button onclick="downloadHTML()">Download HTML</button>
-        </div>
-        <textarea id="resumeInput" placeholder="Paste your resume text here..."></textarea>
-      </div>
-
-      <div class="app-right">
-        <div id="preview"></div>
-      </div>
-    </div>
-  `;
-}
-
-function generateResume() {
-  const input = document.getElementById("resumeInput").value;
-
-  const result = buildPDFHTML(input, {
-    location: "Vancouver, BC",
-    email: "your@email.com",
-    footer: "Infrastructure Leadership Portfolio"
+  revertBtn.addEventListener("click",function(){
+    if(!confirm("Revert to original? Edits will be lost."))return;
+    var prev=undoStack[undoStack.length-1];
+    if(prev){onSave(prev);stopEdit();rerender();}
   });
 
-  window.__LAST_RESULT__ = result;
+  previewBox.addEventListener("keydown",function(ev){
+    if(!editing)return;
+    if((ev.ctrlKey||ev.metaKey)&&ev.key==="s"){ev.preventDefault();saveBtn.click();}
+    if(ev.key==="Escape"){revertBtn.click();}
+  });
 
-  document.getElementById("preview").innerHTML = result.html;
+  toolbar.appendChild(revertBtn);
+  toolbar.appendChild(saveBtn);
+  toolbar.appendChild(editBtn);
+  previewBox.appendChild(toolbar);
 }
 
-function downloadHTML() {
-  if (!window.__LAST_RESULT__) return alert("Generate first");
-
-  const blob = new Blob([
-    `<html><head><style>${styles}</style></head><body>${window.__LAST_RESULT__.html}</body></html>`
-  ], { type: "text/html" });
-
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "resume.html";
-  a.click();
+// ─────────────────────────────────────────────────────────
+// RENDER ENGINE
+// ─────────────────────────────────────────────────────────
+let renderTimeout=null;
+function rerender(){
+  clearTimeout(renderTimeout);
+  renderTimeout=setTimeout(_render,0);
 }
 
+function _render(){
+  try {
+  const T=t();
+  const app=document.getElementById("app");
+  if(!app) {
+    console.error("Could not find #app element");
+    return;
+  }
 
-// =============================
-// NEXT STEP: PDF EXPORT HOOK
-// =============================
+  // Apply theme to body
+  document.body.style.background=T.appBg;
+  document.body.style.color=T.text;
 
-/*
-To enable real PDF downloads, plug in one of these:
+  const card_s={background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"14px",padding:"22px 24px",marginBottom:"18px"};
+  const lbl_s={fontSize:"11px",color:T.muted,marginBottom:"6px",display:"block",textTransform:"uppercase",letterSpacing:"0.07em",fontWeight:"600"};
+  const ta_s=(h=160)=>({width:"100%",minHeight:h+"px",background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"9px",color:T.text,padding:"12px 14px",fontSize:"13px",lineHeight:"1.7",resize:"vertical",boxSizing:"border-box",fontFamily:"ui-monospace,monospace"});
+  const inp_s={background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"8px",color:T.text,padding:"9px 13px",fontSize:"13px",fontFamily:"inherit",width:"100%",boxSizing:"border-box"};
+  const out_s={background:T.outBg,border:`1px solid ${T.outB}`,borderRadius:"9px",padding:"14px 16px",fontSize:"13px",lineHeight:"1.85",color:T.text,whiteSpace:"pre-wrap",maxHeight:"460px",overflowY:"auto",fontFamily:"ui-monospace,monospace"};
 
-Option 1 (fastest): html2pdf.js
-- Converts the generated HTML into a PDF
+  function mkBtn(variant,label,onclick,extra={}){
+    const map={primary:{bg:"#2563eb",c:"#fff"},purple:{bg:"#7c3aed",c:"#fff"},teal:{bg:"#0d9488",c:"#fff"},green:{bg:"#16a34a",c:"#fff"}};
+    const v=map[variant];
+    let s={padding:"9px 20px",borderRadius:"8px",border:v?"none":`1px solid ${T.ghost.border}`,cursor:"pointer",fontSize:"13px",fontWeight:"600",background:v?v.bg:T.ghost.bg,color:v?v.c:T.ghost.text,display:"inline-flex",alignItems:"center",gap:"7px",...extra};
+    if(variant==="danger")s={padding:"7px 14px",borderRadius:"7px",border:`1px solid ${T.danger.border}`,cursor:"pointer",fontSize:"12px",fontWeight:"600",background:T.danger.bg,color:T.danger.text,display:"inline-flex",alignItems:"center",gap:"6px",...extra};
+    const b=h("button",{style:s,onClick:onclick});
+    if(label instanceof Element)b.appendChild(label);
+    else b.textContent=label;
+    return b;
+  }
 
-Option 2 (higher quality): Puppeteer (server-side)
-- Best for production SaaS
+  function pillBtn(label,active,color,onclick,extra={}){
+    const b=h("button",{style:{padding:"6px 14px",borderRadius:"8px",border:`1.5px solid ${active?color:T.cardB}`,background:active?(S.dark?color+"22":color+"18"):"transparent",color:active?color:T.sub,fontSize:"12px",cursor:"pointer",fontWeight:active?"600":"400",...extra},onClick:onclick});
+    b.textContent=label;
+    return b;
+  }
 
-Example (html2pdf):
+  function stepColor(key){
+    return isDone(key)?T.done:S.tab===key?T.active:T.idle;
+  }
 
-function downloadPDF() {
-  const element = document.getElementById("preview");
-  html2pdf().from(element).save("resume.pdf");
+  function mkLabel(text){
+    const l=h("label",{style:lbl_s});l.textContent=text;return l;
+  }
+  function mkInput(val,onchange,extra={}){
+    const i=h("input",{style:inp_s,value:val,...extra});
+    i.addEventListener("input",e=>onchange(e.target.value));
+    return i;
+  }
+  function mkSelect(val,options,onchange){
+    const s=h("select",{style:inp_s});
+    options.forEach(([v,l])=>{const o=h("option",{value:v});o.textContent=l;if(v===val)o.selected=true;s.appendChild(o);});
+    s.addEventListener("change",e=>onchange(e.target.value));
+    return s;
+  }
+  function mkTextarea(val,onchange,heightPx=160,placeholder=""){
+    const ta=h("textarea",{style:ta_s(heightPx),placeholder});
+    ta.value=val;
+    ta.addEventListener("input",e=>onchange(e.target.value));
+    return ta;
+  }
+
+  // ── HEADER ──
+  const TABS=[["resume","1","My Resume"],["search","2","Find Jobs"],["board","3","Job Board"],["tracker","4","Apply & Track"],["interview","5","Interview Prep"]];
+
+  const hasKey=!!S.apiKey;
+  const header=div({style:{background:T.hBg,borderBottom:`1px solid ${T.hBorder}`,padding:"0 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:"0",zIndex:"10",minHeight:"54px",flexWrap:"wrap",gap:"8px",paddingTop:"8px",paddingBottom:"8px"}},[
+    div({style:{display:"flex",alignItems:"center",gap:"10px"}},[
+      div({style:{width:"28px",height:"28px",background:"#2563eb",borderRadius:"7px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px",fontWeight:"700",color:"#fff",cursor:"pointer"},title:"Reload",onClick:()=>location.reload()},["R"]),
+      span({style:{fontSize:"15px",fontWeight:"700",letterSpacing:"-0.01em"}},["ResumeAI"]),
+      span({style:{fontSize:"11px",color:T.muted,marginLeft:"2px"}},["powered by Claude"]),
+    ]),
+    div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},[
+      S.storageReady?div({style:{fontSize:"11px",color:T.muted,display:"flex",alignItems:"center",gap:"4px"}},[
+        span({style:{width:"6px",height:"6px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}}),
+        " Auto-saved"
+      ]):span(),
+      div({style:{display:"flex",alignItems:"center",gap:"6px"}},[
+        h("button",{className:hasKey?"btn-key-active":"btn-key-missing",onClick:()=>{S.showApiKey=!S.showApiKey;rerender();}},[
+          div({className:hasKey?"key-dot":"key-dot-missing"}),
+          hasKey?"API Active":"Set API Key",
+        ]),
+        S.showApiKey?div({style:{display:"flex",alignItems:"center",gap:"6px"}},[
+          (()=>{const inp=h("input",{style:{padding:"5px 10px",borderRadius:"8px",fontSize:"12px",width:"240px",border:`1px solid ${T.inB}`,background:T.inBg,color:T.text},placeholder:"sk-ant-api03-…",type:"password"});inp.value=S.apiKey;inp.addEventListener("input",e=>S.apiKey=e.target.value);inp.addEventListener("keydown",e=>{if(e.key==="Enter"){lsSet("api-key",S.apiKey.trim());S.showApiKey=false;S.apiKeyError=false;rerender();}});setTimeout(()=>inp.focus(),50);return inp;})(),
+          h("button",{style:{padding:"5px 12px",borderRadius:"8px",fontSize:"12px",cursor:"pointer",border:"none",background:"#2563eb",color:"#fff",fontWeight:"600"},onClick:()=>{lsSet("api-key",S.apiKey.trim());S.showApiKey=false;S.apiKeyError=false;rerender();}},["Save"]),
+        ]):null,
+      ].filter(Boolean)),
+      h("button",{style:{padding:"5px 13px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:T.card,color:T.sub,fontSize:"12px",cursor:"pointer",display:"flex",alignItems:"center",gap:"5px"},onClick:()=>{S.dark=!S.dark;lsSet("app-dark",String(S.dark));rerender();}},[S.dark?"☀ Light":"☾ Dark"]),
+      h("button",{style:{padding:"5px 10px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:"transparent",color:T.muted,fontSize:"11px",cursor:"pointer"},onClick:()=>{if(!confirm("Clear all saved data and start fresh?"))return;["tracker-apps-v2","resume-raw","resume-polished","resume-ci","resume-tone","apply-posting","apply-tailored","apply-cover"].forEach(lsDel);S.raw="";S.ci={name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""};S.tone="natural";S.posting="";S.tailored="";S.cover="";S.apps=[...SEED_APPS];S.resumeView="edit";lsSet("tracker-apps-v2",JSON.stringify(SEED_APPS));rerender();}},["Reset"]),
+    ]),
+  ]);
+
+  // ── TAB BAR ──
+  const tabBar=div({style:{display:"flex",gap:"7px",marginBottom:"24px",flexWrap:"wrap"}},
+    TABS.map(([key,num,label])=>{
+      const c=stepColor(key);
+      const done=isDone(key);
+      const isActive=S.tab===key;
+      const b=h("button",{style:{padding:"7px 16px",borderRadius:"20px",border:`1.5px solid ${c.border}`,background:c.bg,color:c.text,fontSize:"13px",cursor:"pointer",display:"flex",alignItems:"center",gap:"6px",fontWeight:isActive?"600":"500"},onClick:()=>{S.tab=key;rerender();}});
+      const badge=span({style:{width:"20px",height:"20px",borderRadius:"50%",background:done?"#16a34a":isActive?"#2563eb":T.muted,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:"11px",color:"#fff",flexShrink:"0",fontWeight:"800"}},[num]);
+      b.appendChild(badge);
+      b.appendChild(document.createTextNode(" "+label));
+      if(done){
+        const tick=document.createElement("span");tick.textContent=" \u2713";tick.style.cssText="font-size:12px;color:#4ade80;font-weight:700";
+        b.appendChild(tick);
+      }
+      if(key==="tracker"&&S.apps.length>0){
+        const ct=span({style:{fontSize:"10px",fontWeight:"700",padding:"1px 6px",borderRadius:"8px",background:S.dark?"#0c1e3e":"#dbeafe",color:S.dark?"#93c5fd":"#1d4ed8"}},[String(S.apps.length)]);
+        b.appendChild(ct);
+      }
+      return b;
+    })
+  );
+
+  // ── TAB CONTENT ──
+  let content=div();
+
+  // ── TAB 1: MY RESUME ──
+  if(S.tab==="resume"){
+
+    async function runAudit(){
+      if(!S.raw.trim()||S.load==="audit")return;
+      S.load="audit";S.auditResult=null;rerender();
+      try{
+        const r=await callAI(
+          `You are a senior hiring manager and executive recruiter. Analyze this resume and return ONLY a JSON object with these exact keys:
+{
+  "score": integer 0-100,
+  "grade": one of "Strong" | "Good" | "Needs Work" | "Weak",
+  "strengths": array of 3 short strings (what is working),
+  "gaps": array of 3 short strings (what is missing or weak),
+  "quickWins": array of 3 actionable suggestions the candidate can do TODAY to improve,
+  "atsFriendly": boolean,
+  "toneIssues": array of buzzwords found (e.g. "spearheaded", "leveraged", "pragmatic")
 }
-*/
+No markdown, no backticks, just valid JSON.`,
+          `Resume to analyze:
+
+${S.raw.substring(0,3000)}`
+        );
+        S.auditResult=JSON.parse(r.replace(/\`\`\`json|\`\`\`/g,"").trim());
+      }catch(e){S.auditError=e.message||"Analysis failed.";}
+      S.load="";rerender();
+    }
+
+    // Impact score live
+    const score=calculateImpactScore(S.raw);
+    const scoreCol=score>=75?"#4ade80":score>=50?"#fbbf24":"#f87171";
+    const scoreBarCol=score>=75?"#16a34a":score>=50?"#d97706":"#dc2626";
+
+    // Structure check
+    const text=S.raw||"";
+    const checks=[
+      [!!(S.ci.name||S.ci.email||S.ci.phone),"Contact info set"],
+      [/SUMMARY|PROFILE|OBJECTIVE/i.test(text),"Professional Summary present"],
+      [(text.match(/ \| | — | – /g)||[]).length>=2,"3+ Experience blocks found"],
+      [(text.match(/(\$\d+|\d+%|\d+\+\s*years?)/gi)||[]).length>=5,"5+ Metrics found"],
+    ];
+
+    const auditR=S.auditResult;
+
+    content=div({},[
+      // Header card
+      div({style:{...card_s,marginBottom:"16px"}},[
+        div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"14px",flexWrap:"wrap",gap:"10px"}},[
+          div({},[
+            div({style:{fontSize:"15px",fontWeight:"700",color:T.text}},["My Resume"]),
+            div({style:{fontSize:"13px",color:T.sub,marginTop:"2px"}},["Paste your resume — get an instant rating, gap analysis, and quick wins."]),
+          ]),
+          mkBtn("primary",S.load==="audit"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Analyzing…"));return w;})():"✦ Analyze resume",runAudit,{fontSize:"13px"}),
+        ]),
+
+        // Textarea
+        div({style:{position:"relative"}},[
+          S.metricAlert?div({style:{background:"rgba(133,77,14,0.1)",border:"1px solid #854d0e",color:"#fbbf24",padding:"8px 12px",borderRadius:"8px",fontSize:"12px",marginBottom:"8px",fontWeight:"600"}},
+            ["\u26a0\ufe0f Low Impact Score: Add numbers ($ or %) to prove your results."]):null,
+          (()=>{
+            const ta=h("textarea",{style:{width:"100%",minHeight:"280px",background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"9px",color:T.text,padding:"12px 14px",fontSize:"13px",lineHeight:"1.7",resize:"vertical",boxSizing:"border-box",fontFamily:"ui-monospace,monospace"}});
+            ta.placeholder="Paste your resume text here…";
+            ta.value=S.raw||"";
+            ta.addEventListener("input",e=>{
+              S.raw=e.target.value;
+              debounceSave("resume-raw",e.target.value);
+              updateMetricWarning(e.target.value);
+            });
+            return ta;
+          })(),
+        ].filter(Boolean)),
+
+        // PDF preview toggle
+        div({style:{marginTop:"12px",display:"flex",gap:"8px",alignItems:"center",justifyContent:"flex-end"}},[
+          pillBtn("📄 PDF Preview",S.resumeView==="preview","#2563eb",()=>{S.resumeView=S.resumeView==="preview"?"edit":"preview";rerender();},{padding:"6px 14px",borderRadius:"7px",fontSize:"12px"}),
+          S.resumeView==="preview"?mkBtn("ghost","🖨 Print / Save PDF",()=>{
+            const pa=document.getElementById("print-area");
+            if(!pa)return;
+            pa.innerHTML=buildPDFHTML(S.raw,S.ci||{});
+            pa.style.display="block";
+            window.print();
+            pa.style.display="none";
+            pa.innerHTML="";
+          },{fontSize:"12px",padding:"6px 14px"}):null,
+        ].filter(Boolean)),
+
+        S.resumeView==="preview"&&S.raw.trim()?(()=>{
+          const pBox=div({style:{marginTop:"14px",border:"1px solid "+T.cardB,borderRadius:"10px",overflow:"hidden",position:"relative"}});
+          pBox.innerHTML=buildPDFHTML(S.raw,S.ci||{});
+          wireEditable(pBox,()=>S.raw,v=>{S.raw=v;lsSet("resume-raw",v);});
+          return pBox;
+        })()
+        :null,
+      ].filter(Boolean)),
+
+      // Pre-flight ATS bar
+      S.raw.trim()?(()=>{
+        const hasPMP=/pmp|pmi/i.test(S.raw);
+        const hasLoc=/vancouver|bc|lower mainland/i.test(S.raw);
+        const hasMet=(S.raw.match(/(\$\d+|\d+%|\d+\+\s*years?)/gi)||[]).length>=2;
+        const allClear=hasPMP&&hasLoc&&hasMet;
+        const chks=[[hasPMP,"PMP detected"],[hasLoc,"Location found"],[hasMet,"2+ Metrics"]];
+        return div({style:{padding:"12px 16px",borderRadius:"10px",marginBottom:"14px",
+          background:allClear?"rgba(22,163,74,0.05)":"rgba(30,64,175,0.05)",
+          border:"1px solid "+(allClear?"#166534":"#1e40af"),
+          display:"flex",justifyContent:"space-between",alignItems:"center",gap:"12px",flexWrap:"wrap"},
+          className:"no-print"},[
+          div({style:{flex:"1"}},[
+            div({style:{fontWeight:"700",color:allClear?"#4ade80":"#93c5fd",fontSize:"13px",marginBottom:"4px"}},[
+              allClear?"✓ Optimised for Senior Roles":"⚡ ATS Pre-Flight Check",
+            ]),
+            div({style:{display:"flex",gap:"12px",flexWrap:"wrap"}},[
+              ...chks.map(([ok,label])=>div({style:{fontSize:"11px",color:ok?"#4ade80":"#9ca3af",display:"flex",alignItems:"center",gap:"4px"}},[
+                span({style:{fontWeight:"700"}},[ok?"✓":"✗"]),label,
+              ])),
+            ]),
+          ]),
+          !allClear?mkBtn("primary","⚡ Auto-Fix",()=>injectKeywords(),{fontSize:"12px",padding:"7px 14px"}):null,
+        ].filter(Boolean));
+      })():null,
+
+      // Live metrics row
+      S.raw.trim()?div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"14px",marginBottom:"16px"}},[
+
+        // Impact score card
+        div({className:"score-card"},[
+          div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},[
+            span({style:{fontWeight:"700",color:"#93c5fd",fontSize:"12px"}},["\uD83D\uDCCA Impact Score"]),
+            span({style:{fontSize:"20px",fontWeight:"800",color:scoreCol}},[score+"%"]),
+          ]),
+          div({style:{height:"5px",background:"#111827",borderRadius:"3px",marginBottom:"8px"}},[
+            div({style:{height:"100%",width:score+"%",background:scoreBarCol,borderRadius:"3px"}}),
+          ]),
+          score<75?div({style:{fontSize:"11px",color:"#9ca3af"}},["Add $ amounts, percentages, and timeframes to boost your score."]):
+          div({style:{fontSize:"11px",color:"#4ade80"}},["\u2713 Good metric density"]),
+          div({style:{marginTop:"8px",display:"flex",gap:"6px",flexWrap:"wrap"}},[
+            mkBtn("ghost","Audit tone",()=>{S.toneCheck=auditTone(S.raw||"");rerender();},{fontSize:"10px",padding:"3px 8px"}),
+          ]),
+          S.toneCheck!==null?div({style:{marginTop:"8px",borderTop:"1px solid #374151",paddingTop:"8px"}},[
+            S.toneCheck.length?div({},[
+              div({style:{fontSize:"10px",fontWeight:"700",color:"#fbbf24",marginBottom:"4px"}},["Buzzwords found:"]),
+              ...S.toneCheck.map(b=>span({className:"buzzword-tag",style:{marginBottom:"3px",display:"inline-block"}},[b.word+" \u2192 "+b.hint])),
+            ]):div({style:{fontSize:"11px",color:"#4ade80"}},["\u2713 No buzzwords"]),
+          ]):null,
+        ].filter(Boolean)),
+
+        // Structure check card
+        div({className:"score-card"},[
+          div({style:{display:"flex",justifyContent:"space-between",marginBottom:"10px"}},[
+            span({style:{fontWeight:"700",color:"#93c5fd",fontSize:"12px"}},["\u2705 Structure"]),
+            span({style:{fontSize:"11px",color:T.muted}},[(checks.filter(c=>c[0]).length)+"/"+checks.length]),
+          ]),
+          ...checks.map(([ok,label])=>div({style:{display:"flex",alignItems:"center",gap:"8px",fontSize:"12px",color:ok?T.text:T.muted,marginBottom:"6px"}},[
+            div({style:{width:"14px",height:"14px",borderRadius:"3px",border:`1.5px solid ${ok?"#16a34a":T.cardB}`,background:ok?"#052e16":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"9px",color:"#4ade80",flexShrink:"0"}},[ok?"\u2713":""]),
+            label,
+          ])),
+        ]),
+
+      ]):null,
+
+      // AI Audit results
+      auditR?div({style:card_s},[
+        div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}},[
+          div({},[
+            div({style:{fontSize:"15px",fontWeight:"700",color:T.text}},["Resume Analysis"]),
+            div({style:{fontSize:"12px",color:T.sub,marginTop:"2px"}},["Based on AI hiring manager review"]),
+          ]),
+          div({style:{display:"flex",alignItems:"center",gap:"10px"}},[
+            div({style:{fontSize:"24px",fontWeight:"800",color:auditR.score>=75?"#4ade80":auditR.score>=50?"#fbbf24":"#f87171"}},[auditR.score+"/100"]),
+            span({style:{fontSize:"12px",fontWeight:"700",padding:"3px 10px",borderRadius:"8px",
+              background:auditR.score>=75?"#052e16":auditR.score>=50?"#1c1200":"#3b1212",
+              color:auditR.score>=75?"#4ade80":auditR.score>=50?"#fbbf24":"#f87171",
+              border:`1px solid ${auditR.score>=75?"#166534":auditR.score>=50?"#854d0e":"#7f1d1d"}`,
+            }},[auditR.grade]),
+          ]),
+        ]),
+
+        div({style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"12px",marginBottom:"14px"}},[
+
+          // Strengths
+          div({style:{background:T.inBg,border:"1px solid #166534",borderRadius:"8px",padding:"12px"}},[
+            div({style:{fontSize:"11px",fontWeight:"700",color:"#4ade80",marginBottom:"8px",textTransform:"uppercase",letterSpacing:"0.06em"}},["\u2714 Strengths"]),
+            ...(auditR.strengths||[]).map(s=>div({style:{fontSize:"12px",color:T.text,marginBottom:"5px",lineHeight:"1.5",display:"flex",gap:"6px"}},[
+              span({style:{color:"#4ade80",flexShrink:"0"}},["\u2022"]),s
+            ])),
+          ]),
+
+          // Gaps
+          div({style:{background:T.inBg,border:"1px solid #7f1d1d",borderRadius:"8px",padding:"12px"}},[
+            div({style:{fontSize:"11px",fontWeight:"700",color:"#f87171",marginBottom:"8px",textTransform:"uppercase",letterSpacing:"0.06em"}},["\u26A0 Gaps"]),
+            ...(auditR.gaps||[]).map(g=>div({style:{fontSize:"12px",color:T.text,marginBottom:"5px",lineHeight:"1.5",display:"flex",gap:"6px"}},[
+              span({style:{color:"#f87171",flexShrink:"0"}},["\u2022"]),g
+            ])),
+          ]),
+
+          // Quick wins
+          div({style:{background:T.inBg,border:"1px solid #1e40af",borderRadius:"8px",padding:"12px"}},[
+            div({style:{fontSize:"11px",fontWeight:"700",color:"#93c5fd",marginBottom:"8px",textTransform:"uppercase",letterSpacing:"0.06em"}},["\u26A1 Quick Wins"]),
+            ...(auditR.quickWins||[]).map((w,i)=>div({style:{fontSize:"12px",color:T.text,marginBottom:"5px",lineHeight:"1.5",display:"flex",gap:"6px"}},[
+              span({style:{color:"#93c5fd",flexShrink:"0",fontWeight:"700"}},[(i+1)+"."]),w
+            ])),
+          ]),
+
+        ]),
+
+        div({style:{display:"flex",alignItems:"center",gap:"10px",padding:"10px 14px",background:T.inBg,borderRadius:"8px"}},[
+          span({style:{fontSize:"12px",color:T.muted}},["ATS friendly:"]),
+          span({style:{fontSize:"12px",fontWeight:"700",color:auditR.atsFriendly?"#4ade80":"#f87171"}},[auditR.atsFriendly?"\u2713 Yes":"\u2717 Issues found"]),
+          auditR.toneIssues&&auditR.toneIssues.length?div({style:{marginLeft:"16px",display:"flex",gap:"4px",flexWrap:"wrap",alignItems:"center"}},[
+            span({style:{fontSize:"12px",color:T.muted}},["Tone: "]),
+            ...auditR.toneIssues.map(w=>span({className:"buzzword-tag"},[w])),
+          ]):span({style:{marginLeft:"16px",fontSize:"12px",color:"#4ade80"}},["\u2713 Tone: clean"]),
+        ]),
+
+      ]):S.auditError?div({style:{...card_s,borderColor:T.danger.border,background:T.danger.bg}},[
+        span({style:{fontSize:"13px",color:T.danger.text}},["\u26A0 "+S.auditError]),
+      ]):null,
+
+    ].filter(Boolean));
+  }
+
+    // ── TAB 2: FIND JOBS ──
+  else if(S.tab==="search"){
+
+    const JOB_BOARDS=[
+      {name:"Indeed Canada",   icon:"🔍", url:(kw,loc)=>"https://ca.indeed.com/jobs?q="+encodeURIComponent(kw)+"&l="+encodeURIComponent(loc)},
+      {name:"LinkedIn",        icon:"💼", url:(kw,loc)=>"https://www.linkedin.com/jobs/search/?keywords="+encodeURIComponent(kw)+"&location="+encodeURIComponent(loc)},
+      {name:"WorkBC",          icon:"🍁", url:(kw,loc)=>"https://www.workbc.ca/Search-Jobs.aspx?searchTerm="+encodeURIComponent(kw)+"&location="+encodeURIComponent(loc)},
+      {name:"Glassdoor",       icon:"🪞", url:(kw,loc)=>"https://www.glassdoor.ca/Job/jobs.htm?sc.keyword="+encodeURIComponent(kw)+"&locT=C&locKeyword="+encodeURIComponent(loc)},
+      {name:"Gov Jobs",        icon:"🏛", url:(kw,loc)=>"https://jobs-emplois.gc.ca/en/search#q="+encodeURIComponent(kw)},
+      {name:"Charity Village", icon:"🤝", url:(kw,loc)=>"https://charityvillage.com/search/?q="+encodeURIComponent(kw)+"&location="+encodeURIComponent(loc)},
+    ];
+
+    if(!S.aiSuggestions)S.aiSuggestions=[];
+    if(!S.recentlyAdded)S.recentlyAdded=[];
+
+    const kw=S.searchKw||"";
+    const loc=S.searchLoc||"Vancouver, BC";
+
+    // Add a job to the board + score it in background
+    async function addJobToBoard(job){
+      if(S.apps.some(a=>a.title===job.title&&a.company===job.company))return;
+      const newApp={
+        id:Date.now().toString(),
+        company:job.company||"",title:job.title||"Untitled",
+        location:job.location||loc,type:job.type||"On-site",
+        salary:job.salaryRange||job.salary||"",url:job.url||"",
+        status:"saved",appliedDate:"",
+        notes:[job.whyGoodFit,job.searchTip?"Search tip: "+job.searchTip:"",job.desc].filter(Boolean).join("\n\n"),
+        matchScore:null,matchKeywords:[],
+      };
+      S.apps=[newApp,...S.apps];
+      lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+      S.recentlyAdded=[newApp,...S.recentlyAdded].slice(0,20);
+      S.addToast=newApp.title+" at "+newApp.company;
+      rerender();
+      // Background match scoring
+      if(S.raw){
+        try{
+          const r=await callAI(
+            "Resume-job matcher. Return ONLY valid JSON: {score: integer 0-100, keywords: array of 3-4 short matching skill strings}. No markdown.",
+            "RESUME:\n"+S.raw.substring(0,500)+"\n\nJOB: "+newApp.title+" at "+newApp.company+"\n"+newApp.notes.substring(0,200)
+          );
+          const sc=JSON.parse(r.replace(/```json|```/g,"").trim());
+          S.apps=S.apps.map(a=>a.id===newApp.id?{...a,matchScore:sc.score,matchKeywords:sc.keywords||[]}:a);
+          S.recentlyAdded=S.recentlyAdded.map(a=>a.id===newApp.id?{...a,matchScore:sc.score,matchKeywords:sc.keywords||[]}:a);
+          lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+        }catch{}
+      }
+      setTimeout(()=>{if(S.addToast===newApp.title+" at "+newApp.company){S.addToast="";rerender();}},3000);
+      rerender();
+    }
+
+    // ── 1. PASTE A JOB POSTING ──
+    let pasteBtn;
+    const pasteArea=(()=>{
+      const ta=h("textarea",{style:{...inp_s,width:"100%",minHeight:"100px",resize:"vertical",lineHeight:"1.6",fontFamily:"inherit"}});
+      ta.placeholder="Find a job online? Paste the full posting here — Claude extracts the details and adds it to your board automatically.";
+      ta.value=S.pastePosting||"";
+      ta.addEventListener("input",e=>{
+        S.pastePosting=e.target.value;
+        if(pasteBtn)pasteBtn.disabled=!e.target.value.trim();
+      });
+      return ta;
+    })();
+    pasteBtn=(()=>{
+      const b=mkBtn("primary",S.load==="pasteadd"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Adding…"));return w;})():"+ Add",async()=>{
+        const txt=(pasteArea.value||S.pastePosting||"").trim();
+        if(!txt||S.load==="pasteadd")return;
+        S.load="pasteadd";rerender();
+        try{
+          const r=await callAI(
+            "Extract job details. Return ONLY JSON: {title,company,location,type,salary,desc} where desc is a 2-sentence summary. No markdown.",
+            txt.substring(0,2000)
+          );
+          const parsed=JSON.parse(r.replace(/```json|```/g,"").trim());
+          await addJobToBoard({...parsed,desc:parsed.desc||txt.substring(0,200)});
+        }catch{
+          await addJobToBoard({title:"Job from posting",company:"",location:loc,type:"On-site",salary:"",desc:txt.substring(0,300)});
+        }
+        S.pastePosting="";S.load="";pasteArea.value="";rerender();
+      });
+      b.disabled=S.load==="pasteadd"||!(S.pastePosting||"").trim();
+      return b;
+    })();
+
+    const pasteCard=div({style:card_s},[
+      div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"3px"}},["Paste a job posting"]),
+      div({style:{fontSize:"13px",color:T.sub,marginBottom:"12px"}},["Found something on Indeed or LinkedIn? Paste the posting here and Claude will add it to your board."]),
+      pasteArea,
+      div({style:{display:"flex",justifyContent:"flex-end",gap:"8px",marginTop:"10px"}},[pasteBtn]),
+    ]);
+
+    // ── 2. LIVE JOB BOARDS ──
+    const kwInp=(()=>{const i=h("input",{style:inp_s,placeholder:"e.g. Project Manager, Plumber, Sales Rep…"});i.value=kw;i.addEventListener("input",e=>S.searchKw=e.target.value);return i;})();
+    const locInp=(()=>{const i=h("input",{style:inp_s,placeholder:"e.g. Vancouver, BC"});i.value=loc;i.addEventListener("input",e=>S.searchLoc=e.target.value);return i;})();
+
+    // ── STEP HEADER helper ──
+    function stepHeader(num, color, title, subtitle){
+      return div({style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"14px"}},[
+        div({style:{width:"28px",height:"28px",borderRadius:"50%",background:color,color:"#fff",
+          fontSize:"13px",fontWeight:"800",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:"0"}},[num]),
+        div({},[
+          div({style:{fontSize:"14px",fontWeight:"700",color:T.text}},[title]),
+          div({style:{fontSize:"12px",color:T.muted,marginTop:"1px"}},[subtitle]),
+        ]),
+      ]);
+    }
+
+    // ── STEP 1: Search keywords ──
+    const step1Card=div({style:{...card_s,borderLeft:"3px solid #2563eb"}},[
+      stepHeader("1","#2563eb","What are you looking for?","Enter a job title and location — this powers all three steps below"),
+      div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"12px"}},[
+        div({},[mkLabel("Job title or keywords"),kwInp]),
+        div({},[mkLabel("Location"),locInp]),
+      ]),
+      div({style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},[
+        (()=>{
+          const b=mkBtn("primary",S.load==="search"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Searching\u2026"));return w;})():"\u2726 Search jobs",()=>{runAISearch();});
+          b.disabled=S.load==="search";
+          return b;
+        })(),
+        kw?span({style:{fontSize:"12px",color:T.muted}},["or press Enter in either field"]):
+          span({style:{fontSize:"12px",color:T.muted}},["Enter a job title to search \u2014 this activates Steps 2 and 3"]),
+      ]),
+    ].filter(Boolean));
+
+    // ── STEP 2: Search live boards ──
+    const step2Card=div({style:{...card_s,borderLeft:"3px solid #0d9488",opacity:kw?"1":"0.55"}},[
+      stepHeader("2","#0d9488","Search live job boards","Opens your search directly on the site in a new tab"),
+      div({style:{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"8px"}},[
+        ...JOB_BOARDS.map(board=>{
+          const active=!!kw;
+          const el=h("a",{href:"javascript:void(0)",target:"_blank",rel:"noreferrer",
+            style:{display:"flex",alignItems:"center",gap:"10px",padding:"11px 14px",borderRadius:"10px",
+              border:"1px solid "+(active?T.active.border:T.cardB),
+              background:active?T.inBg:"transparent",
+              textDecoration:"none",cursor:active?"pointer":"not-allowed",
+              transition:"all 0.15s"},
+          },[
+            span({style:{fontSize:"20px"}},[board.icon]),
+            div({},[
+              div({style:{fontSize:"12px",fontWeight:"600",color:T.text}},[board.name]),
+              div({style:{fontSize:"11px",color:T.muted,marginTop:"1px"}},[
+                active?("Search \u201c"+kw+"\u201d"):"\u2191 Enter keywords in Step 1",
+              ]),
+            ]),
+          ]);
+          el.addEventListener("click",e=>{
+            const liveKw=(kwInp.value||"").trim();
+            const liveLoc=(locInp.value||"Vancouver, BC").trim();
+            if(!liveKw){
+              e.preventDefault();
+              // Scroll step 1 into view and focus input
+              kwInp.focus();
+              kwInp.scrollIntoView({behavior:"smooth",block:"center"});
+              // Flash the step 1 card
+              step1Card.style.boxShadow="0 0 0 3px #2563eb66";
+              setTimeout(()=>step1Card.style.boxShadow="",1500);
+              return;
+            }
+            el.href=board.url(liveKw,liveLoc);
+          });
+          return el;
+        }),
+      ]),
+    ]);
+
+    // ── STEP 3: AI job leads ──
+    async function runAISearch(){
+      const kwVal=(kwInp.value||S.searchKw||"").trim();
+      const locVal=(locInp.value||S.searchLoc||"").trim();
+      if(!kwVal||S.load==="search")return;
+      S.searchKw=kwVal;S.searchLoc=locVal||"Canada";
+      S.load="search";S.aiSuggestions=[];S.aiSuggestionsError="";S.searchDone=false;rerender();
+      try{
+        const r=await callAI(
+          "Canadian job market expert. Return ONLY a JSON array of 8 job leads. Each: {title, company (real employer), location, type (Remote/Hybrid/On-site/Contract), salaryRange, whyGoodFit (1 sentence), searchTip (1 actionable tip)}. No markdown, no backticks.",
+          "Search: \""+kwVal+"\" in \""+(locVal||"Canada")+"\"."+(S.raw?" Resume summary: "+S.raw.substring(0,400):"")
+        );
+        const parsed=JSON.parse(r.replace(/```json|```/g,"").trim());
+        S.aiSuggestions=Array.isArray(parsed)?parsed.map(j=>({...j,matchScore:null,matchKeywords:[]})):[];
+        S.searchDone=true;
+        S.load="";rerender();
+        // Score all leads against resume in background if resume is loaded
+        if(S.raw){
+          S.load="scoring";rerender();
+          try{
+            const scoreR=await callAI(
+              "Resume-job match scorer. The user has a resume and a list of job leads. For EACH job return a match score and matching keywords. Return ONLY a JSON array (same order as input), each item: {score: integer 0-100, keywords: array of 3 short matching skill/keyword strings}. No markdown.",
+              "RESUME SUMMARY:\n"+S.raw.substring(0,600)+"\n\nJOB LEADS:\n"+
+              S.aiSuggestions.map((j,i)=>`${i+1}. ${j.title} at ${j.company} — ${j.whyGoodFit||""}`).join("\n")
+            );
+            const scores=JSON.parse(scoreR.replace(/```json|```/g,"").trim());
+            if(Array.isArray(scores)){
+              S.aiSuggestions=S.aiSuggestions.map((j,i)=>scores[i]?{...j,matchScore:scores[i].score||0,matchKeywords:scores[i].keywords||[]}:j);
+            }
+          }catch(e){console.log("Scoring failed:",e);}
+          S.load="";rerender();
+        }
+      }catch(e){S.aiSuggestionsError=e.message||"Search failed.";S.load="";rerender();}
+    }
+    [kwInp,locInp].forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();runAISearch();}}));
+
+    let aiBody=div();
+    if(S.load==="search"){
+      aiBody=div({style:{textAlign:"center",padding:"24px",color:T.sub}},[
+        div({style:{fontSize:"13px",fontWeight:"600",color:T.text,marginBottom:"3px"}},["\u2726 Generating leads\u2026"]),
+        div({style:{fontSize:"12px",color:T.muted}},["Claude is researching real companies and roles."]),
+      ]);
+    }else if(S.load==="scoring"){
+      aiBody=div({},[
+        div({style:{textAlign:"center",padding:"12px",background:T.inBg,borderRadius:"8px",marginBottom:"10px",fontSize:"12px",color:T.muted,display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}},[
+          spinEl(),
+          span({},[S.raw?"Scoring leads against your resume\u2026":"Leads ready \u2014 polish your resume to see match scores"]),
+        ]),
+        ...S.aiSuggestions.map(job=>{
+          const already=S.apps.some(a=>a.title===job.title&&a.company===job.company);
+          const card=div({style:{background:T.inBg,border:"1px solid "+T.inB,borderRadius:"10px",padding:"12px 14px",marginBottom:"8px",display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"12px",opacity:"0.7"}});
+          card.appendChild(div({style:{flex:"1",minWidth:"0"}},[
+            div({style:{display:"flex",alignItems:"center",gap:"7px",flexWrap:"wrap",marginBottom:"3px"}},[
+              span({style:{fontSize:"13px",fontWeight:"700",color:T.text}},[job.title]),
+              job.type?span({style:{fontSize:"10px",padding:"2px 7px",borderRadius:"8px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[job.type]):null,
+            ].filter(Boolean)),
+            div({style:{fontSize:"12px",color:T.sub}},[span({style:{fontWeight:"600",color:T.text}},[job.company])," \u00b7 ",job.location]),
+          ].filter(Boolean)));
+          card.appendChild(span({style:{fontSize:"11px",color:T.muted,background:T.inBg,border:"1px solid "+T.inB,borderRadius:"8px",padding:"3px 8px",flexShrink:"0"}},["Scoring\u2026"]));
+          return card;
+        }),
+      ]);
+    }else if(S.aiSuggestionsError){
+      aiBody=div({style:{padding:"10px 14px",background:T.danger.bg,border:"1px solid "+T.danger.border,borderRadius:"8px"}},[
+        span({style:{fontSize:"13px",color:T.danger.text}},["\u26A0 "+S.aiSuggestionsError]),
+      ]);
+    }else if(S.searchDone&&S.aiSuggestions.length>0){
+      const hasScores=S.aiSuggestions.some(j=>j.matchScore!=null);
+      aiBody=div({},[
+        div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px",flexWrap:"wrap",gap:"6px"}},[
+          div({style:{fontSize:"12px",color:T.muted}},[S.aiSuggestions.length+" leads for \u201c"+S.searchKw+"\u201d"]),
+          hasScores
+            ?div({style:{fontSize:"11px",color:T.muted,display:"flex",alignItems:"center",gap:"4px"}},[
+                span({style:{width:"6px",height:"6px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}}),
+                " Scored against your resume"
+              ])
+            :!S.raw?div({style:{fontSize:"11px",color:T.muted}},["Polish your resume to see match scores"]):null,
+        ].filter(Boolean)),
+        ...S.aiSuggestions.map(job=>{
+          const already=S.apps.some(a=>a.title===job.title&&a.company===job.company);
+          const card=div({style:{background:T.inBg,border:"1px solid "+T.inB,borderRadius:"10px",padding:"12px 14px",marginBottom:"8px"}});
+
+          // Match score badge
+          const scoreBadge=job.matchScore!=null
+            ?div({style:{display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",flexShrink:"0"}},[
+                span({style:{
+                  fontSize:"13px",fontWeight:"800",padding:"4px 10px",borderRadius:"9px",
+                  background:job.matchScore>=85?"#052e16":job.matchScore>=70?"#1a2e05":job.matchScore>=50?"#1c1917":"#1c1917",
+                  color:job.matchScore>=85?"#4ade80":job.matchScore>=70?"#a3e635":job.matchScore>=50?"#d6d3d1":"#9ca3af",
+                  border:"1px solid "+(job.matchScore>=85?"#166534":job.matchScore>=70?"#3f6212":"#44403c"),
+                }},[job.matchScore+"%"]),
+                span({style:{fontSize:"9px",color:T.muted,textTransform:"uppercase",letterSpacing:"0.05em"}},["match"]),
+              ])
+            :null;
+
+          const addBtn=mkBtn(already?"ghost":"primary",already?"\u2713 Added":"+ Add",()=>addJobToBoard(job),{fontSize:"11px",padding:"5px 11px",flexShrink:"0",opacity:already?"0.7":"1"});
+          addBtn.disabled=already;
+
+          card.appendChild(div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"10px"}},[
+            div({style:{flex:"1",minWidth:"0"}},[
+              div({style:{display:"flex",alignItems:"center",gap:"7px",flexWrap:"wrap",marginBottom:"3px"}},[
+                span({style:{fontSize:"13px",fontWeight:"700",color:T.text}},[job.title]),
+                job.type?span({style:{fontSize:"10px",padding:"2px 7px",borderRadius:"8px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[job.type]):null,
+              ].filter(Boolean)),
+              div({style:{fontSize:"12px",color:T.sub,marginBottom:"3px"}},[
+                span({style:{fontWeight:"600",color:T.text}},[job.company])," \u00b7 ",job.location,
+                job.salaryRange?span({style:{color:T.text}},[" \u00b7 "+job.salaryRange]):null,
+              ].filter(Boolean)),
+              job.whyGoodFit?div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",marginBottom:"4px"}},["💡 "+job.whyGoodFit]):null,
+              // Keyword chips from scoring
+              job.matchKeywords&&job.matchKeywords.length>0?div({style:{display:"flex",gap:"4px",flexWrap:"wrap"}},[
+                ...job.matchKeywords.map(k=>span({style:{fontSize:"10px",padding:"2px 7px",borderRadius:"6px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[k]))
+              ]):null,
+            ].filter(Boolean)),
+            div({style:{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"6px",flexShrink:"0"}},[
+              scoreBadge,
+              addBtn,
+              h("a",{href:JOB_BOARDS[0].url(job.title,job.location||loc),target:"_blank",rel:"noreferrer",style:{fontSize:"10px",color:T.muted,textDecoration:"none"}},["Search \u2197"]),
+            ].filter(Boolean)),
+          ]));
+          return card;
+        }),
+      ]);
+    }else if(!S.searchDone){
+      aiBody=div({style:{padding:"14px",background:T.inBg,borderRadius:"8px",fontSize:"12px",color:T.muted,textAlign:"center"}},[
+        kw?"Click \u201cGet AI leads\u201d to generate real company leads based on your search":"\u2191 Enter keywords in Step 1 first",
+      ]);
+    }
+
+    const step3Card=div({style:{...card_s,borderLeft:"3px solid #7c3aed",opacity:kw?"1":"0.55"}},[
+      div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"14px"}},[
+        stepHeader("3","#7c3aed","AI job leads","Real companies hiring for your role — scored against your resume"),
+        div({style:{fontSize:"11px",color:T.muted,background:T.inBg,border:"1px solid "+T.inB,borderRadius:"6px",padding:"3px 8px",flexShrink:"0"}},["✨ Uses API"]),
+      ]),
+      aiBody,
+    ]);
+
+    // ── STEP 4: Paste a posting ──
+    const step4Card=div({style:{...card_s,borderLeft:"3px solid #ea580c"}},[
+      stepHeader("4","#ea580c","Paste a job posting","Found a specific job? Paste the full text and Claude adds it to your board"),
+      pasteArea,
+      div({style:{display:"flex",justifyContent:"flex-end",gap:"8px",marginTop:"10px"}},[pasteBtn]),
+    ]);
+
+    // ── Recently added ──
+    const recent=S.recentlyAdded||[];
+    const recentCard=recent.length>0?div({style:card_s},[
+      div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"12px"}},[
+        div({},[
+          div({style:{fontSize:"14px",fontWeight:"700",color:T.text}},["Recently added"]),
+          div({style:{fontSize:"12px",color:T.muted,marginTop:"1px"}},[recent.length+" job"+(recent.length!==1?"s":"")+" added this session \u2014 click any to view on Job Board"]),
+        ]),
+        mkBtn("ghost","Job Board \u2192",()=>{S.tab="board";rerender();},{fontSize:"12px",padding:"5px 12px"}),
+      ]),
+      ...recent.map(app=>{
+        const btn=h("button",{style:{
+          width:"100%",display:"flex",alignItems:"center",gap:"12px",
+          padding:"10px 14px",borderRadius:"10px",marginBottom:"6px",
+          border:"1px solid "+T.cardB,background:T.inBg,cursor:"pointer",textAlign:"left",
+        }});
+        btn.addEventListener("click",()=>{S.tab="board";S.expandedApp=app.id;rerender();});
+        const score=app.matchScore!=null
+          ?span({style:{fontSize:"11px",fontWeight:"700",padding:"3px 8px",borderRadius:"8px",flexShrink:"0",
+              background:app.matchScore>=85?"#052e16":app.matchScore>=70?"#1a2e05":"#1c1917",
+              color:app.matchScore>=85?"#4ade80":app.matchScore>=70?"#a3e635":"#d6d3d1",
+              border:"1px solid "+(app.matchScore>=85?"#166534":app.matchScore>=70?"#3f6212":"#44403c"),
+            }},[app.matchScore+"%"])
+          :span({style:{fontSize:"11px",color:T.muted,background:T.inBg,border:"1px solid "+T.inB,borderRadius:"8px",padding:"3px 8px",flexShrink:"0"}},["Scoring\u2026"]);
+        btn.appendChild(div({style:{flex:"1",minWidth:"0"}},[
+          div({style:{fontSize:"13px",fontWeight:"600",color:T.text,marginBottom:"2px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}},[app.title]),
+          div({style:{fontSize:"11px",color:T.sub}},[app.company+(app.location?" \u00b7 "+app.location:"")]),
+          app.matchKeywords&&app.matchKeywords.length>0?div({style:{display:"flex",gap:"4px",flexWrap:"wrap",marginTop:"4px"}},[
+            ...app.matchKeywords.map(k=>span({style:{fontSize:"10px",padding:"2px 6px",borderRadius:"6px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[k]))
+          ]):null,
+        ].filter(Boolean)));
+        // Live match badge using calculateMatch against resume text
+        const liveMatch=S.raw&&app.posting?calculateMatch(S.raw,app.posting):app.matchScore||null;
+        const matchBadge=liveMatch!==null?div({style:{
+          padding:"3px 9px",borderRadius:"12px",fontSize:"11px",fontWeight:"700",flexShrink:"0",
+          color:liveMatch>=80?"#4ade80":liveMatch>=60?"#fbbf24":"#9ca3af",
+          background:liveMatch>=80?"rgba(22,163,74,0.1)":liveMatch>=60?"rgba(133,77,14,0.1)":"rgba(55,65,81,0.1)",
+          border:"1px solid "+(liveMatch>=80?"#166534":liveMatch>=60?"#854d0e":"#374151"),
+        }},[liveMatch+"%"]):null;
+        if(matchBadge)btn.appendChild(matchBadge);
+        btn.appendChild(span({style:{fontSize:"12px",color:T.muted,marginLeft:"4px",flexShrink:"0"}},["\u2192"]));
+        return btn;
+      }),
+    ]):null;
+
+    // Toast
+    const toast=S.addToast?div({style:{
+      position:"fixed",bottom:"24px",right:"24px",zIndex:"300",
+      background:S.dark?"#052e16":"#f0fdf4",border:"1px solid #16a34a",
+      borderRadius:"12px",padding:"12px 18px",boxShadow:"0 8px 32px rgba(0,0,0,0.25)",
+      display:"flex",alignItems:"center",gap:"10px",maxWidth:"300px",
+    }},[
+      span({style:{fontSize:"16px"}},["✓"]),
+      div({},[
+        div({style:{fontSize:"13px",fontWeight:"700",color:S.dark?"#4ade80":"#15803d"}},[S.addToast+" added!"]),
+        h("button",{style:{fontSize:"12px",color:S.dark?"#86efac":"#16a34a",background:"transparent",border:"none",cursor:"pointer",padding:"0",textDecoration:"underline"},
+          onClick:()=>{S.tab="board";S.addToast="";rerender();}},["Go to Job Board \u2192"]),
+      ]),
+    ]):null;
+
+    content=div({},[step1Card,step2Card,step3Card,step4Card,recentCard,toast].filter(Boolean));
+  }
+
+  // ── TAB 3: JOB BOARD ──
+  else if(S.tab==="board"){
+    function buildAppCard(app){
+      const sm=smeta(app.status);const sbg=S.dark?sm.bgd:sm.bgl;const exp=S.expandedApp===app.id;
+      const card=div({style:{background:T.card,border:`1px solid ${exp?T.active.border:T.cardB}`,borderRadius:"11px",padding:"14px 18px",marginBottom:"10px"}});
+      const statusSel=h("select",{style:{fontSize:"11px",padding:"4px 8px",borderRadius:"7px",border:`1px solid ${T.cardB}`,background:sbg,color:sm.color,cursor:"pointer",fontFamily:"inherit",fontWeight:"600",flexShrink:"0"}});
+      STATUSES.forEach(s=>{const o=h("option",{value:s.key});o.textContent=s.label;if(s.key===app.status)o.selected=true;statusSel.appendChild(o);});
+      statusSel.addEventListener("change",async e=>{S.apps=S.apps.map(a=>a.id===app.id?{...a,status:e.target.value}:a);lsSet("tracker-apps-v2",JSON.stringify(S.apps));rerender();});
+
+      // Score badge — show if scored, show "Score" button if not
+      const hasScore=app.matchScore!=null;
+      const scoreBadge=hasScore
+        ?div({style:{display:"flex",flexDirection:"column",alignItems:"center",gap:"2px",flexShrink:"0"}},[
+            span({style:{
+              fontSize:"12px",fontWeight:"800",padding:"3px 8px",borderRadius:"8px",
+              background:app.matchScore>=85?"#052e16":app.matchScore>=70?"#1a2e05":"#1c1917",
+              color:app.matchScore>=85?"#4ade80":app.matchScore>=70?"#a3e635":"#d6d3d1",
+              border:"1px solid "+(app.matchScore>=85?"#166534":app.matchScore>=70?"#3f6212":"#44403c"),
+            }},[app.matchScore+"%"]),
+            span({style:{fontSize:"9px",color:T.muted,textTransform:"uppercase",letterSpacing:"0.05em"}},["match"]),
+          ])
+        :S.raw?(()=>{
+            const b=h("button",{style:{fontSize:"10px",padding:"3px 8px",borderRadius:"7px",border:"1px solid "+T.inB,background:"transparent",color:T.muted,cursor:"pointer",flexShrink:"0",whiteSpace:"nowrap"}});
+            b.textContent="Score";
+            b.addEventListener("click",async e=>{
+              e.stopPropagation();
+              b.textContent="…";b.disabled=true;
+              try{
+                const r=await callAI(
+                  "Resume-job match scorer. Return ONLY valid JSON: {score: integer 0-100, keywords: array of 3 short matching skill strings}. No markdown.",
+                  "RESUME:\n"+S.raw.substring(0,500)+"\n\nJOB: "+app.title+" at "+app.company+"\n"+(app.notes||"").substring(0,200)
+                );
+                const sc=JSON.parse(r.replace(/```json|```/g,"").trim());
+                S.apps=S.apps.map(a=>a.id===app.id?{...a,matchScore:sc.score,matchKeywords:sc.keywords||[]}:a);
+                lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+                rerender();
+              }catch{b.textContent="Score";b.disabled=false;}
+            });
+            return b;
+          })()
+        :null;
+
+      const row=div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"10px"}},[
+        div({style:{flex:"1",cursor:"pointer"},onClick:()=>{S.expandedApp=exp?null:app.id;rerender();}},[
+          div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"3px"}},[
+            span({style:{fontSize:"14px",fontWeight:"700"}},[app.title]),
+            span({style:{fontSize:"11px",fontWeight:"700",padding:"2px 8px",borderRadius:"9px",background:sbg,color:sm.color}},[sm.label]),
+            span({style:{fontSize:"11px",padding:"2px 8px",borderRadius:"9px",background:T.tag.bg,color:T.tag.text,border:`1px solid ${T.tag.border}`}},[app.type]),
+          ]),
+          div({style:{fontSize:"12px",color:T.sub}},[span({style:{fontWeight:"600",color:T.text}},[app.company]),app.location?" · "+app.location:"",app.salary?" · ":"",(app.salary?span({style:{color:T.text,fontWeight:"500"}},[app.salary]):null)].filter(Boolean)),
+          // Keyword chips under title if scored
+          app.matchKeywords&&app.matchKeywords.length>0?div({style:{display:"flex",gap:"4px",flexWrap:"wrap",marginTop:"4px"}},[
+            ...app.matchKeywords.map(k=>span({style:{fontSize:"10px",padding:"2px 6px",borderRadius:"6px",background:T.tag.bg,color:T.tag.text,border:"1px solid "+T.tag.border}},[k]))
+          ]):null,
+        ].filter(Boolean)),
+        scoreBadge,
+        statusSel,
+        (()=>{const b=h("button",{style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0"},title:"Remove"});b.textContent="🗑";b.addEventListener("click",e=>{e.stopPropagation();if(!confirm("Remove "+app.title+"?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();});return b;})(),
+      ].filter(Boolean));
+      card.appendChild(row);
+      if(exp){
+        const hasDocs=!!(app.savedResume||app.savedCover);
+        const actions=div({style:{marginTop:"12px",paddingTop:"12px",borderTop:`1px solid ${T.div}`}},[
+          app.notes?h("p",{style:{fontSize:"12px",color:T.sub,lineHeight:"1.7",marginBottom:"12px"}},[app.notes]):null,
+          div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
+            mkBtn("primary",hasDocs?"↺ Re-generate →":"✦ Generate application →",()=>{
+              S.selectedJob=app;
+              S.posting=app.title+" at "+app.company+"\nLocation: "+app.location+"\nType: "+app.type+(app.salary?"\nSalary: "+app.salary:"")+"\n\n"+(app.notes||"");
+              S.tailored="";S.cover="";S.tab="apply";rerender();
+            },{fontSize:"12px",padding:"6px 14px"}),
+            app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",style:{padding:"6px 14px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:T.ghost.text,textDecoration:"none",display:"inline-flex",alignItems:"center"}},["View posting ↗"]):null,
+            mkBtn("danger","Remove",async()=>{if(!confirm("Remove?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();}),
+          ].filter(Boolean)),
+        ].filter(Boolean));
+        card.appendChild(actions);
+      }
+      return card;
+    }
+
+    function buildForm(){
+      const EMPTY={id:"",company:"",title:"",location:"",type:"Hybrid",salary:"",url:"",status:"saved",appliedDate:new Date().toISOString().slice(0,10),notes:""};
+      if(!S.fd.id)S.fd={...EMPTY,id:Date.now().toString()};
+      const f=S.fd;
+      return div({style:{...card_s,border:`1.5px solid ${T.active.border}`}},[
+        div({style:{fontSize:"13px",fontWeight:"700",marginBottom:"12px"}},[S.editId?"Edit job":"Add job"]),
+        div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}},[
+          div({},[mkLabel("Company"),(()=>{const i=mkInput(f.company||"",v=>{S.fd.company=v;});i.placeholder="Company";return i;})()]),
+          div({},[mkLabel("Job Title"),(()=>{const i=mkInput(f.title||"",v=>{S.fd.title=v;});i.placeholder="Title";return i;})()]),
+          div({},[mkLabel("Location"),(()=>{const i=mkInput(f.location||"",v=>{S.fd.location=v;});i.placeholder="City, Province";return i;})()]),
+          div({},[mkLabel("Salary"),(()=>{const i=mkInput(f.salary||"",v=>{S.fd.salary=v;});i.placeholder="e.g. $120K";return i;})()]),
+          div({},[mkLabel("Type"),mkSelect(f.type||"Hybrid",[["Remote","Remote"],["Hybrid","Hybrid"],["On-site","On-site"],["Contract","Contract"]],v=>S.fd.type=v)]),
+          div({},[mkLabel("URL"),(()=>{const i=mkInput(f.url||"",v=>{S.fd.url=v;});i.placeholder="https://…";return i;})()]),
+        ]),
+        div({style:{marginBottom:"10px"}},[mkLabel("Notes"),mkTextarea(f.notes||"",v=>S.fd.notes=v,70,"Key requirements…")]),
+        div({style:{display:"flex",gap:"8px"}},[
+          (()=>{const b=mkBtn("primary",S.editId?"Save":"Add",async()=>{
+            if(!S.fd.company||!S.fd.title)return;
+            if(S.editId)S.apps=S.apps.map(a=>a.id===S.editId?{...S.fd}:a);
+            else S.apps=[{...S.fd},...S.apps];
+            lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+            S.showForm=false;S.editId=null;rerender();
+          },{fontSize:"12px",padding:"7px 16px"});b.disabled=!S.fd.company||!S.fd.title;return b;})(),
+          mkBtn("ghost","Cancel",()=>{S.showForm=false;S.editId=null;rerender();},{fontSize:"12px",padding:"7px 16px"}),
+        ]),
+      ]);
+    }
+
+    // ── URL IMPORT ──
+    async function importFromUrl(){
+      const url=S.urlImport.trim();
+      if(!url||S.load==="urlimport")return;
+      S.load="urlimport";S.urlImportStatus="";S.showUrlPaste=false;rerender();
+      try{
+        const result=await callAI(
+          `You are a job posting parser. The user will give you a job posting URL. Use your knowledge to extract the job details. Return ONLY a valid JSON object with these exact keys: title, company, location, type (one of: Remote/Hybrid/On-site/Contract), salary (or empty string), notes (2-3 sentence summary of the role and key requirements). No markdown, no backticks, no extra text.`,
+          `Extract job details from this posting URL: ${url}\n\nIf you cannot access the URL or determine the details, return: {"error":"Could not fetch job details from this URL"}`
+        );
+        let parsed;
+        try{ parsed=JSON.parse(result.replace(/```json|```/g,"").trim()); }
+        catch{ parsed={error:"Could not parse response"}; }
+
+        if(parsed.error||!parsed.title){
+          S.urlImportStatus="error";S.showUrlPaste=true;
+        }else{
+          const newApp={
+            id:Date.now().toString(),
+            company:parsed.company||"",
+            title:parsed.title||"",
+            location:parsed.location||"",
+            type:parsed.type||"On-site",
+            salary:parsed.salary||"",
+            url:url,
+            status:"saved",
+            appliedDate:"",
+            notes:parsed.notes||"",
+          };
+          S.apps=[newApp,...S.apps];
+          lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+          S.urlImport="";S.urlImportStatus="success";S.urlImportPaste="";
+          setTimeout(()=>{S.urlImportStatus="";rerender();},3000);
+        }
+      }catch{
+        S.urlImportStatus="error";S.showUrlPaste=true;
+      }
+      S.load="";rerender();
+    }
+
+    async function importFromPaste(){
+      const text=S.urlImportPaste.trim();
+      const url=S.urlImport.trim();
+      if(!text||S.load==="urlimport")return;
+      S.load="urlimport";rerender();
+      try{
+        const result=await callAI(
+          `You are a job posting parser. Extract job details from this pasted job description. Return ONLY a valid JSON object with these exact keys: title, company, location, type (one of: Remote/Hybrid/On-site/Contract), salary (or empty string), notes (2-3 sentence summary of role and key requirements). No markdown, no backticks, no extra text.`,
+          `Job posting text:\n\n${text}`
+        );
+        let parsed;
+        try{ parsed=JSON.parse(result.replace(/```json|```/g,"").trim()); }
+        catch{ parsed={error:"parse fail"}; }
+
+        if(!parsed.error&&parsed.title){
+          const newApp={id:Date.now().toString(),company:parsed.company||"",title:parsed.title||"",location:parsed.location||"",type:parsed.type||"On-site",salary:parsed.salary||"",url:url||"",status:"saved",appliedDate:"",notes:parsed.notes||""};
+          S.apps=[newApp,...S.apps];lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+          S.urlImport="";S.urlImportPaste="";S.urlImportStatus="success";S.showUrlPaste=false;
+          setTimeout(()=>{S.urlImportStatus="";rerender();},3000);
+        }
+      }catch{}
+      S.load="";rerender();
+    }
+
+    const urlCard=div({style:{...card_s,marginBottom:"18px"}},[
+      div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"4px"}},["Add job from URL"]),
+      div({style:{fontSize:"13px",color:T.sub,marginBottom:"14px"}},["Paste a job posting link — Claude will extract the details and add it to your board."]),
+      div({style:{display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap"}},[
+        (()=>{
+          const inp=h("input",{style:{...inp_s,flex:"1",minWidth:"200px"},placeholder:"https://ca.indeed.com/viewjob?jk=… or any job URL"});
+          inp.value=S.urlImport;
+          inp.addEventListener("input",e=>{S.urlImport=e.target.value;S.urlImportStatus="";});
+          inp.addEventListener("keydown",e=>{if(e.key==="Enter")importFromUrl();});
+          return inp;
+        })(),
+        (()=>{
+          const b=mkBtn("primary",S.load==="urlimport"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Fetching…"));return w;})():"Import job",importFromUrl,{flexShrink:"0"});
+          b.disabled=S.load==="urlimport"||!S.urlImport.trim();
+          return b;
+        })(),
+      ]),
+      S.urlImportStatus==="success"?div({style:{marginTop:"10px",fontSize:"13px",color:T.done.text,background:T.done.bg,border:`1px solid ${T.done.border}`,padding:"8px 12px",borderRadius:"8px",fontWeight:"600"}},["✓ Job added to your board!"]):null,
+      S.urlImportStatus==="error"?div({style:{marginTop:"10px",fontSize:"13px",color:T.warn.text,background:T.warn.bg,border:`1px solid ${T.warn.border}`,padding:"8px 12px",borderRadius:"8px"}},[
+        "⚠ Couldn't read that page directly (most job sites block automated access). ",
+        h("button",{style:{color:T.warn.text,background:"transparent",border:"none",cursor:"pointer",textDecoration:"underline",fontSize:"13px",padding:"0"},onClick:()=>{S.showUrlPaste=!S.showUrlPaste;rerender();}},["Paste the job text instead →"]),
+      ]):null,
+      S.showUrlPaste?div({style:{marginTop:"10px"}},[
+        div({style:{fontSize:"12px",color:T.muted,marginBottom:"6px"}},["Copy the job description text from the page and paste it here:"]),
+        mkTextarea(S.urlImportPaste,v=>S.urlImportPaste=v,100,"Paste the full job posting text here…"),
+        div({style:{marginTop:"8px"}},[
+          (()=>{
+            const b=mkBtn("teal","Parse & add to board",importFromPaste,{fontSize:"12px",padding:"7px 14px"});
+            b.disabled=S.load==="urlimport"||!S.urlImportPaste.trim();
+            return b;
+          })(),
+        ]),
+      ]):null,
+    ].filter(Boolean));
+
+    content=div({},[
+      urlCard,
+      div({style:card_s},[
+        div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}},[
+          div({},[div({style:{fontSize:"15px",fontWeight:"700",marginBottom:"3px"}},["Your job board"]),div({style:{fontSize:"13px",color:T.sub}},["Jobs you've saved. Click any to generate your application."])]),
+          mkBtn("primary","+ Add manually",()=>{S.fd={};S.editId=null;S.showForm=true;rerender();},{fontSize:"12px",padding:"7px 14px"}),
+        ]),
+        S.apps.length===0?div({style:{textAlign:"center",padding:"36px",color:T.sub,fontSize:"13px"}},["No jobs yet. Import from a URL above or go to Find Jobs."]):null,
+        ...S.apps.map(buildAppCard),
+      ].filter(Boolean)),
+      S.showForm?buildForm():null,
+    ].filter(Boolean));
+  }
+
+  // ── TAB 5: TRACKER ──
+  else if(S.tab==="tracker"){
+    const counts=STATUSES.reduce((acc,s)=>({...acc,[s.key]:S.apps.filter(a=>a.status===s.key).length}),{});
+    const filtered=S.apps.filter(a=>S.filterSt==="all"||a.status===S.filterSt);
+
+    const statGrid=div({style:{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:"9px",marginBottom:"20px"}},
+      STATUSES.map(s=>{
+        const bg=S.dark?s.bgd:s.bgl;const active=S.filterSt===s.key;
+        const card=div({style:{background:bg,border:`1px solid ${active?s.color:T.cardB}`,borderRadius:"10px",padding:"11px 12px",textAlign:"center",cursor:"pointer",outline:active?`2px solid ${s.color}`:"none"},onClick:()=>{S.filterSt=active?"all":s.key;rerender();}});
+        card.innerHTML=`<div style="font-size:22px;font-weight:700;color:${s.color}">${counts[s.key]||0}</div><div style="font-size:11px;color:${T.muted};margin-top:2px;font-weight:600">${s.label}</div>`;
+        return card;
+      })
+    );
+
+    function buildTrackerAppCard(app){
+      const sm=smeta(app.status);const sbg=S.dark?sm.bgd:sm.bgl;const exp=S.expandedApp===app.id;
+      // Stale detection — applied for 7+ days with no movement
+      const isStale=(()=>{
+        if(app.status!=="applied"||!app.appliedDate)return false;
+        const days=Math.floor((Date.now()-new Date(app.appliedDate).getTime())/(1000*60*60*24));
+        return days>=7;
+      })();
+      const card=div({style:{background:T.card,border:`1px solid ${exp?T.active.border:T.cardB}`,borderRadius:"11px",padding:"14px 18px",marginBottom:"9px"}});
+      if(isStale)card.className="app-stale";
+      const statusSel=h("select",{style:{fontSize:"11px",padding:"4px 8px",borderRadius:"7px",border:`1px solid ${T.cardB}`,background:sbg,color:sm.color,cursor:"pointer",fontFamily:"inherit",fontWeight:"600",flexShrink:"0"}});
+      STATUSES.forEach(s=>{const o=h("option",{value:s.key});o.textContent=s.label;if(s.key===app.status)o.selected=true;statusSel.appendChild(o);});
+      statusSel.addEventListener("change",e=>{S.apps=S.apps.map(a=>a.id===app.id?{...a,status:e.target.value}:a);lsSet("tracker-apps-v2",JSON.stringify(S.apps));rerender();});
+      const row=div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"10px"}},[
+        div({style:{flex:"1",cursor:"pointer"},onClick:()=>{S.expandedApp=exp?null:app.id;rerender();}},[
+          div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"3px"}},[
+            span({style:{fontSize:"14px",fontWeight:"700"}},[app.title]),
+            span({style:{fontSize:"11px",fontWeight:"700",padding:"2px 8px",borderRadius:"9px",background:sbg,color:sm.color}},[sm.label]),
+          ]),
+          div({style:{fontSize:"12px",color:T.sub}},[span({style:{fontWeight:"600",color:T.text}},[app.company]),app.location?" · "+app.location:"",app.appliedDate?" · "+app.appliedDate:""]),
+        ]),
+        statusSel,
+        (()=>{const b=h("button",{style:{background:"transparent",border:"none",cursor:"pointer",padding:"4px 6px",borderRadius:"6px",color:T.muted,fontSize:"15px",flexShrink:"0"},title:"Remove"});b.textContent="🗑";b.addEventListener("click",e=>{e.stopPropagation();if(!confirm("Remove "+app.title+"?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();});return b;})(),
+      ]);
+      card.appendChild(row);
+      if(exp){
+        const hasDocs=!!(app.savedResume||app.savedCover);
+        const docSection=hasDocs?div({style:{background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"12px 14px",marginBottom:"12px"}},[
+          div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px"}},[
+            div({style:{display:"flex",alignItems:"center",gap:"7px"}},[
+              span({style:{fontSize:"12px",fontWeight:"700",color:T.text}},["Documents"]),
+              app.savedDocsDate?span({style:{fontSize:"11px",color:T.muted}},[" — "+app.savedDocsDate]):null,
+            ].filter(Boolean)),
+            mkBtn("ghost","Load into Apply →",()=>{
+              S.selectedJob=app;
+              S.posting=app.title+" at "+app.company+"\nLocation: "+app.location+"\nType: "+app.type+(app.salary?"\nSalary: "+app.salary:"")+"\n\n"+(app.notes||"");
+              if(app.savedResume){S.tailored=app.savedResume;lsSet("apply-tailored",app.savedResume);}
+              if(app.savedCover){S.cover=app.savedCover;lsSet("apply-cover",app.savedCover);}
+              S.applyOut=app.savedResume?"resumepdf":"cover";S.tab="apply";rerender();
+            },{fontSize:"11px",padding:"5px 12px"}),
+          ]),
+          div({style:{display:"flex",gap:"8px",flexWrap:"wrap"}},[
+            app.savedResume?div({style:{flex:"1",minWidth:"160px",background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"10px 12px"}},[
+              div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"5px"}},["Tailored Resume"]),
+              div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",maxHeight:"44px",overflow:"hidden"}},[app.savedResume.substring(0,130)+"…"]),
+              div({style:{display:"flex",gap:"5px",marginTop:"7px",flexWrap:"wrap"}},[
+                mkBtn("ghost","View PDF",()=>{const pa=document.getElementById("print-area");pa.style.display="block";alert("PDF export removed in this version. Copy the text instead.");pa.style.display="none";},{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","Copy",()=>navigator.clipboard.writeText(app.savedResume).catch(()=>{}),{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","⬇ .txt",()=>{const a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(app.savedResume);a.download=app.company.replace(/[\s]+/g,"_")+"_resume.txt";a.click();},{fontSize:"11px",padding:"3px 8px"}),
+              ]),
+            ]):null,
+            app.savedCover?div({style:{flex:"1",minWidth:"160px",background:T.card,border:`1px solid ${T.cardB}`,borderRadius:"8px",padding:"10px 12px"}},[
+              div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"5px"}},["Cover Letter"]),
+              div({style:{fontSize:"11px",color:T.sub,lineHeight:"1.5",maxHeight:"44px",overflow:"hidden"}},[app.savedCover.substring(0,130)+"…"]),
+              div({style:{display:"flex",gap:"5px",marginTop:"7px",flexWrap:"wrap"}},[
+                mkBtn("ghost","Copy",()=>navigator.clipboard.writeText(app.savedCover).catch(()=>{}),{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","⬇ .txt",()=>{const a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(app.savedCover);a.download=app.company.replace(/[\s]+/g,"_")+"_cover.txt";a.click();},{fontSize:"11px",padding:"3px 8px"}),
+              ]),
+            ]):null,
+          ].filter(Boolean)),
+        ]):null;
+        const expanded=div({style:{marginTop:"12px",paddingTop:"12px",borderTop:`1px solid ${T.div}`}},[
+          app.notes?h("p",{style:{fontSize:"12px",color:T.sub,lineHeight:"1.7",marginBottom:"10px"}},[app.notes]):null,
+          docSection,
+          div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
+            mkBtn("teal","Prep interview →",()=>{S.intJob=app.id;S.tab="interview";rerender();},{fontSize:"12px",padding:"6px 12px"}),
+            isStale?mkBtn("ghost","📧 Follow-up email",()=>{
+              const template=generateFollowUp(app.title,app.company);
+              S.followUpText=template;S.followUpJob=app.id;rerender();
+            },{fontSize:"12px",padding:"6px 12px",borderColor:"#854d0e",color:"#fbbf24"}):null,
+            mkBtn("ghost","Edit",()=>{S.fd={...app};S.editId=app.id;S.showForm=true;rerender();},{fontSize:"12px",padding:"6px 12px"}),
+            app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",style:{padding:"6px 12px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:T.ghost.text,textDecoration:"none",display:"inline-flex",alignItems:"center"}},["View ↗"]):null,
+            mkBtn("danger","Remove",()=>{if(!confirm("Remove?"))return;S.apps=S.apps.filter(a=>a.id!==app.id);lsSet("tracker-apps-v2",JSON.stringify(S.apps));if(S.expandedApp===app.id)S.expandedApp=null;rerender();}),
+          ].filter(Boolean)),
+          // Follow-up email display
+          S.followUpJob===app.id&&S.followUpText?div({style:{marginTop:"12px",background:T.inBg,border:`1px solid #854d0e`,borderRadius:"8px",padding:"12px 14px"}},[
+            div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},[
+              div({style:{fontSize:"12px",fontWeight:"700",color:"#fbbf24"}},["📧 Follow-up email template"]),
+              div({style:{display:"flex",gap:"6px"}},[
+                mkBtn("ghost",S.copied==="followup"?"✓ Copied":"Copy",()=>{navigator.clipboard.writeText(S.followUpText).catch(()=>{});S.copied="followup";setTimeout(()=>{S.copied="";rerender();},2000);rerender();},{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","↺ Regenerate",()=>{S.followUpText=generateFollowUp(app.title,app.company);rerender();},{fontSize:"11px",padding:"3px 8px"}),
+                mkBtn("ghost","✕",()=>{S.followUpText="";S.followUpJob=null;rerender();},{fontSize:"11px",padding:"3px 8px"}),
+              ]),
+            ]),
+            h("pre",{style:{fontSize:"11px",color:T.text,lineHeight:"1.7",whiteSpace:"pre-wrap",fontFamily:"inherit",margin:"0"}},[S.followUpText]),
+          ]):null,
+        ].filter(Boolean));
+        card.appendChild(expanded);
+      }
+      return card;
+    }
+
+    function buildTrackerForm(){
+      const f=S.fd;
+      if(!f.id)S.fd.id=Date.now().toString();
+      return div({style:{...card_s,border:`1.5px solid ${T.active.border}`,marginBottom:"16px"}},[
+        div({style:{fontSize:"13px",fontWeight:"700",marginBottom:"12px"}},[S.editId?"Edit application":"Add application"]),
+        div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}},[
+          div({},[mkLabel("Company"),(()=>{const i=mkInput(f.company||"",v=>S.fd.company=v);i.placeholder="Company";return i;})()]),
+          div({},[mkLabel("Job Title"),(()=>{const i=mkInput(f.title||"",v=>S.fd.title=v);i.placeholder="Title";return i;})()]),
+          div({},[mkLabel("Status"),mkSelect(f.status||"saved",STATUSES.map(s=>[s.key,s.label]),v=>S.fd.status=v)]),
+          div({},[mkLabel("Date Applied"),(()=>{const i=h("input",{style:inp_s,type:"date",value:f.appliedDate||""});i.addEventListener("input",e=>S.fd.appliedDate=e.target.value);return i;})()]),
+        ]),
+        div({style:{marginBottom:"10px"}},[mkLabel("Notes"),mkTextarea(f.notes||"",v=>S.fd.notes=v,70,"Notes…")]),
+        div({style:{display:"flex",gap:"8px"}},[
+          (()=>{const b=mkBtn("primary",S.editId?"Save":"Add",()=>{
+            if(!S.fd.company||!S.fd.title)return;
+            if(S.editId)S.apps=S.apps.map(a=>a.id===S.editId?{...S.fd}:a);
+            else S.apps=[{...S.fd},...S.apps];
+            lsSet("tracker-apps-v2",JSON.stringify(S.apps));
+            S.showForm=false;S.editId=null;rerender();
+          },{fontSize:"12px",padding:"7px 14px"});b.disabled=!S.fd.company||!S.fd.title;return b;})(),
+          mkBtn("ghost","Cancel",()=>{S.showForm=false;S.editId=null;rerender();},{fontSize:"12px",padding:"7px 14px"}),
+        ]),
+      ]);
+    }
+
+    content=div({},[
+      statGrid,
+      div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px",flexWrap:"wrap",gap:"8px"}},[
+        div({style:{display:"flex",gap:"7px",alignItems:"center"}},[
+          span({style:{fontSize:"12px",color:T.sub}},[filtered.length+" application"+(filtered.length!==1?"s":"")]),
+          S.filterSt!=="all"?h("button",{style:{fontSize:"11px",color:T.sub,background:"transparent",border:`1px solid ${T.cardB}`,borderRadius:"12px",padding:"3px 10px",cursor:"pointer"},onClick:()=>{S.filterSt="all";rerender();}},"✕ Clear"):null,
+        ].filter(Boolean)),
+        mkBtn("primary","+ Add Application",()=>{S.fd={id:Date.now().toString(),company:"",title:"",location:"",type:"Hybrid",salary:"",url:"",status:"saved",appliedDate:new Date().toISOString().slice(0,10),notes:""};S.editId=null;S.showForm=true;rerender();},{fontSize:"12px",padding:"7px 14px"}),
+      ]),
+      S.showForm?buildTrackerForm():null,
+      !S.storageReady?div({style:{...card_s,textAlign:"center",padding:"40px"}},["Loading…"]):null,
+      S.storageReady&&filtered.length===0?div({style:{...card_s,textAlign:"center",padding:"40px",color:T.sub}},["No applications"+(S.filterSt!=="all"?" with this status yet":"")]):null,
+      ...filtered.map(buildTrackerAppCard),
+    ].filter(Boolean));
+  }
+
+  // ── TAB 6: INTERVIEW PREP ──
+  else if(S.tab==="interview"){
+    const jobSelect=div({},[
+      mkLabel("Preparing for"),
+      (()=>{
+        const s=h("select",{style:inp_s});
+        const opt=h("option",{value:""});opt.textContent="General PM / Ops Manager";s.appendChild(opt);
+        S.apps.forEach(a=>{const o=h("option",{value:a.id});o.textContent=`${a.title} – ${a.company}`;if(a.id===S.intJob)o.selected=true;s.appendChild(o);});
+        s.addEventListener("change",e=>{S.intJob=e.target.value||null;rerender();});
+        return s;
+      })(),
+    ]);
+    const roundPills=div({},[
+      mkLabel("Interview round"),
+      div({style:{display:"flex",gap:"7px",flexWrap:"wrap",paddingTop:"2px"}},[
+        ...([["prescreen","Pre-screen"],["first","First Interview"],["second","Second / Panel"]]).map(([v,l])=>pillBtn(l,S.intRound===v,"#0d9488",()=>{S.intRound=v;rerender();},{padding:"7px 13px",borderRadius:"8px"}))
+      ]),
+    ]);
+    const genQsBtn=(()=>{
+      const b=mkBtn("teal",S.intLoad?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Generating…"));return w;})():"✦ Generate interview questions",async()=>{
+        if(S.intLoad)return;
+        S.intLoad=true;S.intQs=[];S.mockQ="";S.mockA="";S.mockFb="";rerender();
+        const job=S.intJob?S.apps.find(a=>a.id===S.intJob):null;
+        const rl={prescreen:"pre-screen phone call",first:"first interview",second:"second interview or panel"}[S.intRound];
+        try{
+          const r=await callAI(`Interview coach. Return ONLY a JSON array, each item: {category,question,tip}. No markdown, no backticks, no commentary.`,
+            `8 questions for a ${rl}. Job: ${job?`${job.title} at ${job.company}`:"Senior PM / Operations Manager"}. ${job?.notes?"Notes: "+job.notes:""} Candidate: 17+ yrs PM/ops, PMP, TELUS, infrastructure, construction-adjacent, Lean Six Sigma, Agile. Mix: 4 general (category "General PM & Ops"), 4 role-specific (category "Role-Specific").`);
+          try{S.intQs=JSON.parse(r.replace(/```json|```/g,"").trim());S.mockQ="";}
+          catch{S.intQs=[{category:"Error",question:"Could not parse. Try again.",tip:""}];}
+        }catch{S.intQs=[{category:"Error",question:"Error generating.",tip:""}];}
+        S.intLoad=false;rerender();
+      });b.disabled=S.intLoad;return b;
+    })();
+
+    let qSection=null;
+    if(S.intQs.length>0){
+      const job=S.intJob?S.apps.find(a=>a.id===S.intJob):null;
+      const cats=["General PM & Ops","Role-Specific"];
+      qSection=div({style:card_s},[
+        div({style:{fontSize:"14px",fontWeight:"700",marginBottom:"16px"}},[
+          S.intRound==="prescreen"?"Pre-screen questions":S.intRound==="first"?"First interview questions":"Second interview / panel questions",
+          job?span({style:{fontSize:"12px",color:T.sub,fontWeight:"400",marginLeft:"8px"}},[" — "+job.company]):null,
+        ].filter(Boolean)),
+        ...cats.map(cat=>{
+          const qs=S.intQs.filter(q=>q.category===cat);
+          if(!qs.length)return null;
+          return div({style:{marginBottom:"20px"}},[
+            div({style:{fontSize:"11px",fontWeight:"700",textTransform:"uppercase",letterSpacing:"0.07em",color:cat==="Role-Specific"?(S.dark?"#93c5fd":"#1d4ed8"):T.muted,marginBottom:"10px",paddingBottom:"6px",borderBottom:`1px solid ${T.div}`}},[cat]),
+            ...qs.map(q=>div({style:{marginBottom:"10px",padding:"12px 14px",background:T.inBg,border:`1px solid ${T.inB}`,borderRadius:"9px"}},[
+              div({style:{fontSize:"13px",fontWeight:"600",color:T.text,marginBottom:"5px",lineHeight:"1.5"}},[q.question]),
+              q.tip?div({style:{fontSize:"12px",color:T.sub,lineHeight:"1.6",borderLeft:`2px solid ${S.dark?"#1e40af":"#93c5fd"}`,paddingLeft:"10px",marginBottom:"6px"}},["💡 "+q.tip]):null,
+              pillBtn("Practice this →",S.mockQ===q.question,"#7c3aed",()=>{S.mockQ=q.question;S.mockA="";S.mockFb="";rerender();},{padding:"4px 11px",borderRadius:"7px",fontSize:"11px"}),
+            ].filter(Boolean))),
+          ]);
+        }).filter(Boolean),
+      ]);
+    }
+
+    let mockSection=null;
+    if(S.mockQ){
+      const submitFb=mkBtn("purple",S.load==="mock"?(()=>{const w=div({style:{display:"flex",alignItems:"center",gap:"6px"}});w.appendChild(spinEl());w.appendChild(document.createTextNode("Analysing…"));return w;})():"Get feedback",async()=>{
+        if(!S.mockA.trim()||S.load==="mock")return;
+        S.load="mock";S.mockFb="";rerender();
+        try{const r=await callAI(`Interview coach. Honest constructive feedback. Format: what worked (1-2 sentences), what to improve (1-2 sentences), better version of the answer (2-3 sentences). Under 200 words.`,`Q: ${S.mockQ}\n\nAnswer: ${S.mockA}`);S.mockFb=r;}
+        catch{S.mockFb="Error. Try again.";}
+        S.load="";rerender();
+      });submitFb.disabled=S.load==="mock"||!S.mockA.trim();
+
+      mockSection=div({style:{...card_s,border:`1.5px solid ${S.dark?"#7c3aed":"#a78bfa"}`}},[
+        div({style:{fontSize:"13px",fontWeight:"700",color:S.dark?"#c4b5fd":"#6d28d9",marginBottom:"6px"}},["Mock interview"]),
+        div({style:{fontSize:"14px",fontWeight:"600",color:T.text,marginBottom:"12px",lineHeight:"1.5",padding:"10px 14px",background:T.inBg,borderRadius:"8px",border:`1px solid ${T.inB}`}},[S.mockQ]),
+        mkLabel("Your answer"),
+        mkTextarea(S.mockA,v=>{S.mockA=v;},110,"Type your answer as if you're in the interview…"),
+        div({style:{marginTop:"10px",display:"flex",gap:"8px"}},[
+          submitFb,
+          mkBtn("ghost","Clear",()=>{S.mockQ="";S.mockA="";S.mockFb="";rerender();},{fontSize:"12px",padding:"7px 14px"}),
+        ]),
+        S.mockFb?div({style:{marginTop:"14px",padding:"14px 16px",background:S.dark?"#052e16":"#f0fdf4",border:`1px solid ${S.dark?"#166534":"#86efac"}`,borderRadius:"9px"}},[
+          div({style:{fontSize:"11px",fontWeight:"700",textTransform:"uppercase",letterSpacing:"0.07em",color:S.dark?"#4ade80":"#15803d",marginBottom:"8px"}},["Coach feedback"]),
+          div({style:{fontSize:"13px",color:T.text,lineHeight:"1.75",whiteSpace:"pre-wrap"}},[S.mockFb]),
+        ]):null,
+      ].filter(Boolean));
+    }
+
+    content=div({},[
+      div({style:card_s},[
+        div({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"16px",marginBottom:"16px"}},[jobSelect,roundPills]),
+        genQsBtn,
+      ]),
+      qSection,mockSection,
+    ].filter(Boolean));
+  }
+
+  // ── ASSEMBLE ──
+  const main=div({style:{maxWidth:"1080px",margin:"0 auto",padding:"24px 20px"}},[tabBar,content]);
+
+  const showSetup=!hasKey&&!lsGet("setup-dismissed","");
+  const setupModal=showSetup?div({style:{position:"fixed",inset:"0",background:"rgba(0,0,0,0.75)",zIndex:"200",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}},[
+    div({style:{background:S.dark?"#161c27":"#fff",borderRadius:"16px",padding:"32px",maxWidth:"460px",width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,0.5)"}},[
+      div({style:{fontSize:"26px",marginBottom:"10px"}},["🚀"]),
+      div({style:{fontSize:"18px",fontWeight:"700",color:T.text,marginBottom:"8px"}},["Welcome to ResumeAI"]),
+      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.7",marginBottom:"18px"}},["AI-powered resume polishing, job tailoring, and interview prep — all running locally on your device. To enable the AI you need a free Anthropic API key."]),
+      div({style:{background:S.dark?"#0d1117":"#f4f6fa",border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"18px"}},[
+        div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:"10px"}},["One-time setup"]),
+        ...[["1","Visit console.anthropic.com/settings/keys"],["2","Click Create Key and copy it"],["3","Paste it below and click Save"]].map(([n,txt])=>
+          div({style:{display:"flex",gap:"10px",alignItems:"center",marginBottom:"7px"}},[
+            span({style:{width:"20px",height:"20px",borderRadius:"50%",background:"#2563eb",color:"#fff",fontSize:"10px",fontWeight:"700",display:"inline-flex",alignItems:"center",justifyContent:"center",flexShrink:"0"}},[n]),
+            span({style:{fontSize:"13px",color:T.text}},[txt]),
+          ])
+        ),
+      ]),
+      div({style:{display:"flex",gap:"8px",marginBottom:"10px"}},[
+        (()=>{
+          const inp=h("input",{style:{flex:"1",padding:"10px 12px",borderRadius:"8px",fontSize:"13px",border:`1px solid ${T.inB}`,background:T.inBg,color:T.text},placeholder:"sk-ant-api03-…",type:"password"});
+          inp.value=S.apiKey||"";
+          inp.addEventListener("input",e=>{S.apiKey=e.target.value;});
+          inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&S.apiKey.trim()){lsSet("api-key",S.apiKey.trim());lsSet("setup-dismissed","1");rerender();}});
+          setTimeout(()=>inp.focus(),120);
+          return inp;
+        })(),
+        h("button",{style:{padding:"10px 18px",borderRadius:"8px",background:"#2563eb",color:"#fff",fontSize:"13px",fontWeight:"700",border:"none",cursor:"pointer",flexShrink:"0"},
+          onClick:()=>{if(S.apiKey.trim()){lsSet("api-key",S.apiKey.trim());lsSet("setup-dismissed","1");rerender();}else alert("Please paste your API key first.");}},
+          ["Save & start"]),
+      ]),
+      h("a",{href:"https://console.anthropic.com/settings/keys",target:"_blank",style:{fontSize:"12px",color:"#2563eb",display:"block",marginBottom:"12px"}},["Open Anthropic console →"]),
+      h("button",{style:{fontSize:"12px",color:T.muted,background:"transparent",border:"none",cursor:"pointer",textDecoration:"underline"},
+        onClick:()=>{lsSet("setup-dismissed","1");rerender();}},
+        ["Skip for now — I’ll add it later"]),
+      div({style:{marginTop:"14px",padding:"12px 14px",background:"#0c1e3e",border:"1px solid #1e40af",borderRadius:"8px"}},[
+        div({style:{fontSize:"11px",fontWeight:"700",color:"#93c5fd",marginBottom:"4px"}},["\uD83E\uDDEA Just testing?"]),
+        div({style:{fontSize:"11px",color:"#64748b",marginBottom:"8px",lineHeight:"1.5"}},["Use the shared demo key below. Limited credits, rate-limited — for testing only."]),
+        h("button",{style:{fontSize:"12px",padding:"6px 14px",borderRadius:"7px",border:"1px solid #1e40af",background:"#1e3a8a",color:"#93c5fd",cursor:"pointer",fontWeight:"600",width:"100%"},
+          onClick:()=>{
+            const demoKey="PASTE_DEMO_KEY_HERE";
+            S.apiKey=demoKey;lsSet("api-key",demoKey);lsSet("setup-dismissed","1");rerender();
+          }},["Use demo key \u2014 start testing \u2192"]),
+      ]),
+    ]),
+  ]):null;
+
+  const noKeyBanner=(!hasKey&&lsGet("setup-dismissed",""))?div({style:{background:T.warn.bg,borderBottom:`1px solid ${T.warn.border}`,padding:"8px 24px",display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},[
+    span({style:{fontSize:"12px",color:T.warn.text}},["⚠ AI features require an API key — "]),
+    h("button",{style:{fontSize:"12px",color:T.warn.text,background:"transparent",border:"none",cursor:"pointer",textDecoration:"underline",padding:"0"},onClick:()=>{S.showApiKey=true;rerender();}},
+      ["add it here"]),
+    span({style:{fontSize:"12px",color:T.warn.text}},[ " or visit "]),
+    h("a",{href:"https://console.anthropic.com/settings/keys",target:"_blank",style:{fontSize:"12px",color:T.warn.text}},["console.anthropic.com"]),
+  ]):null;
+
+  const root=div({style:{minHeight:"100vh",background:T.appBg,color:T.text,fontFamily:"'Inter',system-ui,sans-serif"}},[header,noKeyBanner,main,setupModal]);
+
+  app.innerHTML="";
+  app.appendChild(root);
+  } catch(e) {
+    console.error("Render error:", e);
+    const app=document.getElementById("app");
+    if(app) app.innerHTML='<div style="padding:20px;color:red">Error loading app. Check console.</div>';
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────────────────
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() {
+    loadAll();
+    _render();
+  });
+} else {
+  loadAll();
+  _render();
+}
+</script>
+
+
+<div id="claude-static-indicator-container" style="position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); align-items: center; justify-content: center; padding: 6px 6px 6px 16px; background: rgb(250, 249, 245); border: 0.5px solid rgba(31, 30, 29, 0.3); border-radius: 14px; box-shadow: rgba(0, 0, 0, 0.15) 0px 40px 80px 0px; z-index: 2147483647; pointer-events: none; white-space: nowrap; user-select: none; font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; flex-shrink: 0; margin-right: 8px;">
+        <path d="M3.13946 10.6399L6.28757 8.87462L6.37405 8.73821L6.28757 8.6339H6.13189L5.60432 8.6018L3.80541 8.55366L2.24865 8.48947L0.735135 8.40923H0.492973L0.354595 8.32899L0.181622 8.1685L0.0345946 8.01605L0 7.85557L0.0345946 7.62287L0.138378 7.44634L0.224865 7.40622H0.354595L0.812973 7.44634L1.82486 7.51856L3.34703 7.62287L4.44541 7.68706L6.08 7.85557H6.33946L6.37405 7.75125L6.28757 7.68706L6.21838 7.62287L4.64432 6.55567L2.94054 5.4323L2.04973 4.78235L1.57405 4.45336L1.33189 4.14845L1.22811 3.92377L1.17622 3.69107L1.22811 3.47442L1.33189 3.28185L1.46162 3.13741L1.66054 2.99298H1.87676L2.24865 3.0331L2.39568 3.07322L2.99243 3.53059L4.26378 4.51755L5.92432 5.73721L6.16649 5.93781H6.27892V5.82548L6.16649 5.64092L5.26703 4.01204L4.30703 2.35105L3.87459 1.66098L3.76216 1.25176C3.7391 1.16082 3.69297 0.977332 3.69297 0.970913V0.762287L3.77946 0.505517L3.93513 0.240722L4.18595 0.0882648L4.4627 0H4.67892L4.83459 0.0240722L5.12865 0.0882648L5.4054 0.328987L5.82054 1.27583L6.48649 2.76028L7.52432 4.78235L7.82703 5.38415L7.99135 5.93781L8.05189 6.10632H8.15567V6.01003L8.24216 4.87061L8.39784 3.47442L8.55351 1.67703L8.6054 1.17151L8.85622 0.561685L8.9773 0.417252L9.21946 0.232698H9.35784L9.74703 0.417252L9.97189 0.665998L10.067 0.874624L10.0238 1.17151L9.83351 2.40722L9.46162 4.34102L9.21946 5.64092H9.35784L9.52216 5.47242L10.1795 4.60582L11.2778 3.22568L11.7622 2.68004L12.333 2.07823L12.6962 1.78937L13.0162 1.67703L13.3881 1.78937L13.7168 2.06219L13.8897 2.54363V2.76028L13.6649 3.32197L12.9557 4.22066L12.3676 4.98295L12.0043 5.56871L11.0011 7.02106V7.08526H11.1741L13.0768 6.67603L14.1059 6.49147L15.3341 6.28285L15.5762 6.34704L15.8876 6.53962L15.9481 6.80441L15.8876 7.12538L15.7319 7.34203L14.4173 7.66299L12.8778 7.97593L10.5854 8.51559C10.5705 8.51909 10.56 8.53236 10.56 8.54764C10.56 8.56468 10.573 8.57891 10.59 8.58044L11.6238 8.67402L12.0649 8.69809H13.1459L15.1611 8.85055L15.6886 9.19559L15.9481 9.39619L16 9.62086L15.9481 9.94985L15.8443 10.1023L15.4119 10.3029L15.1351 10.3591L14.0454 10.1023L11.4941 9.49248L10.6205 9.27583H10.4995V9.34804L11.2259 10.0622L12.5665 11.2658L14.2357 12.8225L14.3222 13.0953V13.2076L14.1059 13.5125L13.9243 13.5206L13.8811 13.4804L12.4108 12.3731L12.2984 12.325L11.84 11.8756L10.56 10.7924H10.4735V10.9047L10.7676 11.338L12.333 13.6891L12.4108 14.4112L12.2984 14.6439L11.8919 14.7884L11.667 14.7563L11.4508 14.7081L11.2605 14.5396L10.5254 13.4162L9.5827 11.9719L8.82162 10.672H8.79342C8.76039 10.672 8.73278 10.6972 8.7297 10.73L8.27676 15.5667L8.06919 15.8154L7.6454 16H7.58486L7.17838 15.6951L6.96216 15.1976L7.17838 14.2106L7.43784 12.9268L7.6454 11.9077L7.83567 10.6399L7.95187 10.2164C7.9548 10.2057 7.95069 10.1944 7.94161 10.1881C7.91157 10.1672 7.87034 10.1741 7.84878 10.2037L6.89297 11.5145L5.44 13.4804L4.28973 14.7081L4.01297 14.8205H3.80541L3.5373 14.5717V14.4514L3.58054 14.1304L3.84865 13.7372L5.44 11.7151L6.4 10.4554L7.01872 9.73222C7.04511 9.70139 7.04245 9.65523 7.0127 9.62763C7.00333 9.61894 6.98925 9.61773 6.97854 9.62471L2.75027 12.3811L1.99784 12.4774L1.66919 12.1725L1.71243 11.675L1.86811 11.5145L3.13946 10.6399Z" fill="#D97757"></path>
+      </svg>
+      <span style="vertical-align: middle; color: #141413; font-size: 14px; display: inline-block;">Claude is active in this tab group</span>
+      <div style="display: inline-block; width: 0.5px; height: 32px; background: rgba(31, 30, 29, 0.15); margin: 0 8px; vertical-align: middle;"></div>
+      <button id="claude-static-chat-button" style="position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 6px; background: transparent; border: none; cursor: pointer; pointer-events: auto; vertical-align: middle; width: 32px; height: 32px; border-radius: 8px; transition: background 0.2s;">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="#141413" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px; display: block;">
+          <path d="M10 2.5C14.1421 2.5 17.5 5.85786 17.5 10C17.5 14.1421 14.1421 17.5 10 17.5H3C2.79779 17.5 2.61549 17.3782 2.53809 17.1914C2.4607 17.0046 2.50349 16.7895 2.64648 16.6465L4.35547 14.9365C3.20124 13.6175 2.5 11.8906 2.5 10C2.5 5.85786 5.85786 2.5 10 2.5ZM10 3.5C6.41015 3.5 3.5 6.41015 3.5 10C3.5 11.7952 4.22659 13.4199 5.40332 14.5967L5.46582 14.6729C5.52017 14.7544 5.5498 14.8508 5.5498 14.9502C5.5498 15.0828 5.49709 15.2099 5.40332 15.3037L4.20703 16.5H10C13.5899 16.5 16.5 13.5899 16.5 10C16.5 6.41015 13.5899 3.5 10 3.5ZM13.29 9.30371C13.3986 9.05001 13.6925 8.93174 13.9463 9.04004C14.2 9.14863 14.3183 9.44253 14.21 9.69629C13.8506 10.536 13.1645 11.25 12.25 11.25C11.6372 11.25 11.128 10.9289 10.75 10.4648C10.372 10.9289 9.86276 11.25 9.25 11.25C8.63724 11.25 8.12801 10.9289 7.75 10.4648C7.37198 10.9289 6.86276 11.25 6.25 11.25C5.97386 11.25 5.75 11.0261 5.75 10.75C5.75 10.4739 5.97386 10.25 6.25 10.25C6.58764 10.25 7.00448 9.97056 7.29004 9.30371L7.32422 9.2373C7.41431 9.09121 7.5749 9 7.75 9C7.9501 9 8.13123 9.11975 8.20996 9.30371L8.32227 9.53516C8.59804 10.0359 8.95442 10.25 9.25 10.25C9.58764 10.25 10.0045 9.97056 10.29 9.30371L10.3242 9.2373C10.4143 9.09121 10.5749 9 10.75 9C10.9501 9 11.1312 9.11975 11.21 9.30371L11.3223 9.53516C11.598 10.0359 11.9544 10.25 12.25 10.25C12.5876 10.25 13.0045 9.97056 13.29 9.30371Z"></path>
+        </svg>
+        <span id="claude-static-chat-tooltip" style="position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%); padding: 6px 12px; background: #30302E; color: #FAF9F5; border-radius: 6px; font-size: 12px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">Open chat</span>
+      </button>
+      <button id="claude-static-close-button" style="position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 6px; background: transparent; border: none; cursor: pointer; pointer-events: auto; vertical-align: middle; width: 32px; height: 32px; margin-left: 4px; border-radius: 8px; transition: background 0.2s;">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px; display: block;">
+          <path d="M15.1464 4.14642C15.3417 3.95121 15.6582 3.95118 15.8534 4.14642C16.0486 4.34168 16.0486 4.65822 15.8534 4.85346L10.7069 9.99997L15.8534 15.1465C16.0486 15.3417 16.0486 15.6583 15.8534 15.8535C15.6826 16.0244 15.4186 16.0461 15.2245 15.918L15.1464 15.8535L9.99989 10.707L4.85338 15.8535C4.65813 16.0486 4.34155 16.0486 4.14634 15.8535C3.95115 15.6583 3.95129 15.3418 4.14634 15.1465L9.29286 9.99997L4.14634 4.85346C3.95129 4.65818 3.95115 4.34162 4.14634 4.14642C4.34154 3.95128 4.65812 3.95138 4.85338 4.14642L9.99989 9.29294L15.1464 4.14642Z" fill="#141413"></path>
+        </svg>
+        <span id="claude-static-close-tooltip" style="position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%); padding: 6px 12px; background: #30302E; color: #FAF9F5; border-radius: 6px; font-size: 12px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">Dismiss</span>
+      </button>
+    </div></body></html>
