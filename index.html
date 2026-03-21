@@ -887,11 +887,6 @@ function escapeHTML(s){
   return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
 
-function getFormattedDate(){
-  const d=new Date();
-  const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  return"Last Updated: "+months[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear();
-}
 
 function parseResume(text){
   const lines=text.split("\n").map(l=>l.trim()).filter(Boolean);
@@ -993,7 +988,6 @@ function renderHTML(data,ci){
   });
 
   const footer=ci.footer||"Infrastructure Leadership Portfolio";
-  html+='<div style="margin-top:32px;border-top:0.5px solid #eee;padding-top:8px;text-align:right;font-size:7.5pt;color:#aaa;font-style:italic;letter-spacing:0.02em">'+getFormattedDate()+' | '+escapeHTML(footer)+'</div>';
 
   return'<div class="pdf-wrap">'+html+'</div>';
 }
@@ -1418,6 +1412,12 @@ function mkBrand(size=20, checkSize=21){
   return wrap;
 }
 
+const TONE_RULES={
+  natural:`VOICE (critical): Write like a confident human — not a corporate AI. Plain direct language. AVOID: spearheaded, leveraged, utilized, orchestrated, championed, fostered, robust, seamless, synergy, dynamic, innovative, results-driven, passionate, proven track record, go-getter. Use ONLY strong plain verbs: built, led, cut, grew, saved, shipped, ran, fixed.`,
+  formal:`VOICE: Professional formal tone. Clear structured language. Avoid buzzwords. Use precise industry terms.`,
+  executive:`VOICE: C-suite executive tone. Strategic, board-level language. Quantify everything. Lead with business impact.`
+};
+
 // RENDER ENGINE
 // ─────────────────────────────────────────────────────────
 let renderTimeout=null;
@@ -1564,6 +1564,22 @@ ${S.raw.substring(0,3000)}`
       [(text.match(/ \| | — | – /g)||[]).length>=2,"3+ Experience blocks found"],
       [(text.match(/(\$\d+|\d+%|\d+\+\s*years?)/gi)||[]).length>=5,"5+ Metrics found"],
     ];
+
+    // Polish action — AI rewrites resume
+    async function doPolish(){
+      if(!S.raw.trim()||S.load==="polish")return;
+      S.load="polish";rerender();
+      try{
+        const r=await callAI(
+          "Professional resume writer. Rewrite into clean ATS-friendly plain text.\n"+(TONE_RULES[S.tone||"natural"]||"")+"\nALL CAPS headers. Sections: PROFESSIONAL SUMMARY, AREAS OF EXPERTISE, TECHNICAL SKILLS, PROFESSIONAL EXPERIENCE, CERTIFICATIONS. No tables/columns. Output ONLY resume text.",
+          "Resume to rewrite:\n\n"+S.raw.substring(0,4000)
+        );
+        S.raw=r;lsSet("resume-raw",r);S.resumeView="preview";
+      }catch(e){S.polishError=e.message||"Error. Try again.";}
+      S.load="";showToast("Resume improved ✅","success");
+      if(S.onboardingStep===1){S.onboardingStep=3;}
+      rerender();
+    }
 
     const auditR=S.auditResult;
 
