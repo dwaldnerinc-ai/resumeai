@@ -1444,7 +1444,7 @@ ${S.raw.substring(0,3000)}`
         const actions=div({style:{marginTop:"12px",paddingTop:"12px",borderTop:`1px solid ${T.div}`}},[
           app.notes?h("p",{style:{fontSize:"12px",color:T.sub,lineHeight:"1.7",marginBottom:"12px"}},[app.notes]):null,
           div({style:{display:"flex",gap:"7px",flexWrap:"wrap"}},[
-            mkBtn("primary",hasDocs?"↺ Re-generate →":"✦ Generate application →",()=>{
+            mkBtn("primary",hasDocs?"↺ Re-generate cover letter":"✦ Generate cover letter",()=>{
               S.coverJobId=app.id;S.coverApp=app;S.showCoverModal=true;rerender();
             },{fontSize:"12px",padding:"6px 14px"}),
             app.url?h("a",{href:app.url,target:"_blank",rel:"noreferrer",style:{padding:"6px 14px",borderRadius:"8px",border:`1px solid ${T.ghost.border}`,fontSize:"12px",fontWeight:"600",background:T.ghost.bg,color:T.ghost.text,textDecoration:"none",display:"inline-flex",alignItems:"center"}},["View posting ↗"]):null,
