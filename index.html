@@ -748,7 +748,7 @@ function _render(){
         ]):null,
       ].filter(Boolean)),
       h("button",{style:{padding:"5px 13px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:T.card,color:T.sub,fontSize:"12px",cursor:"pointer",display:"flex",alignItems:"center",gap:"5px"},onClick:()=>{S.dark=!S.dark;lsSet("app-dark",String(S.dark));rerender();}},[S.dark?"☀ Light":"☾ Dark"]),
-      h("button",{style:{padding:"5px 10px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:"transparent",color:T.muted,fontSize:"11px",cursor:"pointer"},onClick:()=>{if(!confirm("Clear all saved data and start fresh?"))return;["tracker-apps-v2","resume-raw","resume-polished","resume-ci","resume-tone","apply-posting","apply-tailored","apply-cover"].forEach(lsDel);S.raw="";S.ci={name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""};S.tone="natural";S.posting="";S.tailored="";S.cover="";S.apps=[...SEED_APPS];S.resumeView="edit";lsSet("tracker-apps-v2",JSON.stringify(SEED_APPS));rerender();}},["Reset"]),
+      h("button",{style:{padding:"5px 10px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:"transparent",color:T.muted,fontSize:"11px",cursor:"pointer"},onClick:()=>{if(!confirm("Clear all saved data and start fresh?"))return;["tracker-apps-v2","resume-raw","resume-ci","api-key","setup-dismissed"].forEach(lsDel);S.raw="";S.ci={name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""};S.apps=[...SEED_APPS];S.resumeView="edit";S.auditResult=null;S.toneCheck=null;S.coverLetter="";lsSet("tracker-apps-v2",JSON.stringify(SEED_APPS));rerender();}},["Reset"]),
     ]),
   ]);
 
@@ -851,6 +851,10 @@ ${S.raw.substring(0,3000)}`
 
         // PDF preview toggle
         div({style:{marginTop:"12px",display:"flex",gap:"8px",alignItems:"center",justifyContent:"flex-end"}},[
+          S.raw.trim()?mkBtn("ghost",S.copied==="resume"?"✓ Copied":"Copy text",()=>{
+              navigator.clipboard.writeText(S.raw).catch(()=>{});
+              S.copied="resume";setTimeout(()=>{S.copied="";rerender();},2000);rerender();
+            },{fontSize:"12px",padding:"6px 12px"}):null,
           pillBtn("📄 PDF Preview",S.resumeView==="preview","#2563eb",()=>{S.resumeView=S.resumeView==="preview"?"edit":"preview";rerender();},{padding:"6px 14px",borderRadius:"7px",fontSize:"12px"}),
           S.resumeView==="preview"?mkBtn("ghost","🖨 Print / Save PDF",()=>{
             const pa=document.getElementById("print-area");
@@ -1852,8 +1856,8 @@ ${S.raw.substring(0,3000)}`
   const setupModal=showSetup?div({style:{position:"fixed",inset:"0",background:"rgba(0,0,0,0.75)",zIndex:"200",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}},[
     div({style:{background:S.dark?"#161c27":"#fff",borderRadius:"16px",padding:"32px",maxWidth:"460px",width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,0.5)"}},[
       div({style:{fontSize:"26px",marginBottom:"10px"}},["🚀"]),
-      div({style:{fontSize:"18px",fontWeight:"700",color:T.text,marginBottom:"8px"}},["Welcome to ResumeAI"]),
-      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.7",marginBottom:"18px"}},["AI-powered resume polishing, job tailoring, and interview prep — all running locally on your device. To enable the AI you need a free Anthropic API key."]),
+      div({style:{fontSize:"18px",fontWeight:"700",color:T.text,marginBottom:"8px"}},["Welcome to ResumeAI 👋"]),
+      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.7",marginBottom:"18px"}},["Analyze your resume, find jobs, generate cover letters, and prep for interviews — powered by Claude AI. Your data stays in your browser. Add your Anthropic API key to get started."]),
       div({style:{background:S.dark?"#0d1117":"#f4f6fa",border:`1px solid ${T.inB}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"18px"}},[
         div({style:{fontSize:"11px",fontWeight:"700",color:T.muted,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:"10px"}},["One-time setup"]),
         ...[["1","Visit console.anthropic.com/settings/keys"],["2","Click Create Key and copy it"],["3","Paste it below and click Save"]].map(([n,txt])=>
