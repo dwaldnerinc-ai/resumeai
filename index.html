@@ -589,7 +589,7 @@ function wireEditable(previewBox, getText, onSave){
 }
 
 // Cover letter modal — renders over the tracker when showCoverModal is true
-function renderCoverModal(T,card_s,mkBtn,div,span,h){
+function renderCoverModal(T,card_s,mkBtn,pillBtn,div,span,h){
   if(!S.showCoverModal||!S.coverApp)return null;
   const app=S.coverApp;
 
@@ -674,7 +674,7 @@ OUTPUT: Plain text only. No markdown. No asterisks. Fill in real contact info fr
           navigator.clipboard.writeText(S.coverLetter).catch(()=>{});
           S.copied="cover";setTimeout(()=>{S.copied="";rerender();},2000);rerender();
         },{fontSize:"12px"}):null,
-        S.coverLetter?mkBtn("ghost","🖨 Save as PDF",()=>{
+        S.coverLetter?mkBtn("ghost","🖨 Print / Save PDF",()=>{
           const pa=document.getElementById("print-area");if(!pa)return;
           pa.innerHTML='<div style="font-family:Inter,sans-serif;padding:0.75in;max-width:none;font-size:11pt;line-height:1.8;white-space:pre-wrap;color:#1a1a1a">'+S.coverLetter.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</div>';
           pa.style.display="block";window.print();pa.style.display="none";pa.innerHTML="";
@@ -1943,7 +1943,7 @@ ${S.raw.substring(0,3000)}`
     h("a",{href:"https://console.anthropic.com/settings/keys",target:"_blank",style:{fontSize:"12px",color:T.warn.text}},["console.anthropic.com"]),
   ]):null;
 
-  const coverModal=renderCoverModal(T,card_s,mkBtn,div,span,h);
+  const coverModal=renderCoverModal(T,card_s,mkBtn,pillBtn,div,span,h);
     const root=div({style:{minHeight:"100vh",background:T.appBg,color:T.text,fontFamily:"'Inter',system-ui,sans-serif"}},[header,noKeyBanner,main,setupModal,coverModal].filter(Boolean));
 
   app.innerHTML="";
