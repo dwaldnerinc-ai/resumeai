@@ -1218,7 +1218,13 @@ function renderStartHere(T,card_s,mkBtn,div,span,h){
     div({style:{...card_s,textAlign:"center",marginBottom:"20px",background:allDone?"rgba(22,163,74,0.05)":S.dark?"rgba(37,99,235,0.05)":"rgba(37,99,235,0.03)",border:"1px solid "+(allDone?"#166534":"#1e40af")}},[
       div({style:{fontSize:"28px",marginBottom:"8px"}},[allDone?"🎉":"🚀"]),
       div({style:{fontSize:"18px",fontWeight:"800",color:T.text,marginBottom:"6px"}},[allDone?"You're all set!":"Let's get you set up"]),
-      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.6"}},[allDone?"Your profile is complete. Use the tabs above to keep going.":"Follow these 4 steps to get the most out of Applyify."]),
+      div({style:{fontSize:"13px",color:T.sub,lineHeight:"1.6"}},[allDone?"Your profile is complete. Use the tabs above to keep going.":(()=>{
+        const s=h("span",{style:{display:"inline"}});
+        s.appendChild(document.createTextNode("Follow these 4 steps to get the most out of "));
+        s.appendChild(mkBrand(13,14));
+        s.appendChild(document.createTextNode("."));
+        return s;
+      })()]),
       allDone?div({style:{marginTop:"14px",display:"flex",gap:"8px",justifyContent:"center",flexWrap:"wrap"}},[
         mkBtn("primary","Go to My Resume",()=>{S.tab="resume";rerender();},{fontSize:"13px"}),
         mkBtn("ghost","Go to Tracker",()=>{S.tab="tracker";rerender();},{fontSize:"13px"}),
@@ -1281,11 +1287,7 @@ function renderOnboarding(T,card_s,mkBtn,div,span,h){
   if(step === 0){
     return modal([
       // Logo wordmark
-      div({style:{display:"flex",alignItems:"center",gap:"4px",marginBottom:"24px",fontFamily:"'Sora','DM Sans',sans-serif",fontSize:"20px",fontWeight:"600",letterSpacing:"-0.03em"}},[
-        span({style:{color:"#22c55e",fontSize:"20px",fontWeight:"700",marginRight:"2px"}},["✓"]),
-        span({style:{color:"#fff"}},["Apply"]),
-        span({style:{color:"#22c55e",fontStyle:"italic",letterSpacing:"-0.09em",marginLeft:"-1px"}},["ify"]),
-      ]),
+      (()=>{const w=div({style:{marginBottom:"24px"}});w.appendChild(mkBrand(20,21));return w;})(),
       h("h2",{style:{fontFamily:"'Sora',sans-serif",fontSize:"24px",fontWeight:"800",color:"#f0f4ff",letterSpacing:"-0.02em",marginBottom:"10px"}},["Apply smarter. Get hired faster."]),
       h("p",{style:{fontSize:"14px",color:"#4b5563",lineHeight:"1.7",marginBottom:"20px"}},["Your AI-powered job search toolkit. Everything stays in your browser — private by default."]),
       // 3 bullets
@@ -1397,6 +1399,25 @@ function renderOnboarding(T,card_s,mkBtn,div,span,h){
 // ── END ONBOARDING ────────────────────────────────────────────────────────
 
 
+
+// Reusable branded wordmark — Apply(white) + ify(green italic tighter)
+function mkBrand(size=20, checkSize=21){
+  const wrap = h("span",{style:{
+    display:"inline-flex",alignItems:"center",gap:"0",
+    fontFamily:"'Sora','DM Sans',sans-serif",
+    fontSize:size+"px",fontWeight:"600",
+    letterSpacing:"-0.03em",lineHeight:"1",
+    userSelect:"none",verticalAlign:"middle",
+  }});
+  const check = h("span",{style:{color:"#22c55e",fontSize:checkSize+"px",fontWeight:"700",marginRight:"3px"}},["✓"]);
+  const apply = h("span",{style:{color:"#ffffff",letterSpacing:"-0.03em"}},["Apply"]);
+  const ify   = h("span",{style:{color:"#22c55e",fontStyle:"italic",letterSpacing:"-0.09em",marginLeft:"-1px"}},["ify"]);
+  wrap.appendChild(check);
+  wrap.appendChild(apply);
+  wrap.appendChild(ify);
+  return wrap;
+}
+
 // RENDER ENGINE
 // ─────────────────────────────────────────────────────────
 let renderTimeout=null;
@@ -1470,34 +1491,7 @@ function _render(){
   const TABS=[["start","🚀","Start Here"],["resume","1","My Resume"],["search","2","Find Jobs"],["board","3","Job Board"],["tracker","4","Apply & Track"],["interview","5","Interview Prep"]];
 
   const hasKey=!!S.apiKey;
-  const header=div({style:{background:T.hBg,borderBottom:`1px solid ${T.hBorder}`,padding:"0 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:"0",zIndex:"10",minHeight:"54px",flexWrap:"wrap",gap:"8px",paddingTop:"8px",paddingBottom:"8px"}},[
-    div({style:{display:"flex",alignItems:"center",gap:"10px"}},[
-      h("span",{style:{display:"flex",alignItems:"center",gap:"8px",cursor:"pointer",fontFamily:"'Sora',sans-serif",fontSize:"18px",fontWeight:"800",letterSpacing:"-0.03em"},
-        onClick:()=>location.reload()},[
-        h("img",{src:"https://dwaldnerinc-ai.github.io/resumeai/applyify_check.png",style:{height:"26px",width:"26px",objectFit:"contain",borderRadius:"4px"}}),
-        h("span",{style:{color:"#fff"}},["Apply"]),
-        h("span",{style:{color:"#22c55e"}},["ify"]),
-      ]),
-    ]),
-    div({style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},[
-      S.storageReady?div({style:{fontSize:"11px",color:T.muted,display:"flex",alignItems:"center",gap:"4px"}},[
-        span({style:{width:"6px",height:"6px",borderRadius:"50%",background:"#16a34a",display:"inline-block"}}),
-        " Auto-saved"
-      ]):span(),
-      div({style:{display:"flex",alignItems:"center",gap:"6px"}},[
-        h("button",{className:hasKey?"btn-key-active":"btn-key-missing",onClick:()=>{S.showApiKey=!S.showApiKey;rerender();}},[
-          div({className:hasKey?"key-dot":"key-dot-missing"}),
-          hasKey?"API Active":"Set API Key",
-        ]),
-        S.showApiKey?div({style:{display:"flex",alignItems:"center",gap:"6px"}},[
-          (()=>{const inp=h("input",{style:{padding:"5px 10px",borderRadius:"8px",fontSize:"12px",width:"240px",border:`1px solid ${T.inB}`,background:T.inBg,color:T.text},placeholder:"sk-ant-api03-…",type:"password"});inp.value=S.apiKey;inp.addEventListener("input",e=>S.apiKey=e.target.value);inp.addEventListener("keydown",e=>{if(e.key==="Enter"){lsSet("api-key",S.apiKey.trim());S.showApiKey=false;S.apiKeyError=false;rerender();}});setTimeout(()=>inp.focus(),50);return inp;})(),
-          h("button",{style:{padding:"5px 12px",borderRadius:"8px",fontSize:"12px",cursor:"pointer",border:"none",background:"#2563eb",color:"#fff",fontWeight:"600"},onClick:()=>{lsSet("api-key",S.apiKey.trim());S.showApiKey=false;S.apiKeyError=false;rerender();}},["Save"]),
-        ]):null,
-      ].filter(Boolean)),
-      h("button",{style:{padding:"5px 13px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:T.card,color:T.sub,fontSize:"12px",cursor:"pointer",display:"flex",alignItems:"center",gap:"5px"},onClick:()=>{S.dark=!S.dark;lsSet("app-dark",String(S.dark));rerender();}},[S.dark?"☀ Light":"☾ Dark"]),
-      h("button",{style:{padding:"5px 10px",borderRadius:"20px",border:`1px solid ${T.cardB}`,background:"transparent",color:T.muted,fontSize:"11px",cursor:"pointer"},onClick:()=>{if(!confirm("Clear all saved data and start fresh?"))return;["tracker-apps-v2","resume-raw","resume-polished","resume-ci","resume-tone","apply-posting","apply-tailored","apply-cover"].forEach(lsDel);S.raw="";S.ci={name:"",tagline:"",phone:"",email:"",location:"Vancouver, BC",linkedin:""};S.tone="natural";S.posting="";S.tailored="";S.cover="";S.apps=[...SEED_APPS];S.resumeView="edit";lsSet("tracker-apps-v2",JSON.stringify(SEED_APPS));rerender();}},["Reset"]),
-    ]),
-  ]);
+    // Static HTML header handles branding — JS injects controls via ap-header-actions
 
   // ── TAB BAR ──
   const tabBar=div({style:{display:"flex",gap:"7px",marginBottom:"24px",flexWrap:"wrap"}},
@@ -1648,7 +1642,7 @@ ${S.raw.substring(0,3000)}`
           border:"1px solid rgba(34,197,94,0.25)",
           borderRadius:"10px",fontSize:"13px",color:"#4ade80",fontWeight:"600",
         }},[
-          span({style:{fontSize:"18px"}},["👇"]),
+          span({style:{fontSize:"18px"}},["👆"]),
           span({},[" Paste your resume above, then click  ✦ Improve Resume  to get instant AI feedback"]),
         ]):null,
 
